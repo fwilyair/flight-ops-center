@@ -1,0 +1,5 @@
+{
+  "name": "Flight Ops Center",
+  "description": "A high-fidelity Flight Operations Gantt Chart Dashboard featuring real-time flight tracking, status monitoring, and timeline visualizations.",
+  "requestFramePermissions": []
+}
