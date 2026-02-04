@@ -117,14 +117,14 @@ export const Header: React.FC = () => {
 
         {/* Liquid Blobs Container - High Blur for Fusion */}
         <div className="absolute inset-0 filter blur-3xl opacity-80 dark:opacity-60">
-          {/* Blob 1: Professional Blue (#3B75B0) */}
-          <div className="absolute top-[-10%] left-[-10%] w-72 h-72 bg-[#3B75B0] rounded-full mix-blend-multiply filter blur-xl animate-blob"></div>
+          {/* Blob 1: Main Subject Blue (Vivid) */}
+          <div className="absolute top-[-10%] left-[-10%] w-72 h-72 bg-[#00A0E9] rounded-full mix-blend-multiply filter blur-xl animate-blob"></div>
 
-          {/* Blob 2: Deep Depth (#2A5A8A) */}
-          <div className="absolute top-[-10%] left-[20%] w-72 h-72 bg-[#2A5A8A] rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-2000"></div>
+          {/* Blob 2: Deep Depth (Darker Blue) */}
+          <div className="absolute top-[-10%] left-[20%] w-72 h-72 bg-[#0077CC] rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-2000"></div>
 
-          {/* Blob 3: Soft Light (#6B9AC9) */}
-          <div className="absolute bottom-[-20%] left-[10%] w-72 h-72 bg-[#6B9AC9] rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-4000"></div>
+          {/* Blob 3: Soft Light (Cyan Tint) */}
+          <div className="absolute bottom-[-20%] left-[10%] w-72 h-72 bg-[#33BEF2] rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-4000"></div>
         </div>
 
         {/* Logo Container (Positioned on top of the liquid) */}

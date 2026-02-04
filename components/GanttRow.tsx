@@ -25,17 +25,17 @@ const FlightStatusBadge = ({ status, type = 'ARR' }: { status: string; type?: 'A
 
 const FlightTypeBadge = ({ type }: { type: FlightType }) => {
     const map: Record<FlightType, { label: string; style: string }> = {
-        'REG': { label: '正班', style: 'bg-indigo-50 text-indigo-700 border-indigo-100' },
-        'CARGO': { label: '货班', style: 'bg-purple-50 text-purple-700 border-purple-100' },
-        'EXTRA': { label: '加班', style: 'bg-orange-50 text-orange-700 border-orange-100' },
-        'FERRY': { label: '调机', style: 'bg-cyan-50 text-cyan-700 border-cyan-100' },
-        'DIV': { label: '备降', style: 'bg-rose-50 text-rose-700 border-rose-100' },
+        'REG': { label: '正班', style: 'text-indigo-600' },
+        'CARGO': { label: '货班', style: 'text-purple-600' },
+        'EXTRA': { label: '加班', style: 'text-orange-600' },
+        'FERRY': { label: '调机', style: 'text-cyan-600' },
+        'DIV': { label: '备降', style: 'text-rose-600' },
     };
 
     const config = map[type] || map['REG'];
 
     return (
-        <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold border whitespace-nowrap ${config.style}`}>
+        <span className={`text-base font-bold whitespace-nowrap ${config.style} self-start mt-1 tracking-tight`}>
             {config.label}
         </span>
     );
@@ -57,8 +57,7 @@ const EventPill: React.FC<{ event: TimelineEvent; track: number }> = ({ event, t
             {/* 对齐时间刻度的圆点 (中心对齐 leftPos) - 尺寸增大 - 统一绿色 */}
             <div className={`absolute left-0 top-1/2 -translate-x-1/2 -translate-y-1/2 size-2.5 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-gray-900 shadow-sm`}></div>
 
-            {/* 胶囊主体 - 向右偏移增加，适配更大的圆点 */}
-            <div className={`ml-4 flex items-stretch rounded-lg shadow-sm hover:shadow-lg overflow-hidden border ${colors.border} ${isDelayed ? 'animate-pulse' : ''}`}>
+            <div className={`ml-4 flex items-stretch rounded-full shadow-sm hover:shadow-lg overflow-hidden border ${colors.border} ${isDelayed ? 'animate-pulse' : ''}`}>
                 {/* 主标签部分 - 彩色背景 */}
                 <div className={`flex items-center px-2 py-[2px] ${colors.bg}`}>
                     <span className="text-sm font-bold text-white leading-none tracking-tight">
@@ -69,12 +68,12 @@ const EventPill: React.FC<{ event: TimelineEvent; track: number }> = ({ event, t
                 {/* 时间部分 - 浅色背景 */}
                 <div className={`flex items-center gap-1.5 px-2 py-[2px] ${colors.lightBg}`}>
                     <div className="flex items-center gap-1 leading-none">
-                        <span className="px-1 py-[1px] rounded-[2px] bg-blue-600 text-white text-xs font-bold transform scale-95 origin-center">计</span>
+                        <span className="px-1 py-[1px] rounded bg-blue-600 text-white text-xs font-bold transform scale-95 origin-center">计</span>
                         <span className="tabular-nums font-mono font-bold text-gray-900 dark:text-gray-100 text-sm leading-none">{event.timeScheduled || '--:--'}</span>
                     </div>
                     <div className="w-px h-3 bg-gray-300 dark:bg-gray-600 mx-0.5 opacity-50"></div>
                     <div className="flex items-center gap-1 leading-none">
-                        <span className="px-1 py-[1px] rounded-[2px] bg-green-600 text-white text-xs font-bold transform scale-95 origin-center">实</span>
+                        <span className="px-1 py-[1px] rounded bg-green-600 text-white text-xs font-bold transform scale-95 origin-center">实</span>
                         <span className="tabular-nums font-mono font-bold text-gray-900 dark:text-gray-100 text-sm leading-none">{event.timeActual}</span>
                     </div>
                 </div>
@@ -216,6 +215,42 @@ const TimelineAnnotation: React.FC<{ annotation: Annotation; index: number }> = 
     );
 };
 
+const FusedInfoBadge = ({ label, value, type = 'ARR', status }: { label: string; value: string; type?: 'ARR' | 'DEP'; status?: string }) => {
+    let bgDark = 'bg-gray-600';
+    let bgLight = 'bg-gray-100';
+    let textDark = 'text-white';
+    let textLight = 'text-gray-900';
+    let border = 'border-gray-200';
+
+    if (status === '延误') {
+        bgDark = 'bg-red-600';
+        bgLight = 'bg-red-50';
+        textLight = 'text-red-900';
+        border = 'border-red-100';
+    } else if (type === 'ARR') {
+        bgDark = 'bg-emerald-600';
+        bgLight = 'bg-emerald-50';
+        textLight = 'text-emerald-900';
+        border = 'border-emerald-100';
+    } else {
+        bgDark = 'bg-blue-600';
+        bgLight = 'bg-blue-50';
+        textLight = 'text-blue-900';
+        border = 'border-blue-100';
+    }
+
+    return (
+        <div className={`flex items-center rounded-full overflow-hidden shadow-sm border ${border} h-[26px]`}>
+            <div className={`${bgDark} ${textDark} px-2 h-full flex items-center justify-center text-xs font-bold tracking-wide whitespace-nowrap`}>
+                {label}
+            </div>
+            <div className={`${bgLight} ${textLight} px-2 h-full flex items-center justify-center text-sm font-bold tabular-nums`}>
+                {value}
+            </div>
+        </div>
+    );
+};
+
 export const GanttRow: React.FC<GanttRowProps> = ({ flight }) => {
     const isDelay = flight.arrInfo?.status === '延误' || flight.depInfo?.status === '延误';
 
@@ -269,8 +304,8 @@ export const GanttRow: React.FC<GanttRowProps> = ({ flight }) => {
                     <div className="flex items-start justify-between w-full">
                         <div className="flex gap-1.5">
                             {/* Primary Column */}
-                            <div className="flex flex-col gap-1">
-                                <span className={`text-2xl font-bold leading-none tracking-tight font-mono ${flight.arrInfo ? 'text-emerald-700' : 'text-blue-600'}`}>
+                            <div className="flex flex-col gap-1 w-[90px] min-w-[90px]">
+                                <span className={`text-2xl font-bold leading-none tracking-tight ${flight.arrInfo ? 'text-emerald-700' : 'text-blue-600'}`} style={{ fontFamily: 'Consolas, Monaco, "Courier New", monospace', fontVariantNumeric: 'tabular-nums' }}>
                                     {flight.flightNo.split(" / ")[0]}
                                 </span>
 
@@ -280,23 +315,19 @@ export const GanttRow: React.FC<GanttRowProps> = ({ flight }) => {
                                         <>
                                             {/* Logic: If ARR, show ArrInfo. If DEP (and this is the main col), show DepInfo */}
                                             {flight.arrInfo ? (
-                                                <>
-                                                    <FlightStatusBadge status={flight.arrInfo.status} type="ARR" />
-                                                    {flight.arrInfo.stand && (
-                                                        <div className="h-[22px] min-w-[32px] px-1.5 flex items-center justify-center rounded bg-emerald-50 border border-emerald-100 shadow-sm">
-                                                            <span className="text-[11px] font-bold text-emerald-700 tabular-nums">{flight.arrInfo.stand}</span>
-                                                        </div>
-                                                    )}
-                                                </>
+                                                <FusedInfoBadge
+                                                    label={flight.arrInfo.status}
+                                                    value={flight.arrInfo.stand || '-'}
+                                                    type="ARR"
+                                                    status={flight.arrInfo.status}
+                                                />
                                             ) : flight.depInfo ? (
-                                                <>
-                                                    <FlightStatusBadge status={flight.depInfo.status} type="DEP" />
-                                                    {flight.depInfo.gate && (
-                                                        <div className="h-[22px] min-w-[32px] px-1.5 flex items-center justify-center rounded bg-blue-50 border border-blue-100 shadow-sm">
-                                                            <span className="text-[11px] font-bold text-blue-700 tabular-nums">{flight.depInfo.gate}</span>
-                                                        </div>
-                                                    )}
-                                                </>
+                                                <FusedInfoBadge
+                                                    label={flight.depInfo.status}
+                                                    value={flight.depInfo.gate || '-'}
+                                                    type="DEP"
+                                                    status={flight.depInfo.status}
+                                                />
                                             ) : null}
                                         </>
                                     )}
@@ -306,23 +337,21 @@ export const GanttRow: React.FC<GanttRowProps> = ({ flight }) => {
                             {/* Divider & Secondary Column (Codeshare / Outbound) */}
                             {flight.codeshare && (
                                 <>
-                                    <span className="text-gray-400 text-lg pt-[2px]">/</span>
+                                    <span className="text-gray-400 text-xl pt-[2px] self-start leading-none font-light">/</span>
                                     <div className="flex flex-col gap-1">
-                                        <span className={`text-2xl font-bold leading-none tracking-tight font-mono ${flight.arrInfo && flight.depInfo ? 'text-blue-600' : 'text-gray-500'}`}>
+                                        <span className={`text-2xl font-bold leading-none tracking-tight ${flight.arrInfo && flight.depInfo ? 'text-blue-600' : 'text-gray-500'}`} style={{ fontFamily: 'Consolas, Monaco, "Courier New", monospace', fontVariantNumeric: 'tabular-nums' }}>
                                             {flight.codeshare}
                                         </span>
 
                                         {/* Secondary Status Info (Only for Dual flights where 2nd col is Dep) */}
                                         <div className="flex items-center gap-1 min-h-[22px]">
                                             {flight.arrInfo && flight.depInfo && (
-                                                <>
-                                                    <FlightStatusBadge status={flight.depInfo.status} type="DEP" />
-                                                    {flight.depInfo.gate && (
-                                                        <div className="h-[22px] min-w-[32px] px-1.5 flex items-center justify-center rounded bg-blue-50 border border-blue-100 shadow-sm">
-                                                            <span className="text-[11px] font-bold text-blue-700 tabular-nums">{flight.depInfo.gate}</span>
-                                                        </div>
-                                                    )}
-                                                </>
+                                                <FusedInfoBadge
+                                                    label={flight.depInfo.status}
+                                                    value={flight.depInfo.gate || '-'}
+                                                    type="DEP"
+                                                    status={flight.depInfo.status}
+                                                />
                                             )}
                                         </div>
                                     </div>
