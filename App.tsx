@@ -1,9 +1,10 @@
 import React, { useRef, useEffect, useState, useMemo } from 'react';
 import { Header } from './components/Header';
 import { GanttRow } from './components/GanttRow';
+import { FlightDetailPanel } from './components/FlightDetailPanel';
 import { MOCK_FLIGHTS } from './data';
 import { timeToPixels } from './utils';
-import { START_TIME_HOUR } from './types';
+import { START_TIME_HOUR, Flight } from './types';
 
 // Time markers generation - dynamically calculated based on flight data
 
@@ -21,6 +22,19 @@ const App: React.FC = () => {
 
   // 时间轴比例尺状态 (分钟数)
   const [timeScale, setTimeScale] = useState<5 | 10 | 30 | 60>(10);
+
+  // 航班详情面板状态
+  const [selectedFlight, setSelectedFlight] = useState<Flight | null>(null);
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
+
+  const handleFlightClick = (flight: Flight) => {
+    setSelectedFlight(flight);
+    setIsPanelOpen(true);
+  };
+
+  const handlePanelClose = () => {
+    setIsPanelOpen(false);
+  };
 
   // 过滤航班列表
   const filteredFlights = useMemo(() => {
@@ -200,7 +214,12 @@ const App: React.FC = () => {
 
               <div className="flex flex-col w-full min-w-max">
                 {filteredFlights.map((flight) => (
-                  <GanttRow key={flight.id} flight={flight} timeScale={timeScale} />
+                  <GanttRow
+                    key={flight.id}
+                    flight={flight}
+                    timeScale={timeScale}
+                    onClick={() => handleFlightClick(flight)}
+                  />
                 ))}
 
                 {/* Fill remaining space with empty rows for aesthetics */}
@@ -219,6 +238,12 @@ const App: React.FC = () => {
           <span className="material-symbols-outlined">info</span>
         </button>
       </div>
+      {/* Flight Detail Panel */}
+      <FlightDetailPanel
+        flight={selectedFlight}
+        isOpen={isPanelOpen}
+        onClose={handlePanelClose}
+      />
     </div>
   );
 };

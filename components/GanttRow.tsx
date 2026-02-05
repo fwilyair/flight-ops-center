@@ -5,6 +5,7 @@ import { timeToPixels, getColorForEventType } from '../utils';
 interface GanttRowProps {
     flight: Flight;
     timeScale: number;
+    onClick?: () => void;
 }
 
 const FlightStatusBadge = ({ status, type = 'ARR' }: { status: string; type?: 'ARR' | 'DEP' }) => {
@@ -252,7 +253,7 @@ const FusedInfoBadge = ({ label, value, type = 'ARR', status }: { label: string;
     );
 };
 
-export const GanttRow: React.FC<GanttRowProps> = ({ flight, timeScale }) => {
+export const GanttRow: React.FC<GanttRowProps> = ({ flight, timeScale, onClick }) => {
     const isDelay = flight.arrInfo?.status === '延误' || flight.depInfo?.status === '延误';
 
     // 计算事件的轨道分配
@@ -278,13 +279,17 @@ export const GanttRow: React.FC<GanttRowProps> = ({ flight, timeScale }) => {
         >
 
             <div
-                className={`sticky left-0 w-[260px] min-w-[260px] px-4 py-2 flex flex-col justify-center gap-1 z-40 transition-all duration-300 group-hover:z-50 rounded-l-xl rounded-r-2xl mr-2 relative overflow-hidden group-hover:scale-[1.02] group-hover:shadow-lg origin-left`}
+                className={`sticky left-0 w-[260px] min-w-[260px] px-4 py-2 flex flex-col justify-center gap-1 z-40 transition-all duration-300 group-hover:z-50 rounded-l-xl rounded-r-2xl mr-2 relative overflow-hidden group-hover:scale-[1.02] group-hover:shadow-lg origin-left cursor-pointer`}
                 style={{
                     background: '#f3f4f6',
                     borderRight: '1px solid #e5e7eb',
                     borderTop: '1px solid #e5e7eb',
                     borderBottom: '1px solid #e5e7eb',
                     boxShadow: '4px 0 12px -2px rgba(0, 0, 0, 0.08)'
+                }}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    onClick?.();
                 }}
             >
                 {/* Airline Code Watermark */}
@@ -375,7 +380,7 @@ export const GanttRow: React.FC<GanttRowProps> = ({ flight, timeScale }) => {
                         <div className="flex items-baseline gap-2">
                             <div className="text-base font-bold text-gray-900 dark:text-gray-100 uppercase tracking-wider leading-none italic">COBT</div>
                             <div className="text-sm font-bold text-gray-700 dark:text-gray-300 tabular-nums font-mono italic leading-none">
-                                {flight.times?.cobt || '--:--'}
+                                {flight.times?.cobt ? `${flight.times.cobt}(05)` : '--:--'}
                             </div>
                         </div>
 

@@ -27,6 +27,13 @@ export interface Flight {
   codeshare?: string;
   stand?: string;
   gate?: string;
+  // Aircraft info
+  registration?: string; // 机号 e.g. B-1234
+  aircraftType?: string; // 机型 e.g. A320
+  aircraftCategory?: string; // 机类 e.g. M/H/J
+  // Route
+  route?: string; // 航线 e.g. CTU-PEK
+  flightType?: FlightType;
   // Dual status support
   arrInfo?: {
     status: '前起' | '到达' | '入位' | '备降' | '延误';
@@ -38,13 +45,20 @@ export interface Flight {
   };
 
   times: {
-    // For Gantt/Calculations (keeping existing useful ones)
-    std?: string;
-    etd?: string;
-    cobt?: string;
-    atd?: string;
-    sta?: string;
-    eta?: string;
+    // Scheduled times
+    sta?: string; // 计划到达
+    std?: string; // 计划起飞
+    // Estimated times
+    eta?: string; // 预计到达
+    etd?: string; // 预计起飞
+    // Actual times
+    ata?: string; // 实际到达
+    atd?: string; // 实际起飞
+    // Previous leg departure
+    ptd?: string; // 前站起飞
+    // Slot times
+    cobt?: string; // COBT
+    ctot?: string; // CTOT
   };
   events: TimelineEvent[];
   annotations: Annotation[];

@@ -7,6 +7,10 @@ export const MOCK_FLIGHTS: Flight[] = [
     id: '1',
     flightNo: 'CA1538',
     codeshare: 'CA1539',
+    registration: 'B-6789',
+    aircraftType: 'A320',
+    aircraftCategory: 'M',
+    route: 'PEK - CTU',
     arrInfo: {
       status: '到达',
       stand: '243'
@@ -16,9 +20,14 @@ export const MOCK_FLIGHTS: Flight[] = [
       gate: '15'
     },
     times: {
+      ptd: '07:30',
       sta: '09:15',
       eta: '09:00',
-      cobt: '09:00'
+      ata: '09:02',
+      std: '10:45',
+      etd: '10:50',
+      cobt: '10:20',
+      ctot: '10:35'
     },
     events: [
       { id: 'e1', label: '落地', type: 'LAND', timeActual: '09:00', timeScheduled: '09:00', status: 'overtime-completed' },
