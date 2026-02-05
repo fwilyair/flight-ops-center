@@ -51,5 +51,5 @@ export interface Flight {
 }
 
 export const PIXELS_PER_MINUTE = 8;
-export const START_TIME_HOUR = 14; // 14:00
+export const START_TIME_HOUR = 8; // 8:00
 export const START_TIME_MIN = 0;

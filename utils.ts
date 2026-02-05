@@ -1,6 +1,6 @@
 import { START_TIME_HOUR, START_TIME_MIN, PIXELS_PER_MINUTE } from './types';
 
-export const timeToPixels = (timeStr: string): number => {
+export const timeToPixels = (timeStr: string, scale: number = 10): number => {
   if (!timeStr || timeStr === '--:--') return 0;
 
   const [hours, minutes] = timeStr.split(':').map(Number);
@@ -12,11 +12,14 @@ export const timeToPixels = (timeStr: string): number => {
   }
 
   const totalMinutes = (adjustedHours - START_TIME_HOUR) * 60 + (minutes - START_TIME_MIN);
-  return totalMinutes * PIXELS_PER_MINUTE;
+  // 刻度宽度固定为80px，每个刻度代表scale分钟
+  // 所以每分钟占用的像素 = 80 / scale
+  const pixelsPerMinute = 80 / scale;
+  return totalMinutes * pixelsPerMinute;
 };
 
-export const getDurationPixels = (start: string, end: string): number => {
-  return timeToPixels(end) - timeToPixels(start);
+export const getDurationPixels = (start: string, end: string, scale: number = 10): number => {
+  return timeToPixels(end, scale) - timeToPixels(start, scale);
 };
 
 export const getColorForEventType = (type: string, status?: string) => {

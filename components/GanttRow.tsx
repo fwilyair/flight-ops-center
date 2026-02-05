@@ -4,6 +4,7 @@ import { timeToPixels, getColorForEventType } from '../utils';
 
 interface GanttRowProps {
     flight: Flight;
+    timeScale: number;
 }
 
 const FlightStatusBadge = ({ status, type = 'ARR' }: { status: string; type?: 'ARR' | 'DEP' }) => {
@@ -35,14 +36,14 @@ const FlightTypeBadge = ({ type }: { type: FlightType }) => {
     const config = map[type] || map['REG'];
 
     return (
-        <span className={`text-base font-bold whitespace-nowrap ${config.style} self-start mt-1 tracking-tight`}>
+        <span className={`text-base font-bold whitespace-nowrap ${config.style} tracking-tight`}>
             {config.label}
         </span>
     );
 };
 
-const EventPill: React.FC<{ event: TimelineEvent; track: number }> = ({ event, track }) => {
-    const leftPos = timeToPixels(event.timeScheduled || event.timeActual || '');
+const EventPill: React.FC<{ event: TimelineEvent; track: number; timeScale: number }> = ({ event, track, timeScale }) => {
+    const leftPos = timeToPixels(event.timeScheduled || event.timeActual || '', timeScale);
     const colors = getColorForEventType(event.type, event.status);
     const isDelayed = event.status === 'delayed';
 
@@ -83,19 +84,19 @@ const EventPill: React.FC<{ event: TimelineEvent; track: number }> = ({ event, t
 };
 
 // 计算事件的轨道分配，避免重叠
-const calculateEventTracks = (events: TimelineEvent[]): Map<string, number> => {
+const calculateEventTracks = (events: TimelineEvent[], timeScale: number): Map<string, number> => {
     const tracks = new Map<string, number>();
     const trackEndTimes: number[] = []; // 每个轨道的结束时间（像素）
 
     // 按开始时间排序
     const sortedEvents = [...events].sort((a, b) => {
-        const aTime = timeToPixels(a.timeScheduled || a.timeActual || '');
-        const bTime = timeToPixels(b.timeScheduled || b.timeActual || '');
+        const aTime = timeToPixels(a.timeScheduled || a.timeActual || '', timeScale);
+        const bTime = timeToPixels(b.timeScheduled || b.timeActual || '', timeScale);
         return aTime - bTime;
     });
 
     sortedEvents.forEach(event => {
-        const startPx = timeToPixels(event.timeScheduled || event.timeActual || '');
+        const startPx = timeToPixels(event.timeScheduled || event.timeActual || '', timeScale);
         // 新设计的胶囊宽度：标签 + 时间部分
         const labelLength = event.label.length;
         // 修正：text-sm font-bold 每个汉字约16-18px，加上padding
@@ -126,11 +127,11 @@ const calculateEventTracks = (events: TimelineEvent[]): Map<string, number> => {
     return tracks;
 };
 
-const TimelineAnnotation: React.FC<{ annotation: Annotation; index: number }> = ({ annotation, index }) => {
+const AnnotationLine: React.FC<{ annotation: Annotation; index: number; timeScale: number }> = ({ annotation, index, timeScale }) => {
     if (!annotation.startTime || !annotation.endTime) return null;
 
-    const startPx = timeToPixels(annotation.startTime);
-    const endPx = timeToPixels(annotation.endTime);
+    const startPx = timeToPixels(annotation.startTime, timeScale);
+    const endPx = timeToPixels(annotation.endTime, timeScale);
     const width = endPx - startPx;
     const centerPx = startPx + width / 2;
 
@@ -251,11 +252,11 @@ const FusedInfoBadge = ({ label, value, type = 'ARR', status }: { label: string;
     );
 };
 
-export const GanttRow: React.FC<GanttRowProps> = ({ flight }) => {
+export const GanttRow: React.FC<GanttRowProps> = ({ flight, timeScale }) => {
     const isDelay = flight.arrInfo?.status === '延误' || flight.depInfo?.status === '延误';
 
     // 计算事件的轨道分配
-    const eventTracks = calculateEventTracks(flight.events);
+    const eventTracks = calculateEventTracks(flight.events, timeScale);
     const maxTrack = Math.max(0, ...Array.from(eventTracks.values()));
     const trackCount = maxTrack + 1;
 
@@ -298,86 +299,88 @@ export const GanttRow: React.FC<GanttRowProps> = ({ flight }) => {
                     </div>
                 </div>
 
+                {/* Video Play Button (Absolute Top-Right) */}
+
+
+
                 {/* Content Wrapper */}
-                <div className="relative z-10 w-full flex flex-col gap-1">
-                    {/* Unified Flight Info Row */}
+                <div className="relative z-10 w-full flex flex-col gap-2">
+                    {/* Row 1: Flight Numbers + Play Button */}
                     <div className="flex items-start justify-between w-full">
-                        <div className="flex gap-1.5">
-                            {/* Primary Column */}
-                            <div className="flex flex-col gap-1 w-[90px] min-w-[90px]">
-                                <span className={`text-2xl font-bold leading-none tracking-tight ${flight.arrInfo ? 'text-emerald-700' : 'text-blue-600'}`} style={{ fontFamily: 'Consolas, Monaco, "Courier New", monospace', fontVariantNumeric: 'tabular-nums' }}>
-                                    {flight.flightNo.split(" / ")[0]}
-                                </span>
+                        <div className="flex items-center">
+                            <span className={`text-2xl font-bold leading-none tracking-tight font-mono tabular-nums ${flight.arrInfo ? 'text-emerald-700' : 'text-blue-600'}`}>
+                                {flight.flightNo.split(" / ")[0]}
+                            </span>
 
-                                {/* Primary Status Info */}
-                                <div className="flex items-center gap-1 min-h-[22px]">
-                                    {(flight.arrInfo || (!flight.arrInfo && flight.depInfo && !flight.codeshare) || (!flight.arrInfo && flight.depInfo)) && (
-                                        <>
-                                            {/* Logic: If ARR, show ArrInfo. If DEP (and this is the main col), show DepInfo */}
-                                            {flight.arrInfo ? (
-                                                <FusedInfoBadge
-                                                    label={flight.arrInfo.status}
-                                                    value={flight.arrInfo.stand || '-'}
-                                                    type="ARR"
-                                                    status={flight.arrInfo.status}
-                                                />
-                                            ) : flight.depInfo ? (
-                                                <FusedInfoBadge
-                                                    label={flight.depInfo.status}
-                                                    value={flight.depInfo.gate || '-'}
-                                                    type="DEP"
-                                                    status={flight.depInfo.status}
-                                                />
-                                            ) : null}
-                                        </>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Divider & Secondary Column (Codeshare / Outbound) */}
                             {flight.codeshare && (
                                 <>
-                                    <span className="text-gray-400 text-xl pt-[2px] self-start leading-none font-light">/</span>
-                                    <div className="flex flex-col gap-1">
-                                        <span className={`text-2xl font-bold leading-none tracking-tight ${flight.arrInfo && flight.depInfo ? 'text-blue-600' : 'text-gray-500'}`} style={{ fontFamily: 'Consolas, Monaco, "Courier New", monospace', fontVariantNumeric: 'tabular-nums' }}>
-                                            {flight.codeshare}
-                                        </span>
-
-                                        {/* Secondary Status Info (Only for Dual flights where 2nd col is Dep) */}
-                                        <div className="flex items-center gap-1 min-h-[22px]">
-                                            {flight.arrInfo && flight.depInfo && (
-                                                <FusedInfoBadge
-                                                    label={flight.depInfo.status}
-                                                    value={flight.depInfo.gate || '-'}
-                                                    type="DEP"
-                                                    status={flight.depInfo.status}
-                                                />
-                                            )}
-                                        </div>
-                                    </div>
+                                    <div className="flex flex-none justify-center w-5 min-w-[20px] text-gray-400 text-xl leading-none font-light">/</div>
+                                    <span className={`text-2xl font-bold leading-none tracking-tight font-mono tabular-nums ${flight.arrInfo && flight.depInfo ? 'text-blue-600' : 'text-gray-500'}`}>
+                                        {flight.codeshare}
+                                    </span>
                                 </>
                             )}
-                        </div>
-                        <FlightTypeBadge type={flight.flightType} />
-                    </div>
-
-                    {/* Row 3: COBT & Actions */}
-                    <div className="flex items-center justify-between w-full mt-1.5">
-                        {/* COBT Tag */}
-                        <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800/50 rounded px-1.5 py-0.5 border border-gray-100 dark:border-gray-800">
-                            <div className="text-xs font-bold text-gray-900 dark:text-gray-100 uppercase tracking-wider">COBT</div>
-                            <div className="text-xs font-bold text-gray-700 dark:text-gray-300 tabular-nums font-mono">
-                                {flight.times?.cobt || '--:--'}
-                            </div>
                         </div>
 
                         {/* Video Play Button */}
                         <button
-                            className="flex items-center justify-center size-6 rounded-full text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors"
+                            className="flex items-center justify-center size-8 rounded-full text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors -mt-1"
                             title="播放监控视频"
                         >
-                            <span className="material-symbols-outlined text-[20px]">play_circle</span>
+                            <span className="material-symbols-outlined text-[26px]">play_circle</span>
                         </button>
+                    </div>
+
+                    {/* Row 2: Status Badges (跨整个宽度，与播放按钮右对齐) */}
+                    <div className="flex items-center justify-between w-full">
+                        {/* Primary Status Info */}
+                        <div className="w-fit">
+                            {(flight.arrInfo || (!flight.arrInfo && flight.depInfo && !flight.codeshare) || (!flight.arrInfo && flight.depInfo)) && (
+                                <>
+                                    {flight.arrInfo ? (
+                                        <FusedInfoBadge
+                                            label={flight.arrInfo.status}
+                                            value={flight.arrInfo.stand || '-'}
+                                            type="ARR"
+                                            status={flight.arrInfo.status}
+                                        />
+                                    ) : flight.depInfo ? (
+                                        <FusedInfoBadge
+                                            label={flight.depInfo.status}
+                                            value={flight.depInfo.gate || '-'}
+                                            type="DEP"
+                                            status={flight.depInfo.status}
+                                        />
+                                    ) : null}
+                                </>
+                            )}
+                        </div>
+
+                        {/* Secondary Status Info (Only for Dual flights) */}
+                        {flight.codeshare && flight.arrInfo && flight.depInfo && (
+                            <div className="w-fit">
+                                <FusedInfoBadge
+                                    label={flight.depInfo.status}
+                                    value={flight.depInfo.gate || '-'}
+                                    type="DEP"
+                                    status={flight.depInfo.status}
+                                />
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Row 3: COBT & Actions */}
+                    <div className="flex items-center justify-between w-full">
+                        {/* COBT Tag */}
+                        <div className="flex items-baseline gap-2">
+                            <div className="text-base font-bold text-gray-900 dark:text-gray-100 uppercase tracking-wider leading-none italic">COBT</div>
+                            <div className="text-sm font-bold text-gray-700 dark:text-gray-300 tabular-nums font-mono italic leading-none">
+                                {flight.times?.cobt || '--:--'}
+                            </div>
+                        </div>
+
+                        {/* Flight Type Badge (Moved from Row 2) */}
+                        <FlightTypeBadge type={flight.flightType} />
                     </div>
                 </div>
             </div>
@@ -385,10 +388,10 @@ export const GanttRow: React.FC<GanttRowProps> = ({ flight }) => {
             {/* Right Content: Timeline */}
             <div className="flex-1 relative gantt-grid-bg">
                 {flight.annotations?.map((anno, idx) => (
-                    <TimelineAnnotation key={`anno-${idx}`} annotation={anno} index={idx} />
+                    <AnnotationLine key={`anno-${idx}`} annotation={anno} index={idx} timeScale={timeScale} />
                 ))}
                 {flight.events.map((event) => (
-                    <EventPill key={event.id} event={event} track={eventTracks.get(event.id) || 0} />
+                    <EventPill key={event.id} event={event} track={eventTracks.get(event.id) || 0} timeScale={timeScale} />
                 ))}
             </div>
         </div >

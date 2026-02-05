@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState, useMemo } from 'react';
 import { Header } from './components/Header';
 import { GanttRow } from './components/GanttRow';
 import { MOCK_FLIGHTS } from './data';
@@ -8,17 +8,41 @@ import { START_TIME_HOUR } from './types';
 // Time markers generation - dynamically calculated based on flight data
 
 const App: React.FC = () => {
-  const [currentTime, setCurrentTime] = React.useState(() => {
+  const [currentTime, setCurrentTime] = useState(() => {
     const now = new Date();
     return `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
   });
+
+  // 搜索和日期状态
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedDate, setSelectedDate] = useState(
+    new Date().toISOString().split('T')[0]
+  );
+
+  // 时间轴比例尺状态 (分钟数)
+  const [timeScale, setTimeScale] = useState<5 | 10 | 30 | 60>(10);
+
+  // 过滤航班列表
+  const filteredFlights = useMemo(() => {
+    return MOCK_FLIGHTS.filter(flight => {
+      // 航班号过滤（不区分大小写）
+      const matchesSearch = searchQuery === '' ||
+        flight.flightNo.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (flight.codeshare?.toLowerCase().includes(searchQuery.toLowerCase()));
+
+      // 日期过滤（暂时返回 true，后续可扩展）
+      const matchesDate = true;
+
+      return matchesSearch && matchesDate;
+    });
+  }, [searchQuery, selectedDate]);
 
   // 计算所有航班事件的最大时间，确保时间轴足够长
   const calculateMaxTime = () => {
     let maxMinutes = 0;
 
-    // 1. 遍历所有航班事件
-    MOCK_FLIGHTS.forEach(flight => {
+    // 1. 遍历所有航班事件（使用过滤后的列表）
+    filteredFlights.forEach(flight => {
       flight.events.forEach(event => {
         const time = event.timeScheduled || event.timeActual || '';
         if (time && time !== '--:--') {
@@ -47,11 +71,11 @@ const App: React.FC = () => {
     return maxMinutes + 180;
   };
 
-  // 动态计算需要的时间刻度数量
+  // 动态计算需要的时间刻度数量（基于选择的比例尺）
   const maxMinutes = calculateMaxTime();
-  const INTERVALS = Math.max(60, Math.ceil(maxMinutes / 10)); // 每个刻度10分钟
+  const INTERVALS = Math.max(60, Math.ceil(maxMinutes / timeScale)); // 每个刻度根据比例尺变化
 
-  const currentTimePx = timeToPixels(currentTime);
+  const currentTimePx = timeToPixels(currentTime, timeScale);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
 
@@ -84,7 +108,14 @@ const App: React.FC = () => {
 
   return (
     <div className="atmosphere-bg flex flex-col h-screen overflow-hidden" style={{ background: 'var(--bg-primary)' }}>
-      <Header />
+      <Header
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        selectedDate={selectedDate}
+        onDateChange={setSelectedDate}
+        timeScale={timeScale}
+        onTimeScaleChange={setTimeScale}
+      />
 
       <main className="flex-1 relative overflow-hidden flex flex-col">
         {/* Main Scrollable Area */}
@@ -103,11 +134,12 @@ const App: React.FC = () => {
               <div className="flex flex-1 relative">
                 <div className="flex w-full h-full">
                   {Array.from({ length: INTERVALS }).map((_, i) => {
-                    const totalMins = i * 10;
+                    const totalMins = i * timeScale;
                     // Fix: Ensure hours wrap around 24
                     const h = Math.floor(START_TIME_HOUR + totalMins / 60) % 24;
                     const m = totalMins % 60;
                     const timeStr = `${h}:${m.toString().padStart(2, '0')}`;
+                    // 刻度宽度固定为80px，每个刻度代表的时间长度由timeScale决定
                     return (
                       <div key={i} className="timeline-tick w-[80px] flex-none flex items-center justify-center text-sm font-bold text-gray-900 dark:text-gray-100 tabular-nums font-mono select-none border-l border-gray-100 dark:border-gray-800">
                         {timeStr}
@@ -167,8 +199,8 @@ const App: React.FC = () => {
               ></div>
 
               <div className="flex flex-col w-full min-w-max">
-                {MOCK_FLIGHTS.map((flight) => (
-                  <GanttRow key={flight.id} flight={flight} />
+                {filteredFlights.map((flight) => (
+                  <GanttRow key={flight.id} flight={flight} timeScale={timeScale} />
                 ))}
 
                 {/* Fill remaining space with empty rows for aesthetics */}

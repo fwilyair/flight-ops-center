@@ -16,17 +16,17 @@ export const MOCK_FLIGHTS: Flight[] = [
       gate: '15'
     },
     times: {
-      sta: '20:15',
-      eta: '20:00',
-      cobt: '20:00'
+      sta: '09:15',
+      eta: '09:00',
+      cobt: '09:00'
     },
     events: [
-      { id: 'e1', label: '落地', type: 'LAND', timeActual: '20:00', timeScheduled: '20:00', status: 'overtime-completed' },
-      { id: 'e2', label: '靠桥', type: 'IN-BLK', timeActual: '20:25', timeScheduled: '20:15', status: 'overtime-completed' },
+      { id: 'e1', label: '落地', type: 'LAND', timeActual: '09:00', timeScheduled: '09:00', status: 'overtime-completed' },
+      { id: 'e2', label: '靠桥', type: 'IN-BLK', timeActual: '09:25', timeScheduled: '09:15', status: 'overtime-completed' },
     ],
     annotations: [
-      { type: 'connector', startTime: '20:00', endTime: '21:00', label: '放行', style: 'solid', color: 'gray' },
-      { type: 'connector', startTime: '21:00', endTime: '22:00', label: '起飞', style: 'solid', color: 'gray' }
+      { type: 'connector', startTime: '09:00', endTime: '10:00', label: '放行', style: 'solid', color: 'gray' },
+      { type: 'connector', startTime: '10:00', endTime: '11:00', label: '起飞', style: 'solid', color: 'gray' }
     ]
   },
 
@@ -45,19 +45,19 @@ export const MOCK_FLIGHTS: Flight[] = [
       gate: '32'
     },
     times: {
-      sta: '20:40',
-      std: '22:00',
-      cobt: '20:30'
+      sta: '09:40',
+      std: '11:00',
+      cobt: '09:30'
     },
     events: [
-      { id: 'e3', label: '落地', type: 'LAND', timeActual: '20:40', timeScheduled: '20:40', status: 'overtime-completed' },
-      { id: 'e4', label: '靠桥', type: 'IN-BLK', timeActual: '21:00', timeScheduled: '20:50', status: 'overtime-completed' },
-      { id: 'e5', label: '开始卸载', type: 'UNLOAD', timeActual: '21:05', timeScheduled: '21:00', status: 'overtime-completed' },
-      { id: 'e6', label: '起飞', type: 'DEP', timeActual: '--:--', timeScheduled: '22:00', status: 'warning' },
+      { id: 'e3', label: '落地', type: 'LAND', timeActual: '09:40', timeScheduled: '09:40', status: 'overtime-completed' },
+      { id: 'e4', label: '靠桥', type: 'IN-BLK', timeActual: '10:00', timeScheduled: '09:50', status: 'overtime-completed' },
+      { id: 'e5', label: '开始卸载', type: 'UNLOAD', timeActual: '10:05', timeScheduled: '10:00', status: 'overtime-completed' },
+      { id: 'e6', label: '起飞', type: 'DEP', timeActual: '--:--', timeScheduled: '11:00', status: 'warning' },
     ],
     annotations: [
-      { type: 'connector', startTime: '20:30', endTime: '21:30', label: '放行', style: 'solid', color: 'gray' },
-      { type: 'connector', startTime: '21:30', endTime: '22:30', label: '起飞', style: 'solid', color: 'gray' }
+      { type: 'connector', startTime: '09:30', endTime: '10:30', label: '放行', style: 'solid', color: 'gray' },
+      { type: 'connector', startTime: '10:30', endTime: '11:30', label: '起飞', style: 'solid', color: 'gray' }
     ]
   },
 
@@ -75,18 +75,18 @@ export const MOCK_FLIGHTS: Flight[] = [
       gate: '08' // Assuming gate is known
     },
     times: {
-      std: '21:10',
-      etd: '22:30',
-      cobt: '21:35'
+      std: '10:10',
+      etd: '11:30',
+      cobt: '10:35'
     },
     events: [
-      { id: 'e7', label: '登机', type: 'BOARD', timeActual: '--:--', timeScheduled: '21:10', status: 'overtime-incomplete' },
-      { id: 'e8', label: '关舱门', type: 'COBT', timeActual: '--:--', timeScheduled: '21:35', status: 'overtime-incomplete' },
-      { id: 'e9', label: '推出', type: 'ATD', timeActual: '--:--', timeScheduled: '21:45', status: 'warning' },
+      { id: 'e7', label: '登机', type: 'BOARD', timeActual: '--:--', timeScheduled: '10:10', status: 'overtime-incomplete' },
+      { id: 'e8', label: '关舱门', type: 'COBT', timeActual: '--:--', timeScheduled: '10:35', status: 'overtime-incomplete' },
+      { id: 'e9', label: '推出', type: 'ATD', timeActual: '--:--', timeScheduled: '10:45', status: 'warning' },
     ],
     annotations: [
-      { type: 'connector', startTime: '21:10', endTime: '22:10', label: '放行', style: 'solid', color: 'gray' },
-      { type: 'connector', startTime: '21:35', endTime: '22:35', label: '起飞', style: 'solid', color: 'gray' }
+      { type: 'connector', startTime: '10:10', endTime: '11:10', label: '放行', style: 'solid', color: 'gray' },
+      { type: 'connector', startTime: '10:35', endTime: '11:35', label: '起飞', style: 'solid', color: 'gray' }
     ]
   },
 
@@ -104,20 +104,20 @@ export const MOCK_FLIGHTS: Flight[] = [
       gate: '15'
     },
     times: {
-      std: '21:00',
-      atd: '21:18',
-      cobt: '21:00'
+      std: '10:00',
+      atd: '10:18',
+      cobt: '10:00'
     },
     events: [
-      { id: 'e10', label: '开始登机', type: 'BOARD', timeActual: '20:30', timeScheduled: '20:30', status: 'overtime-completed' },
-      { id: 'e11', label: '登机完成', type: 'BOARD', timeActual: '20:55', timeScheduled: '20:50', status: 'overtime-completed' },
-      { id: 'e12', label: '关舱门', type: 'COBT', timeActual: '21:00', timeScheduled: '21:00', status: 'overtime-completed' },
-      { id: 'e13', label: '推出', type: 'ATD', timeActual: '21:08', timeScheduled: '21:05', status: 'overtime-completed' },
-      { id: 'e14', label: '起飞', type: 'DEP', timeActual: '21:18', timeScheduled: '21:15', status: 'overtime-completed' },
+      { id: 'e10', label: '开始登机', type: 'BOARD', timeActual: '09:30', timeScheduled: '09:30', status: 'overtime-completed' },
+      { id: 'e11', label: '登机完成', type: 'BOARD', timeActual: '09:55', timeScheduled: '09:50', status: 'overtime-completed' },
+      { id: 'e12', label: '关舱门', type: 'COBT', timeActual: '10:00', timeScheduled: '10:00', status: 'overtime-completed' },
+      { id: 'e13', label: '推出', type: 'ATD', timeActual: '10:08', timeScheduled: '10:05', status: 'overtime-completed' },
+      { id: 'e14', label: '起飞', type: 'DEP', timeActual: '10:18', timeScheduled: '10:15', status: 'overtime-completed' },
     ],
     annotations: [
-      { type: 'connector', startTime: '20:30', endTime: '21:30', label: '放行', style: 'solid', color: 'gray' },
-      { type: 'connector', startTime: '21:08', endTime: '22:08', label: '起飞', style: 'solid', color: 'gray' }
+      { type: 'connector', startTime: '09:30', endTime: '10:30', label: '放行', style: 'solid', color: 'gray' },
+      { type: 'connector', startTime: '10:08', endTime: '11:08', label: '起飞', style: 'solid', color: 'gray' }
     ]
   },
 
@@ -135,15 +135,15 @@ export const MOCK_FLIGHTS: Flight[] = [
       gate: '22'
     },
     times: {
-      std: '21:50',
-      cobt: '21:20'
+      std: '10:50',
+      cobt: '10:20'
     },
     events: [
-      { id: 'e15', label: '登机', type: 'BOARD', timeActual: '--:--', timeScheduled: '21:50', status: 'overtime-incomplete' },
+      { id: 'e15', label: '登机', type: 'BOARD', timeActual: '--:--', timeScheduled: '10:50', status: 'overtime-incomplete' },
     ],
     annotations: [
-      { type: 'connector', startTime: '21:50', endTime: '22:50', label: '放行', style: 'solid', color: 'gray' },
-      { type: 'connector', startTime: '22:20', endTime: '23:20', label: '起飞', style: 'solid', color: 'gray' }
+      { type: 'connector', startTime: '10:50', endTime: '11:50', label: '放行', style: 'solid', color: 'gray' },
+      { type: 'connector', startTime: '11:20', endTime: '12:20', label: '起飞', style: 'solid', color: 'gray' }
     ]
   },
 
@@ -161,16 +161,16 @@ export const MOCK_FLIGHTS: Flight[] = [
       gate: '06'
     },
     times: {
-      sta: '22:15',
+      sta: '11:15',
       cobt: '--:--'
     },
     events: [
-      { id: 'e16', label: '预计落地', type: 'LAND', timeActual: '--:--', timeScheduled: '22:15', status: 'alert' },
-      { id: 'e17', label: '预计靠桥', type: 'IN-BLK', timeActual: '--:--', timeScheduled: '22:28', status: 'alert' },
+      { id: 'e16', label: '预计落地', type: 'LAND', timeActual: '--:--', timeScheduled: '11:15', status: 'alert' },
+      { id: 'e17', label: '预计靠桥', type: 'IN-BLK', timeActual: '--:--', timeScheduled: '11:28', status: 'alert' },
     ],
     annotations: [
-      { type: 'connector', startTime: '21:45', endTime: '22:45', label: '放行', style: 'solid', color: 'gray' },
-      { type: 'connector', startTime: '22:15', endTime: '23:15', label: '起飞', style: 'solid', color: 'gray' }
+      { type: 'connector', startTime: '10:45', endTime: '11:45', label: '放行', style: 'solid', color: 'gray' },
+      { type: 'connector', startTime: '11:15', endTime: '12:15', label: '起飞', style: 'solid', color: 'gray' }
     ]
   },
 
@@ -188,16 +188,16 @@ export const MOCK_FLIGHTS: Flight[] = [
       gate: '12'
     },
     times: {
-      std: '22:00',
+      std: '11:00',
       cobt: '--:--'
     },
     events: [
-      { id: 'e18', label: '机组就位', type: 'BOARD', timeActual: '--:--', timeScheduled: '22:00', status: 'warning' },
-      { id: 'e19', label: '放行', type: 'COBT', timeActual: '--:--', timeScheduled: '22:30', status: 'warning' },
+      { id: 'e18', label: '机组就位', type: 'BOARD', timeActual: '--:--', timeScheduled: '11:00', status: 'warning' },
+      { id: 'e19', label: '放行', type: 'COBT', timeActual: '--:--', timeScheduled: '11:30', status: 'warning' },
     ],
     annotations: [
-      { type: 'connector', startTime: '22:00', endTime: '23:00', label: '放行', style: 'solid', color: 'gray' },
-      { type: 'connector', startTime: '22:30', endTime: '23:30', label: '起飞', style: 'solid', color: 'gray' }
+      { type: 'connector', startTime: '11:00', endTime: '12:00', label: '放行', style: 'solid', color: 'gray' },
+      { type: 'connector', startTime: '11:30', endTime: '12:30', label: '起飞', style: 'solid', color: 'gray' }
     ]
   }
 ];
