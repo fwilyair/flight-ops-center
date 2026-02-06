@@ -46,8 +46,7 @@ const StatusBadge = ({ color, label }: { color: string; label: string }) => {
   }
 
   return (
-    <div className={`flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-full border pl-3 pr-4 ${bgClass} ${borderClass}`}>
-      <div className={`size-2.5 rounded-full ${dotClass}`}></div>
+    <div className={`flex h-8 w-[100px] shrink-0 items-center justify-center gap-x-2 rounded-full border px-0 ${bgClass} ${borderClass}`}>
       <p className={`text-xs font-bold uppercase tracking-wide ${textClass}`}>{label}</p>
     </div>
   );

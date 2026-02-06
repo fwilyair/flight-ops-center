@@ -31,123 +31,322 @@ export const FlightDetailPanel: React.FC<FlightDetailPanelProps> = ({
                 onClick={onClose}
             />
 
-            {/* Panel */}
+            {/* Panel - offset from top to not cover timeline */}
             <div
-                className={`fixed top-0 right-0 h-full w-[400px] bg-white dark:bg-gray-900 shadow-2xl z-[70] transform transition-transform duration-300 ease-out ${isOpen ? 'translate-x-0' : 'translate-x-full'
+                className={`fixed right-0 w-[400px] shadow-2xl z-[70] transform transition-transform duration-300 ease-out rounded-l-2xl overflow-hidden ${isOpen ? 'translate-x-0' : 'translate-x-full'
                     }`}
-                style={{ boxShadow: 'var(--shadow-md), -4px 0 20px rgba(0,0,0,0.1)' }}
+                style={{
+                    top: '95px',
+                    height: 'calc(100vh - 95px)',
+                    boxShadow: 'var(--shadow-md), -4px 0 20px rgba(0,0,0,0.1)'
+                }}
             >
-                {/* Header */}
+                {/* White base background */}
+                <div className="absolute inset-0 bg-white"></div>
+
+                {/* Unified gradient overlay for entire panel */}
+                <div className="absolute inset-0 bg-gradient-to-br from-sky-50/70 via-cyan-50/40 to-blue-50/50"></div>
+
+                {/* Animated liquid blobs - covers entire panel */}
+                <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                    {/* Blob 1 - Sky blue */}
+                    <div
+                        className="absolute w-[500px] h-[500px] rounded-full opacity-60 blur-3xl"
+                        style={{
+                            background: 'radial-gradient(circle, rgba(135,206,250,0.4) 0%, rgba(135,206,250,0) 70%)',
+                            top: '-100px',
+                            left: '-100px',
+                            animation: 'blob 8s ease-in-out infinite'
+                        }}
+                    ></div>
+
+                    {/* Blob 2 - Cyan */}
+                    <div
+                        className="absolute w-[400px] h-[400px] rounded-full opacity-50 blur-3xl"
+                        style={{
+                            background: 'radial-gradient(circle, rgba(103,232,249,0.35) 0%, rgba(103,232,249,0) 70%)',
+                            top: '200px',
+                            right: '-50px',
+                            animation: 'blob 10s ease-in-out infinite 2s'
+                        }}
+                    ></div>
+
+                    {/* Blob 3 - Light purple */}
+                    <div
+                        className="absolute w-[350px] h-[350px] rounded-full opacity-40 blur-3xl"
+                        style={{
+                            background: 'radial-gradient(circle, rgba(196,181,253,0.3) 0%, rgba(196,181,253,0) 70%)',
+                            bottom: '100px',
+                            left: '50px',
+                            animation: 'blob 12s ease-in-out infinite 4s'
+                        }}
+                    ></div>
+
+                    {/* Blob 4 - Light pink */}
+                    <div
+                        className="absolute w-[300px] h-[300px] rounded-full opacity-35 blur-3xl"
+                        style={{
+                            background: 'radial-gradient(circle, rgba(251,207,232,0.25) 0%, rgba(251,207,232,0) 70%)',
+                            top: '400px',
+                            left: '150px',
+                            animation: 'blob 9s ease-in-out infinite 1s'
+                        }}
+                    ></div>
+
+                    {/* Blob 5 - Deep sky blue */}
+                    <div
+                        className="absolute w-[450px] h-[450px] rounded-full opacity-50 blur-3xl"
+                        style={{
+                            background: 'radial-gradient(circle, rgba(56,189,248,0.3) 0%, rgba(56,189,248,0) 70%)',
+                            bottom: '-50px',
+                            right: '-100px',
+                            animation: 'blob 11s ease-in-out infinite 3s'
+                        }}
+                    ></div>
+                </div>
+
+                {/* CSS Keyframes for blob animation */}
+                <style>{`
+                    @keyframes blob {
+                        0%, 100% {
+                            transform: translate(0, 0) scale(1);
+                        }
+                        25% {
+                            transform: translate(30px, -50px) scale(1.1);
+                        }
+                        50% {
+                            transform: translate(-20px, 20px) scale(0.95);
+                        }
+                        75% {
+                            transform: translate(40px, 30px) scale(1.05);
+                        }
+                    }
+                `}</style>
+
+                {/* Header - Centered Title Design */}
                 <div
-                    className="flex items-center justify-between h-14 px-4 border-b"
-                    style={{ borderColor: 'var(--border-color)', background: 'var(--bg-card)' }}
+                    className="flex items-center justify-center h-14 relative z-20"
                 >
-                    <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">航班详情</h2>
-                    <button
-                        onClick={onClose}
-                        className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                    >
-                        <span className="material-symbols-outlined text-gray-500 dark:text-gray-400">close</span>
-                    </button>
+                    <h2 className="text-xl font-bold tracking-[0.25em] uppercase text-amber-700" style={{ fontFamily: "'Noto Sans SC', system-ui, sans-serif" }}>
+                        航班详情
+                    </h2>
                 </div>
 
                 {/* Content */}
-                <div className="p-4 space-y-4 overflow-y-auto h-[calc(100%-3.5rem)]">
-                    {/* Flight Numbers - Centered, same size, matching left panel colors */}
-                    <div className="bg-gradient-to-br from-sky-50 to-indigo-50 dark:from-sky-900/30 dark:to-indigo-900/30 rounded-2xl p-5 border border-sky-100 dark:border-sky-800 shadow-sm relative overflow-hidden">
-                        <div className="flex items-center justify-center gap-3">
-                            <span className="text-3xl font-bold text-emerald-700 dark:text-emerald-400 font-mono tracking-tight tabular-nums">
-                                {flight.flightNo.split(' / ')[0]}
-                            </span>
-                            {flight.codeshare && (
-                                <>
-                                    <span className="text-2xl text-slate-300 dark:text-slate-600 font-light select-none">/</span>
-                                    <span className="text-3xl font-bold text-blue-600 dark:text-blue-400 font-mono tracking-tight tabular-nums">
-                                        {flight.codeshare}
-                                    </span>
-                                </>
-                            )}
-                        </div>
-                        {/* Route - Displayed below flight number, no icon */}
-                        <div className="mt-3 flex items-center justify-center">
-                            <span className="text-lg font-bold text-slate-600 dark:text-slate-300 tracking-wide">
-                                {flight.route || 'CTU - PEK'}
-                            </span>
-                        </div>
-                    </div>
+                <div className="overflow-y-auto h-[calc(100%-3.5rem)] relative z-10">
 
-                    {/* Aircraft & Gate Info - 5 items in one row */}
-                    <div className="grid grid-cols-5 gap-2">
-                        {[
-                            { label: '机位', value: flight.arrInfo?.stand || flight.stand || '-' },
-                            { label: '登机口', value: flight.depInfo?.gate || flight.gate || '-' },
-                            { label: '机号', value: flight.registration || '-' },
-                            { label: '机型', value: flight.aircraftType || '-' },
-                            { label: '机类', value: flight.aircraftCategory || '-' },
-                        ].map((item) => (
-                            <div key={item.label} className="bg-white dark:bg-gray-800/60 p-2 rounded-xl border border-gray-100 dark:border-gray-700/50 shadow-[0_2px_8px_rgba(0,0,0,0.02)] flex flex-col items-center justify-center min-h-[65px]">
-                                <div className="text-[10px] text-gray-400 dark:text-gray-500 mb-0.5 font-medium uppercase tracking-wide whitespace-nowrap">
-                                    {item.label}
-                                </div>
-                                <div className="text-sm font-bold text-gray-900 dark:text-white font-mono tabular-nums whitespace-nowrap">{item.value}</div>
-                            </div>
-                        ))}
-                    </div>
+                    {/* Content container */}
+                    <div className="relative z-10 px-4 pb-4 space-y-5">
 
-
-
-                    {/* Times Table */}
-                    <div className="bg-white dark:bg-gray-800/40 rounded-2xl border border-gray-100 dark:border-gray-700/50 shadow-sm overflow-hidden">
-                        <div className="text-sm divide-y divide-gray-100 dark:divide-gray-700/50">
-                            {/* 前站起飞 */}
-                            <div className="grid grid-cols-[80px_1fr] p-3 hover:bg-gray-50/50 transition-colors bg-orange-50/30">
-                                <div className="text-gray-900 dark:text-gray-100 font-bold">前站起飞</div>
-                                <div className="font-mono tabular-nums text-gray-700 dark:text-gray-200 font-bold text-center pr-10">
-                                    {formatTime(flight.times?.ptd)}
-                                </div>
+                        {/* Flight Numbers */}
+                        <div>
+                            <div className="flex items-center justify-center gap-3 mt-[12px] mb-[11px]">
+                                <span className="text-3xl font-black text-emerald-600 font-mono tracking-tight tabular-nums" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+                                    {flight.flightNo.split(' / ')[0]}
+                                </span>
+                                {flight.codeshare && (
+                                    <>
+                                        <span className="text-2xl text-slate-400 font-extralight select-none">/</span>
+                                        <span className="text-3xl font-black text-blue-600 font-mono tracking-tight tabular-nums" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+                                            {flight.codeshare}
+                                        </span>
+                                    </>
+                                )}
                             </div>
-                            {/* 计划时间 */}
-                            <div className="grid grid-cols-[80px_1fr_1fr] p-3 hover:bg-gray-50/50 transition-colors">
-                                <div className="text-gray-900 dark:text-gray-100 font-bold">计划时间</div>
-                                <div className="font-mono tabular-nums text-emerald-600 dark:text-emerald-400 font-bold text-center">
-                                    {formatTime(flight.times?.sta)}
-                                </div>
-                                <div className="font-mono tabular-nums text-blue-600 dark:text-blue-400 font-bold text-center">
-                                    {formatTime(flight.times?.std)}
-                                </div>
-                            </div>
-                            {/* 预计时间 */}
-                            <div className="grid grid-cols-[80px_1fr_1fr] p-3 hover:bg-gray-50/50 transition-colors bg-gray-50/30 dark:bg-gray-800/30">
-                                <div className="text-gray-900 dark:text-gray-100 font-bold">预计时间</div>
-                                <div className="font-mono tabular-nums text-emerald-600 dark:text-emerald-400 font-bold text-center">
-                                    {formatTime(flight.times?.eta)}
-                                </div>
-                                <div className="font-mono tabular-nums text-blue-600 dark:text-blue-400 font-bold text-center">
-                                    {formatTime(flight.times?.etd)}
-                                </div>
-                            </div>
-                            {/* 实际时间 */}
-                            <div className="grid grid-cols-[80px_1fr_1fr] p-3 hover:bg-gray-50/50 transition-colors">
-                                <div className="text-gray-900 dark:text-gray-100 font-bold">实际时间</div>
-                                <div className="font-mono tabular-nums text-emerald-600 dark:text-emerald-400 font-bold text-center">
-                                    {formatTime(flight.times?.ata)}
-                                </div>
-                                <div className="font-mono tabular-nums text-blue-600 dark:text-blue-400 font-bold text-center">
-                                    {formatTime(flight.times?.atd)}
-                                </div>
-                            </div>
-                            {/* COBT & CTOT */}
-                            <div className="grid grid-cols-2 divide-x divide-gray-100 dark:divide-gray-700/50">
-                                <div className="p-3">
-                                    <div className="text-gray-900 dark:text-gray-100 font-bold mb-1">COBT</div>
-                                    <div className="font-mono tabular-nums text-gray-900 dark:text-gray-100 font-bold text-lg">{formatTime(flight.times?.cobt)}</div>
-                                </div>
-                                <div className="p-3 pl-5">
-                                    <div className="text-gray-900 dark:text-gray-100 font-bold mb-1">CTOT</div>
-                                    <div className="font-mono tabular-nums text-gray-900 dark:text-gray-100 font-bold text-lg">{formatTime(flight.times?.ctot)}</div>
-                                </div>
+                            {/* Route with elegant separator */}
+                            <div className="flex items-center justify-center gap-3">
+                                <div className="h-px w-10 bg-gradient-to-r from-transparent to-slate-300"></div>
+                                <span className="text-lg font-bold text-slate-600 tracking-[0.2em] uppercase">
+                                    {flight.route || 'CTU - PEK'}
+                                </span>
+                                <div className="h-px w-10 bg-gradient-to-l from-transparent to-slate-300"></div>
                             </div>
                         </div>
+
+                        {/* Aircraft & Gate Info - 5 items in one row */}
+                        <div className="grid grid-cols-5 gap-3">
+                            {[
+                                { label: '机位', value: flight.arrInfo?.stand || flight.stand || '-' },
+                                { label: '登机口', value: flight.depInfo?.gate || flight.gate || '-' },
+                                { label: '机号', value: flight.registration || '-' },
+                                { label: '机型', value: flight.aircraftType || '-' },
+                                { label: '机类', value: flight.aircraftCategory || '-' },
+                            ].map((item) => (
+                                <div key={item.label} className="flex flex-col items-center justify-center py-2">
+                                    <div className="text-[10px] text-slate-400 mb-1 font-medium uppercase tracking-wide">
+                                        {item.label}
+                                    </div>
+                                    <div className="text-sm font-bold text-slate-700 font-mono tabular-nums">{item.value}</div>
+                                </div>
+                            ))}
+                        </div>
+
+
+
+
+                        {/* Times Table */}
+                        <div className="space-y-0">
+                            <div className="text-sm">
+                                {/* 前站起飞 */}
+                                <div className="grid grid-cols-[80px_1fr] p-3">
+                                    <div className="text-gray-900 dark:text-gray-100 font-bold">前站起飞</div>
+                                    <div className="font-mono tabular-nums text-gray-700 dark:text-gray-200 font-bold text-center pr-10">
+                                        {formatTime(flight.times?.ptd)}
+                                    </div>
+                                </div>
+                                {/* 计划时间 */}
+                                <div className="grid grid-cols-[80px_1fr_1fr] p-3">
+                                    <div className="text-gray-900 dark:text-gray-100 font-bold">计划时间</div>
+                                    <div className="font-mono tabular-nums text-emerald-600 dark:text-emerald-400 font-bold text-center">
+                                        {formatTime(flight.times?.sta)}
+                                    </div>
+                                    <div className="font-mono tabular-nums text-blue-600 dark:text-blue-400 font-bold text-center">
+                                        {formatTime(flight.times?.std)}
+                                    </div>
+                                </div>
+                                {/* 预计时间 */}
+                                <div className="grid grid-cols-[80px_1fr_1fr] p-3">
+                                    <div className="text-gray-900 dark:text-gray-100 font-bold">预计时间</div>
+                                    <div className="font-mono tabular-nums text-emerald-600 dark:text-emerald-400 font-bold text-center">
+                                        {formatTime(flight.times?.eta)}
+                                    </div>
+                                    <div className="font-mono tabular-nums text-blue-600 dark:text-blue-400 font-bold text-center">
+                                        {formatTime(flight.times?.etd)}
+                                    </div>
+                                </div>
+                                {/* 实际时间 */}
+                                <div className="grid grid-cols-[80px_1fr_1fr] p-3">
+                                    <div className="text-gray-900 dark:text-gray-100 font-bold">实际时间</div>
+                                    <div className="font-mono tabular-nums text-emerald-600 dark:text-emerald-400 font-bold text-center">
+                                        {formatTime(flight.times?.ata)}
+                                    </div>
+                                    <div className="font-mono tabular-nums text-blue-600 dark:text-blue-400 font-bold text-center">
+                                        {formatTime(flight.times?.atd)}
+                                    </div>
+                                </div>
+                                {/* COBT & CTOT */}
+                                <div className="grid grid-cols-2">
+                                    <div className="p-3">
+                                        <div className="text-gray-900 dark:text-gray-100 font-bold mb-1 italic">COBT</div>
+                                        <div className="font-mono tabular-nums text-gray-900 dark:text-gray-100 font-bold text-lg italic">{formatTime(flight.times?.cobt)}</div>
+                                    </div>
+                                    <div className="p-3 pl-5">
+                                        <div className="text-gray-900 dark:text-gray-100 font-bold mb-1 italic">CTOT</div>
+                                        <div className="font-mono tabular-nums text-gray-900 dark:text-gray-100 font-bold text-lg italic">{formatTime(flight.times?.ctot)}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Event Tasks Section */}
+                        {flight.events && flight.events.length > 0 && (
+                            <div className="space-y-3">
+                                {flight.events.map((event) => {
+                                    // Calculate time difference
+                                    const calcDiff = () => {
+                                        if (!event.timeScheduled || event.timeScheduled === '--:--') return 0;
+                                        const [planH, planM] = event.timeScheduled.split(':').map(Number);
+                                        const planMins = planH * 60 + planM;
+
+                                        let actualMins: number;
+                                        if (event.timeActual && event.timeActual !== '--:--') {
+                                            const [actH, actM] = event.timeActual.split(':').map(Number);
+                                            actualMins = actH * 60 + actM;
+                                        } else {
+                                            const now = new Date();
+                                            actualMins = now.getHours() * 60 + now.getMinutes();
+                                        }
+                                        return Math.abs(actualMins - planMins);
+                                    };
+                                    const diff = calcDiff();
+
+                                    // Status styling using legend colors (matching capsule border)
+                                    const getStatusStyle = () => {
+                                        switch (event.status) {
+                                            case 'overtime-completed':
+                                                return {
+                                                    bar: 'bg-yellow-500',
+                                                    badge: 'bg-yellow-50 text-yellow-900 border-yellow-200',
+                                                    cardBorder: 'border-yellow-500',
+                                                    label: '超时完成'
+                                                };
+                                            case 'overtime-incomplete':
+                                                return {
+                                                    bar: 'bg-red-600',
+                                                    badge: 'bg-red-50 text-red-900 border-red-200',
+                                                    cardBorder: 'border-red-600',
+                                                    label: '超时未完成'
+                                                };
+                                            case 'alert':
+                                                return {
+                                                    bar: 'bg-purple-600',
+                                                    badge: 'bg-purple-50 text-purple-900 border-purple-200',
+                                                    cardBorder: 'border-purple-600',
+                                                    label: '关联告警'
+                                                };
+                                            case 'warning':
+                                                return {
+                                                    bar: 'bg-cyan-600',
+                                                    badge: 'bg-cyan-50 text-cyan-900 border-cyan-200',
+                                                    cardBorder: 'border-cyan-600',
+                                                    label: '临期预警'
+                                                };
+                                            default:
+                                                return {
+                                                    bar: 'bg-gray-300',
+                                                    badge: 'bg-gray-50 text-gray-700 border-gray-200',
+                                                    cardBorder: 'border-gray-200',
+                                                    label: ''
+                                                };
+                                        }
+                                    };
+                                    const style = getStatusStyle();
+
+                                    // Only show status badge for relevant statuses
+                                    const showBadge = ['overtime-completed', 'overtime-incomplete', 'alert', 'warning'].includes(event.status);
+
+                                    return (
+                                        <div
+                                            key={event.id}
+                                            className={`relative rounded-xl overflow-hidden`}
+                                        >
+                                            <div className="px-4 py-3">
+                                                {/* Row 1: Dot + Title + Diff Badge + Status */}
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <div className="flex items-center gap-2.5">
+                                                        {/* Dot indicator inline with title */}
+                                                        <div className={`w-2.5 h-2.5 rounded-full ${style.bar} shadow-sm flex-shrink-0`}></div>
+                                                        <span className="font-bold text-gray-900 dark:text-gray-100 text-sm">
+                                                            {event.label}
+                                                        </span>
+                                                        <span className={`inline-flex items-center justify-center min-w-[28px] h-6 px-2 rounded-md text-xs font-bold tabular-nums ${style.badge} border`}>
+                                                            {diff}
+                                                        </span>
+                                                    </div>
+                                                    {showBadge && (
+                                                        <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${style.badge} border`}>
+                                                            {style.label}
+                                                        </span>
+                                                    )}
+                                                </div>
+
+                                                {/* Row 2: Plan + Actual times - Redesigned */}
+                                                <div className="flex items-center gap-6 mt-1">
+                                                    <div className="flex items-baseline gap-1.5">
+                                                        <span className="text-xs text-slate-400 font-medium">计划</span>
+                                                        <span className="font-mono font-bold text-base text-slate-600 tabular-nums tracking-tight">{formatTime(event.timeScheduled)}</span>
+                                                    </div>
+                                                    <div className="flex items-baseline gap-1.5">
+                                                        <span className="text-xs text-slate-400 font-medium">实际</span>
+                                                        <span className="font-mono font-black text-base text-slate-800 tabular-nums tracking-tight">{formatTime(event.timeActual)}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
