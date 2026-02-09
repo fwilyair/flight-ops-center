@@ -64,6 +64,19 @@ const calculateTimeDiff = (actual?: string, scheduled?: string): number | null =
     return actualMins - scheduledMins;
 };
 
+// Status translation map
+const STATUS_MAP_CN: Record<string, string> = {
+    'completed': '正常完成',
+    'overtime-completed': '超时完成',
+    'overtime-incomplete': '超时未完',
+    'delayed': '延误',
+    'active': '保障中',
+    'pending': '未开始',
+    'normal': '正常',
+    'warning': '异常',
+    'alert': '告警'
+};
+
 export const CapsuleDetailModal: React.FC<CapsuleDetailModalProps> = ({
     isOpen,
     onClose,
@@ -72,6 +85,15 @@ export const CapsuleDetailModal: React.FC<CapsuleDetailModalProps> = ({
     codeshare,
     onControl
 }) => {
+    // ... hooks
+
+    // Helper to get status text
+    const getStatusText = (status: string) => STATUS_MAP_CN[status] || status;
+
+    // ... rest of component
+
+    // In Render:
+    // ... hooks
     const [isControlModalOpen, setIsControlModalOpen] = React.useState(false);
     const [controlText, setControlText] = React.useState('');
     const [localLifecycle, setLocalLifecycle] = React.useState<TaskLifecycleEvent[]>([]);
@@ -122,7 +144,7 @@ export const CapsuleDetailModal: React.FC<CapsuleDetailModalProps> = ({
                 id: `ctrl_${Date.now()}`,
                 type: '管控',
                 timestamp: timestamp,
-                description: `已管控${event.label}：${controlText}`
+                description: controlText
             };
 
             // Update local state (prepend to show at top)
@@ -151,228 +173,188 @@ export const CapsuleDetailModal: React.FC<CapsuleDetailModalProps> = ({
 
             {/* Main Capsule Detail Modal */}
             <div
-                className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[450px] max-h-[85vh] z-[90] rounded-2xl overflow-hidden shadow-2xl flex flex-col"
+                className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] max-h-[90vh] z-[90] rounded-2xl overflow-hidden shadow-2xl flex flex-col"
                 style={{ boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' }}
             >
-                {/* Header - Solid white background */}
-                <div className="relative px-5 py-6 bg-white z-20 border-b border-gray-100 shadow-sm">
+                <div className="relative px-5 py-6 bg-white z-20 border-b border-gray-100 shadow-sm flex-none">
                     {/* Title content - Centered */}
                     <div className="flex items-center justify-center relative">
-                        <div className="flex items-center gap-3">
-                            <span className="text-3xl font-black text-emerald-600 font-mono tracking-tight tabular-nums">{flightNo}</span>
-                            {codeshare && (
-                                <>
-                                    <span className="text-gray-300 text-2xl font-light">/</span>
-                                    <span className="text-3xl font-black text-blue-600 font-mono tracking-tight tabular-nums">{codeshare}</span>
-                                </>
-                            )}
+                        <div className="flex flex-col items-center gap-1">
+                            <div className="flex items-center gap-3">
+                                <span className="text-3xl font-black text-emerald-600 font-mono tracking-tight tabular-nums">{flightNo}</span>
+                                {codeshare && (
+                                    <>
+                                        <span className="text-gray-300 text-2xl font-light">/</span>
+                                        <span className="text-3xl font-black text-blue-600 font-mono tracking-tight tabular-nums">{codeshare}</span>
+                                    </>
+                                )}
+                            </div>
+
+                            {/* Restored Task Details - Text Based - Consistent Font Size - Increased Gap */}
+                            <div className="flex items-center gap-12 mt-2 text-lg font-bold text-gray-800">
+                                <span>{event.label}</span>
+                                {timeDiff !== null && (
+                                    <>
+                                        <span className="w-px h-5 bg-gray-300"></span>
+                                        <span className={`font-mono ${timeDiffColor}`}>
+                                            {timeDiff > 0 ? `+${timeDiff}` : timeDiff} min
+                                        </span>
+                                    </>
+                                )}
+                                <span className="w-px h-5 bg-gray-300"></span>
+                                <span className="text-gray-500">{getStatusText(event.status)}</span>
+                            </div>
                         </div>
 
-                        {/* Close button - Absolute positioned right */}
-                        <button
-                            onClick={onClose}
-                            className="absolute right-0 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full bg-gray-50 hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600"
-                        >
-                            <span className="material-symbols-outlined text-xl">close</span>
-                        </button>
+                        {/* Close button - Absolute positioned right - REMOVED */}
                     </div>
                 </div>
 
                 {/* Content area with liquid flow background */}
-                <div className="flex-1 overflow-y-auto relative bg-white">
+                {/* Content area with liquid flow background */}
+                <div className="flex-1 overflow-y-auto relative bg-white flex flex-col-reverse p-6">
                     {/* Subtle gradient overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-sky-50/50 via-white to-blue-50/30 pointer-events-none"></div>
+                    <div className="absolute inset-0 bg-gradient-to-br from-sky-50/50 via-white to-blue-50/30 pointer-events-none sticky top-0"></div>
 
-                    {/* Animated blob - subtle */}
-                    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                        <div
-                            className="absolute w-[300px] h-[300px] rounded-full opacity-30 blur-3xl"
-                            style={{
-                                background: 'radial-gradient(circle, rgba(135,206,250,0.4) 0%, rgba(135,206,250,0) 70%)',
-                                top: '-50px',
-                                right: '-50px',
-                                animation: 'blob 10s ease-in-out infinite'
-                            }}
-                        ></div>
-                        <div
-                            className="absolute w-[250px] h-[250px] rounded-full opacity-25 blur-3xl"
-                            style={{
-                                background: 'radial-gradient(circle, rgba(196,181,253,0.3) 0%, rgba(196,181,253,0) 70%)',
-                                bottom: '100px',
-                                left: '-30px',
-                                animation: 'blob 12s ease-in-out infinite 2s'
-                            }}
-                        ></div>
-                    </div>
+                    {/* Chat Stream */}
+                    <div className="relative z-10 flex flex-col gap-5 w-full">
+                        {/* Combine and sort specific events and local lifecycle for display */}
+                        {[...localLifecycle]
+                            .sort((a, b) => {
+                                // Simple string comparison for hh:mm format assuming same day
+                                return a.timestamp.localeCompare(b.timestamp);
+                            })
+                            .map((lc) => {
+                                // Determine message type and styling based on event type
+                                let alignment = 'self-start'; // Default Left (Field)
+                                let bubbleStyle = 'bg-gray-100 text-gray-700';
 
-                    {/* CSS Keyframes */}
-                    <style>{`
-                        @keyframes blob {
-                            0%, 100% { transform: translate(0, 0) scale(1); }
-                            25% { transform: translate(20px, -30px) scale(1.05); }
-                            50% { transform: translate(-15px, 15px) scale(0.95); }
-                            75% { transform: translate(25px, 20px) scale(1.02); }
-                        }
-                    `}</style>
+                                // Colors for bubbles (content)
+                                if (['预警', '催办'].includes(lc.type)) {
+                                    alignment = 'self-center';
+                                    if (lc.type === '预警') {
+                                        bubbleStyle = 'bg-orange-50 text-orange-600 border border-orange-100';
+                                    } else { // 催办
+                                        bubbleStyle = 'bg-rose-50 text-rose-600 border border-rose-100';
+                                    }
+                                } else if (lc.type === '管控') {
+                                    alignment = 'self-end';
+                                    // Light Green as requested (matching avatar)
+                                    bubbleStyle = 'bg-emerald-100 text-emerald-700 border border-emerald-200 shadow-sm';
+                                } else {
+                                    // Default Task Blue
+                                    bubbleStyle = 'bg-blue-50 text-blue-700 border border-blue-100 shadow-sm';
+                                }
 
-                    <div className="relative z-10 p-5 space-y-5">
-                        {/* Task Info Row */}
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                {/* Task Name (was Department) + Diff Badge */}
-                                <span className="text-xl font-bold text-gray-900">
-                                    {event.label}
-                                </span>
-                                <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${timeDiffColor} bg-opacity-10`}
-                                    style={{ backgroundColor: timeDiff === null ? undefined : timeDiff > 0 ? 'rgba(220, 38, 38, 0.1)' : 'rgba(16, 185, 129, 0.1)' }}
-                                >
-                                    {timeDiff !== null ? (timeDiff >= 0 ? `+${timeDiff}` : timeDiff) : '--'}
-                                </span>
-                            </div>
+                                // Layout Container Base
+                                const containerBase = "flex items-center gap-3 max-w-[90%]";
 
-                            {/* Task Status Badge */}
-                            <span className={`px-3 py-1 rounded-full text-xs font-bold ${getTaskStatusStyle(event.taskStatus || '未发布')}`}>
-                                {event.taskStatus || '未发布'}
-                            </span>
-                        </div>
+                                // Parse timestamp to MM-DD HH:mm
+                                // If format is YYYY-MM-DD HH:mm, remove YYYY-
+                                let timeStr = lc.timestamp;
+                                if (timeStr.split('-').length === 3) {
+                                    timeStr = timeStr.split('-').slice(1).join('-').trim();
+                                }
 
-                        {/* Department & Personnel */}
-                        <div className="flex flex-col gap-1.5">
-
-                            <div className="flex items-baseline gap-2">
-                                <span className="text-gray-500 font-medium text-sm">保障人员：</span>
-                                <span className="text-gray-800 font-medium text-sm">
-                                    {event.personnel?.join('、') || '--'}
-                                </span>
-                            </div>
-                        </div>
-
-                        {/* Timeline */}
-                        <div className="pt-2">
-                            <div className="relative pl-4">
-                                {/* Vertical line */}
-                                <div className="absolute left-[7px] top-2 bottom-2 w-0.5 bg-gradient-to-b from-blue-400 via-blue-300 to-gray-200"></div>
-
-                                {/* Timeline events - already sorted descending from data */}
-                                <div className="space-y-4">
-                                    {(localLifecycle || []).map((lc, index) => {
-                                        const styles = getLifecycleTypeStyle(lc.type);
-                                        return (
-                                            <div key={lc.id} className="relative flex items-start gap-3">
-                                                {/* Dot */}
-                                                <div className={`absolute -left-[13px] top-[5px] w-2.5 h-2.5 rounded-full ${styles.dot} ring-2 ring-white shadow-sm`}></div>
-
-                                                {/* Content */}
-                                                <div className="flex-1 ml-2">
-                                                    {/* Type label + Timestamp */}
-                                                    <div className="flex items-center gap-2 mb-1">
-                                                        <span className={`px-1.5 py-0.5 rounded text-xs font-bold ${styles.label}`}>
-                                                            {lc.type}
-                                                        </span>
-                                                        <span className="text-sm text-gray-400 font-mono">
-                                                            {lc.timestamp}
-                                                        </span>
-                                                    </div>
-
-                                                    {/* Description */}
-                                                    <p className={`text-sm leading-relaxed ${styles.text}`}>
-                                                        {lc.description}
-                                                    </p>
-                                                </div>
+                                // Special rendering for Center messages (System Alerts)
+                                if (['预警', '催办'].includes(lc.type)) {
+                                    return (
+                                        <div key={lc.id} className={`${alignment} flex flex-col items-center gap-1 my-3`}>
+                                            <div className="text-xs text-gray-500 font-bold font-mono mb-1">{timeStr}</div>
+                                            <div className={`${bubbleStyle} px-6 py-2 rounded-full text-sm font-medium shadow-sm flex items-center gap-2`}>
+                                                <span className="font-bold">{lc.type}</span>
+                                                <span className="w-px h-3 bg-current opacity-30"></span>
+                                                <span>{lc.description}</span>
                                             </div>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-                        </div>
+                                        </div>
+                                    );
+                                }
+
+                                // Right (Control/Me)
+                                if (lc.type === '管控') {
+                                    return (
+                                        <div key={lc.id} className={`${alignment} ${containerBase} flex-row-reverse`}>
+                                            {/* Integrated Bubble: [Label | Content] */}
+                                            <div className={`${bubbleStyle} px-6 py-2 rounded-3xl text-sm leading-relaxed shadow-sm max-w-[90%] flex items-start gap-3`}>
+                                                <span className="font-bold whitespace-nowrap">{lc.type}</span>
+                                                <span className="w-px h-4 bg-current opacity-30 mt-1 flex-shrink-0"></span>
+                                                <span>{lc.description}</span>
+                                            </div>
+
+                                            {/* Time */}
+                                            <div className="text-xs text-gray-500 font-bold font-mono self-center ml-2">{timeStr}</div>
+                                        </div>
+                                    );
+                                }
+
+                                // Left (Task/Field)
+                                return (
+                                    <div key={lc.id} className={`${alignment} ${containerBase}`}>
+                                        {/* Integrated Bubble: [Label | Content] */}
+                                        <div className={`${bubbleStyle} px-6 py-2 rounded-3xl text-sm leading-relaxed shadow-sm max-w-[90%] flex items-start gap-3`}>
+                                            <span className="font-bold whitespace-nowrap">{lc.type}</span>
+                                            <span className="w-px h-4 bg-current opacity-30 mt-1 flex-shrink-0"></span>
+                                            <span>{lc.description}</span>
+                                        </div>
+
+                                        {/* Time */}
+                                        <div className="text-xs text-gray-500 font-bold font-mono self-center mr-2">{timeStr}</div>
+                                    </div>
+                                );
+                            })}
                     </div>
                 </div>
 
-                {/* Control Button - Fixed at bottom */}
-                <div className="p-4 bg-white border-t border-gray-100">
-                    <button
-                        onClick={() => setIsControlModalOpen(true)}
-                        className="w-full py-3 rounded-xl font-bold text-white text-lg tracking-wide bg-gradient-to-r from-orange-500 via-orange-400 to-amber-400 hover:from-orange-600 hover:via-orange-500 hover:to-amber-500 transition-all shadow-lg hover:shadow-xl active:scale-[0.98]"
-                    >
-                        管控
-                    </button>
-                </div>
-            </div>
-
-            {/* Control Detail Modal (Overlay) */}
-            {isControlModalOpen && (
-                <>
-                    {/* Unique Backdrop for Control Modal */}
-                    <div
-                        className={`fixed inset-0 bg-black/60 z-[100] transition-opacity duration-200 ${isClosingControl ? 'opacity-0' : 'opacity-100'}`}
-                        onClick={handleCloseControlModal}
-                    />
-
-                    <div
-                        className={`fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] bg-white z-[110] rounded-2xl overflow-hidden shadow-2xl flex flex-col transition-all duration-200 ${isClosingControl ? 'opacity-0 scale-95' : 'animate-in fade-in zoom-in-95'}`}
-                    >
-                        {/* Header */}
-                        <div className="relative px-5 py-4 bg-white border-b border-gray-100 flex items-center justify-center">
-                            <span className="text-xl font-bold text-gray-900 tracking-wide">发布管控内容</span>
-                            <button
-                                onClick={handleCloseControlModal}
-                                className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full bg-gray-50 hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600"
-                            >
-                                <span className="material-symbols-outlined text-lg">close</span>
-                            </button>
+                {/* Chat Input Area (Footer) - Fixed at bottom */}
+                <div className="p-4 bg-gray-50 border-t border-gray-100 flex-none z-20">
+                    <div className="flex flex-col gap-3">
+                        {/* Shortcuts Row */}
+                        <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar mask-fade-right">
+                            {shortcuts.map((shortcut, idx) => (
+                                <button
+                                    key={idx}
+                                    onClick={() => handleShortcutClick(shortcut)}
+                                    className="flex-shrink-0 px-3 py-1.5 bg-white border border-gray-200 rounded-full text-xs font-medium text-gray-600 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-colors shadow-sm whitespace-nowrap max-w-[150px] truncate"
+                                    title={shortcut}
+                                >
+                                    {shortcut}
+                                </button>
+                            ))}
                         </div>
 
-                        {/* Content */}
-                        <div className="p-6 space-y-4 bg-gray-50/50">
-                            {/* Input Area */}
-                            <div className="bg-white p-1 rounded-xl border border-gray-200 shadow-sm focus-within:ring-2 focus-within:ring-orange-100 focus-within:border-orange-200 transition-all">
+                        {/* Input & Send */}
+                        <div className="flex items-end gap-2">
+                            <div className="flex-1 bg-white rounded-xl border border-gray-200 shadow-sm focus-within:ring-2 focus-within:ring-blue-100 focus-within:border-blue-300 transition-all overflow-hidden flex items-center">
                                 <textarea
                                     value={controlText}
                                     onChange={(e) => setControlText(e.target.value)}
-                                    placeholder="请输入管控内容..."
-                                    className="w-full h-24 p-3 resize-none outline-none text-gray-700 placeholder-gray-400 bg-transparent text-base"
+                                    placeholder="输入管控指令..."
+                                    className="w-full max-h-[100px] min-h-[44px] py-2.5 px-4 resize-none outline-none text-gray-700 placeholder-gray-400 bg-transparent text-sm leading-relaxed"
+                                    rows={1}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' && !e.shiftKey) {
+                                            e.preventDefault();
+                                            handleSubmitControl();
+                                        }
+                                    }}
                                 ></textarea>
                             </div>
 
-                            {/* Shortcuts List */}
-                            <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-                                <div className="px-4 py-2 bg-gray-50 border-b border-gray-100 text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                    快捷用语
-                                </div>
-                                <div className="divide-y divide-gray-50 max-h-[160px] overflow-y-auto">
-                                    {shortcuts.map((shortcut, idx) => (
-                                        <button
-                                            key={idx}
-                                            onClick={() => handleShortcutClick(shortcut)}
-                                            className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-700 transition-colors truncate"
-                                        >
-                                            {shortcut}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Submit Button */}
-                        <div className="p-4 bg-white border-t border-gray-100 flex justify-center">
                             <button
                                 onClick={handleSubmitControl}
-                                disabled={isSubmitting}
-                                className={`px-10 py-2.5 bg-gradient-to-r from-orange-500 via-orange-400 to-amber-400 hover:from-orange-600 hover:via-orange-500 hover:to-amber-500 text-white font-bold rounded-lg shadow-md hover:shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 ${isSubmitting ? 'opacity-70 cursor-not-allowed active:scale-100' : ''}`}
+                                disabled={isSubmitting || !controlText.trim()}
+                                className={`w-11 h-11 flex items-center justify-center rounded-xl bg-blue-600 text-white shadow-md hover:bg-blue-700 hover:shadow-lg transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none shrink-0`}
                             >
                                 {isSubmitting ? (
-                                    <>
-                                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                                        <span>提交中...</span>
-                                    </>
+                                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                                 ) : (
-                                    <span>提交</span>
+                                    <span className="material-symbols-outlined text-[20px] ml-0.5">send</span>
                                 )}
                             </button>
                         </div>
                     </div>
-                </>
-            )}
+                </div>
+            </div>
         </>
     );
 };
