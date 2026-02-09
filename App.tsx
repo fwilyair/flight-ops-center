@@ -2,9 +2,10 @@ import React, { useRef, useEffect, useState, useMemo } from 'react';
 import { Header } from './components/Header';
 import { GanttRow } from './components/GanttRow';
 import { FlightDetailPanel } from './components/FlightDetailPanel';
+import { CapsuleDetailModal } from './components/CapsuleDetailModal';
 import { MOCK_FLIGHTS } from './data';
 import { timeToPixels } from './utils';
-import { START_TIME_HOUR, Flight } from './types';
+import { START_TIME_HOUR, Flight, TimelineEvent } from './types';
 
 // Time markers generation - dynamically calculated based on flight data
 
@@ -34,6 +35,23 @@ const App: React.FC = () => {
 
   const handlePanelClose = () => {
     setIsPanelOpen(false);
+  };
+
+  // 胶囊详情弹窗状态
+  const [selectedEvent, setSelectedEvent] = useState<TimelineEvent | null>(null);
+  const [capsuleFlightNo, setCapsuleFlightNo] = useState('');
+  const [capsuleCodeshare, setCapsuleCodeshare] = useState<string | undefined>(undefined);
+  const [isCapsuleModalOpen, setIsCapsuleModalOpen] = useState(false);
+
+  const handleEventClick = (event: TimelineEvent, flight: Flight) => {
+    setSelectedEvent(event);
+    setCapsuleFlightNo(flight.flightNo.split(' / ')[0]);
+    setCapsuleCodeshare(flight.codeshare);
+    setIsCapsuleModalOpen(true);
+  };
+
+  const handleCapsuleModalClose = () => {
+    setIsCapsuleModalOpen(false);
   };
 
   // 过滤航班列表
@@ -219,6 +237,7 @@ const App: React.FC = () => {
                     flight={flight}
                     timeScale={timeScale}
                     onClick={() => handleFlightClick(flight)}
+                    onEventClick={(event) => handleEventClick(event, flight)}
                   />
                 ))}
 
@@ -243,6 +262,16 @@ const App: React.FC = () => {
         flight={selectedFlight}
         isOpen={isPanelOpen}
         onClose={handlePanelClose}
+      />
+
+      {/* Capsule Detail Modal */}
+      <CapsuleDetailModal
+        isOpen={isCapsuleModalOpen}
+        onClose={handleCapsuleModalClose}
+        event={selectedEvent}
+        flightNo={capsuleFlightNo}
+        codeshare={capsuleCodeshare}
+        onControl={() => console.log('Control clicked for event:', selectedEvent?.label)}
       />
     </div>
   );

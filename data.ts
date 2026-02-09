@@ -30,8 +30,48 @@ export const MOCK_FLIGHTS: Flight[] = [
       ctot: '10:35'
     },
     events: [
-      { id: 'e1', label: '落地', type: 'LAND', timeActual: '09:00', timeScheduled: '09:00', status: 'overtime-completed' },
-      { id: 'e2', label: '靠桥', type: 'IN-BLK', timeActual: '09:25', timeScheduled: '09:15', status: 'overtime-completed' },
+      {
+        id: 'e1',
+        label: '落地',
+        type: 'LAND',
+        timeActual: '09:00',
+        timeScheduled: '09:00',
+        status: 'overtime-completed',
+        taskStatus: '结束',
+        department: '机务保障',
+        personnel: ['张三', '李四'],
+        lifecycle: [
+          { id: 'lc1', type: '结束', timestamp: '02-09 09:00', description: '任务完成' },
+          { id: 'lc2', type: '开始', timestamp: '02-09 08:55', description: '开始执行任务' },
+          { id: 'lc3', type: '到位', timestamp: '02-09 08:50', description: '人员到达机位' },
+          { id: 'lc4', type: '领受', timestamp: '02-09 08:30', description: '张三领受任务' },
+          { id: 'lc5', type: '发布', timestamp: '02-09 08:20', description: '任务已发布' },
+          { id: 'lc_test_1', type: '预警', timestamp: '02-09 08:15', description: '系统自动预警：前序航班延误可能影响' },
+          { id: 'lc_test_2', type: '催办', timestamp: '02-09 08:10', description: '调度中心催办：请尽快确认人员到位情况' },
+          { id: 'lc_test_3', type: '预警', timestamp: '02-09 08:05', description: '资源预警：登机口变更需重新分配' },
+          { id: 'lc_test_4', type: '发布', timestamp: '02-09 08:00', description: '任务尝试初次发布' },
+          { id: 'lc_test_5', type: '创建', timestamp: '02-09 07:55', description: '系统生成初始任务单' },
+          { id: 'lc_test_6', type: '预警', timestamp: '02-09 07:50', description: '离港系统同步异常' },
+          { id: 'lc_test_7', type: '创建', timestamp: '02-08 17:22', description: '任务创建' },
+        ]
+      },
+      {
+        id: 'e2',
+        label: '靠桥',
+        type: 'IN-BLK',
+        timeActual: '09:25',
+        timeScheduled: '09:15',
+        status: 'overtime-completed',
+        taskStatus: '开始',
+        department: '监装监卸',
+        personnel: ['王五'],
+        lifecycle: [
+          { id: 'lc7', type: '催办', timestamp: '02-09 09:34', description: '离计划保障时间还剩1分钟' },
+          { id: 'lc8', type: '预警', timestamp: '02-09 09:32', description: '监装监卸-装机结束-超时14分钟' },
+          { id: 'lc9', type: '预警', timestamp: '02-09 08:46', description: '监装监卸-装机结束-开始装机已延误,可能影响装机结束保障工作' },
+          { id: 'lc10', type: '创建', timestamp: '02-08 17:22', description: '任务创建' },
+        ]
+      },
     ],
     annotations: [
       { type: 'connector', startTime: '09:00', endTime: '10:00', label: '放行', style: 'solid', color: 'gray' },

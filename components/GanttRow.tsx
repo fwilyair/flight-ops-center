@@ -6,6 +6,7 @@ interface GanttRowProps {
     flight: Flight;
     timeScale: number;
     onClick?: () => void;
+    onEventClick?: (event: TimelineEvent) => void;
 }
 
 const FlightStatusBadge = ({ status, type = 'ARR' }: { status: string; type?: 'ARR' | 'DEP' }) => {
@@ -43,7 +44,7 @@ const FlightTypeBadge = ({ type }: { type: FlightType }) => {
     );
 };
 
-const EventPill: React.FC<{ event: TimelineEvent; track: number; timeScale: number }> = ({ event, track, timeScale }) => {
+const EventPill: React.FC<{ event: TimelineEvent; track: number; timeScale: number; onEventClick?: (event: TimelineEvent) => void }> = ({ event, track, timeScale, onEventClick }) => {
     const leftPos = timeToPixels(event.timeScheduled || event.timeActual || '', timeScale);
     const colors = getColorForEventType(event.type, event.status);
     const isDelayed = event.status === 'delayed';
@@ -55,6 +56,10 @@ const EventPill: React.FC<{ event: TimelineEvent; track: number; timeScale: numb
         <div
             className={`absolute flex items-center z-10 hover:z-20 transition-all cursor-pointer select-none group`}
             style={{ left: `${leftPos}px`, top: `${topPos}px` }}
+            onClick={(e) => {
+                e.stopPropagation();
+                onEventClick?.(event);
+            }}
         >
             {/* 对齐时间刻度的圆点 (中心对齐 leftPos) - 尺寸增大 - 统一绿色 */}
             <div className={`absolute left-0 top-1/2 -translate-x-1/2 -translate-y-1/2 size-2.5 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-gray-900 shadow-sm`}></div>
@@ -253,7 +258,7 @@ const FusedInfoBadge = ({ label, value, type = 'ARR', status }: { label: string;
     );
 };
 
-export const GanttRow: React.FC<GanttRowProps> = ({ flight, timeScale, onClick }) => {
+export const GanttRow: React.FC<GanttRowProps> = ({ flight, timeScale, onClick, onEventClick }) => {
     const isDelay = flight.arrInfo?.status === '延误' || flight.depInfo?.status === '延误';
 
     // 计算事件的轨道分配
@@ -396,7 +401,7 @@ export const GanttRow: React.FC<GanttRowProps> = ({ flight, timeScale, onClick }
                     <AnnotationLine key={`anno-${idx}`} annotation={anno} index={idx} timeScale={timeScale} />
                 ))}
                 {flight.events.map((event) => (
-                    <EventPill key={event.id} event={event} track={eventTracks.get(event.id) || 0} timeScale={timeScale} />
+                    <EventPill key={event.id} event={event} track={eventTracks.get(event.id) || 0} timeScale={timeScale} onEventClick={onEventClick} />
                 ))}
             </div>
         </div >
