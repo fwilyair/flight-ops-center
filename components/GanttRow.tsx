@@ -7,6 +7,7 @@ interface GanttRowProps {
     timeScale: number;
     onClick?: () => void;
     onEventClick?: (event: TimelineEvent) => void;
+    onVideoClick?: () => void;
 }
 
 const FlightStatusBadge = ({ status, type = 'ARR' }: { status: string; type?: 'ARR' | 'DEP' }) => {
@@ -258,7 +259,7 @@ const FusedInfoBadge = ({ label, value, type = 'ARR', status }: { label: string;
     );
 };
 
-export const GanttRow: React.FC<GanttRowProps> = ({ flight, timeScale, onClick, onEventClick }) => {
+export const GanttRow: React.FC<GanttRowProps> = ({ flight, timeScale, onClick, onEventClick, onVideoClick }) => {
     const isDelay = flight.arrInfo?.status === '延误' || flight.depInfo?.status === '延误';
 
     // 计算事件的轨道分配
@@ -336,6 +337,10 @@ export const GanttRow: React.FC<GanttRowProps> = ({ flight, timeScale, onClick, 
                         <button
                             className="flex items-center justify-center size-8 rounded-full text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors -mt-1"
                             title="播放监控视频"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onVideoClick?.();
+                            }}
                         >
                             <span className="material-symbols-outlined text-[26px]">play_circle</span>
                         </button>

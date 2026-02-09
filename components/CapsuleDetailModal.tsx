@@ -44,6 +44,8 @@ const getLifecycleTypeStyle = (type: TaskLifecycleEvent['type']) => {
         case '开始':
         case '结束':
             return { dot: 'bg-blue-500', text: 'text-blue-600', label: 'bg-blue-100 text-blue-700' };
+        case '管控':
+            return { dot: 'bg-emerald-500', text: 'text-emerald-700', label: 'bg-emerald-100 text-emerald-800' };
         default:
             return { dot: 'bg-gray-400', text: 'text-gray-600', label: 'bg-gray-100 text-gray-600' };
     }
@@ -70,6 +72,70 @@ export const CapsuleDetailModal: React.FC<CapsuleDetailModalProps> = ({
     codeshare,
     onControl
 }) => {
+    const [isControlModalOpen, setIsControlModalOpen] = React.useState(false);
+    const [controlText, setControlText] = React.useState('');
+    const [localLifecycle, setLocalLifecycle] = React.useState<TaskLifecycleEvent[]>([]);
+    const [isSubmitting, setIsSubmitting] = React.useState(false);
+    const [isClosingControl, setIsClosingControl] = React.useState(false);
+
+    const handleCloseControlModal = () => {
+        setIsClosingControl(true);
+        setTimeout(() => {
+            setIsControlModalOpen(false);
+            setIsClosingControl(false);
+            setControlText('');
+        }, 200);
+    };
+
+    // Initialize local lifecycle state when event changes
+    React.useEffect(() => {
+        if (event?.lifecycle) {
+            setLocalLifecycle(event.lifecycle);
+        }
+    }, [event]);
+
+    const shortcuts = [
+        "请及时到位",
+        "注意保障时间，特殊情况请及时偏离上报",
+        "设备故障，请协调备用设备",
+        "收到请回复"
+    ];
+
+    const handleShortcutClick = (text: string) => {
+        setControlText(text);
+    };
+
+    const handleSubmitControl = () => {
+        if (!controlText.trim() || !event) return;
+
+        setIsSubmitting(true);
+
+        // Simulate network delay for better UX
+        setTimeout(() => {
+            console.log('Control submitted:', controlText);
+
+            // Create new control event
+            const now = new Date();
+            const timestamp = `${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+
+            const newEvent: TaskLifecycleEvent = {
+                id: `ctrl_${Date.now()}`,
+                type: '管控',
+                timestamp: timestamp,
+                description: `已管控${event.label}：${controlText}`
+            };
+
+            // Update local state (prepend to show at top)
+            setLocalLifecycle(prev => [newEvent, ...prev]);
+
+            // Here you would typically call an API to persist this
+
+            setIsSubmitting(false);
+            handleCloseControlModal();
+            if (onControl) onControl();
+        }, 600);
+    };
+
     if (!isOpen || !event) return null;
 
     const timeDiff = calculateTimeDiff(event.timeActual, event.timeScheduled);
@@ -83,7 +149,7 @@ export const CapsuleDetailModal: React.FC<CapsuleDetailModalProps> = ({
                 onClick={onClose}
             />
 
-            {/* Modal */}
+            {/* Main Capsule Detail Modal */}
             <div
                 className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[450px] max-h-[85vh] z-[90] rounded-2xl overflow-hidden shadow-2xl flex flex-col"
                 style={{ boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' }}
@@ -189,12 +255,12 @@ export const CapsuleDetailModal: React.FC<CapsuleDetailModalProps> = ({
 
                                 {/* Timeline events - already sorted descending from data */}
                                 <div className="space-y-4">
-                                    {(event.lifecycle || []).map((lc, index) => {
+                                    {(localLifecycle || []).map((lc, index) => {
                                         const styles = getLifecycleTypeStyle(lc.type);
                                         return (
                                             <div key={lc.id} className="relative flex items-start gap-3">
                                                 {/* Dot */}
-                                                <div className={`absolute -left-4 top-1 w-3.5 h-3.5 rounded-full ${styles.dot} ring-2 ring-white shadow-sm`}></div>
+                                                <div className={`absolute -left-[13px] top-[5px] w-2.5 h-2.5 rounded-full ${styles.dot} ring-2 ring-white shadow-sm`}></div>
 
                                                 {/* Content */}
                                                 <div className="flex-1 ml-2">
@@ -225,13 +291,88 @@ export const CapsuleDetailModal: React.FC<CapsuleDetailModalProps> = ({
                 {/* Control Button - Fixed at bottom */}
                 <div className="p-4 bg-white border-t border-gray-100">
                     <button
-                        onClick={onControl}
+                        onClick={() => setIsControlModalOpen(true)}
                         className="w-full py-3 rounded-xl font-bold text-white text-lg tracking-wide bg-gradient-to-r from-orange-500 via-orange-400 to-amber-400 hover:from-orange-600 hover:via-orange-500 hover:to-amber-500 transition-all shadow-lg hover:shadow-xl active:scale-[0.98]"
                     >
                         管控
                     </button>
                 </div>
             </div>
+
+            {/* Control Detail Modal (Overlay) */}
+            {isControlModalOpen && (
+                <>
+                    {/* Unique Backdrop for Control Modal */}
+                    <div
+                        className={`fixed inset-0 bg-black/60 z-[100] transition-opacity duration-200 ${isClosingControl ? 'opacity-0' : 'opacity-100'}`}
+                        onClick={handleCloseControlModal}
+                    />
+
+                    <div
+                        className={`fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] bg-white z-[110] rounded-2xl overflow-hidden shadow-2xl flex flex-col transition-all duration-200 ${isClosingControl ? 'opacity-0 scale-95' : 'animate-in fade-in zoom-in-95'}`}
+                    >
+                        {/* Header */}
+                        <div className="relative px-5 py-4 bg-white border-b border-gray-100 flex items-center justify-center">
+                            <span className="text-xl font-bold text-gray-900 tracking-wide">发布管控内容</span>
+                            <button
+                                onClick={handleCloseControlModal}
+                                className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full bg-gray-50 hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600"
+                            >
+                                <span className="material-symbols-outlined text-lg">close</span>
+                            </button>
+                        </div>
+
+                        {/* Content */}
+                        <div className="p-6 space-y-4 bg-gray-50/50">
+                            {/* Input Area */}
+                            <div className="bg-white p-1 rounded-xl border border-gray-200 shadow-sm focus-within:ring-2 focus-within:ring-orange-100 focus-within:border-orange-200 transition-all">
+                                <textarea
+                                    value={controlText}
+                                    onChange={(e) => setControlText(e.target.value)}
+                                    placeholder="请输入管控内容..."
+                                    className="w-full h-24 p-3 resize-none outline-none text-gray-700 placeholder-gray-400 bg-transparent text-base"
+                                ></textarea>
+                            </div>
+
+                            {/* Shortcuts List */}
+                            <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                                <div className="px-4 py-2 bg-gray-50 border-b border-gray-100 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                    快捷用语
+                                </div>
+                                <div className="divide-y divide-gray-50 max-h-[160px] overflow-y-auto">
+                                    {shortcuts.map((shortcut, idx) => (
+                                        <button
+                                            key={idx}
+                                            onClick={() => handleShortcutClick(shortcut)}
+                                            className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-700 transition-colors truncate"
+                                        >
+                                            {shortcut}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Submit Button */}
+                        <div className="p-4 bg-white border-t border-gray-100 flex justify-center">
+                            <button
+                                onClick={handleSubmitControl}
+                                disabled={isSubmitting}
+                                className={`px-10 py-2.5 bg-gradient-to-r from-orange-500 via-orange-400 to-amber-400 hover:from-orange-600 hover:via-orange-500 hover:to-amber-500 text-white font-bold rounded-lg shadow-md hover:shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 ${isSubmitting ? 'opacity-70 cursor-not-allowed active:scale-100' : ''}`}
+                            >
+                                {isSubmitting ? (
+                                    <>
+                                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                        <span>提交中...</span>
+                                    </>
+                                ) : (
+                                    <span>提交</span>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </>
+            )}
         </>
     );
 };

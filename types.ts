@@ -2,7 +2,7 @@
 // Task lifecycle event for timeline display
 export interface TaskLifecycleEvent {
   id: string;
-  type: '创建' | '发布' | '领受' | '到位' | '开始' | '结束' | '预警' | '催办';
+  type: '创建' | '发布' | '领受' | '到位' | '开始' | '结束' | '预警' | '催办' | '管控';
   timestamp: string; // ISO format or "MM-DD HH:mm"
   description: string;
 }

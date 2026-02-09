@@ -29,8 +29,12 @@ const App: React.FC = () => {
   const [isPanelOpen, setIsPanelOpen] = useState(false);
 
   const handleFlightClick = (flight: Flight) => {
-    setSelectedFlight(flight);
-    setIsPanelOpen(true);
+    if (selectedFlight?.id === flight.id && isPanelOpen) {
+      setIsPanelOpen(false);
+    } else {
+      setSelectedFlight(flight);
+      setIsPanelOpen(true);
+    }
   };
 
   const handlePanelClose = () => {
@@ -52,6 +56,17 @@ const App: React.FC = () => {
 
   const handleCapsuleModalClose = () => {
     setIsCapsuleModalOpen(false);
+  };
+
+  // 视频监控弹窗状态
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+
+  const handleVideoClick = () => {
+    setIsVideoModalOpen(true);
+  };
+
+  const handleVideoModalClose = () => {
+    setIsVideoModalOpen(false);
   };
 
   // 过滤航班列表
@@ -238,6 +253,7 @@ const App: React.FC = () => {
                     timeScale={timeScale}
                     onClick={() => handleFlightClick(flight)}
                     onEventClick={(event) => handleEventClick(event, flight)}
+                    onVideoClick={handleVideoClick}
                   />
                 ))}
 
@@ -273,6 +289,49 @@ const App: React.FC = () => {
         codeshare={capsuleCodeshare}
         onControl={() => console.log('Control clicked for event:', selectedEvent?.label)}
       />
+
+      {/* Video Monitor Modal - Under Construction */}
+      {isVideoModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity animate-in fade-in duration-200"
+            onClick={handleVideoModalClose}
+          ></div>
+
+          {/* Modal Content */}
+          <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-[400px] overflow-hidden animate-in zoom-in-95 duration-200 scale-100 opacity-100">
+            {/* Header */}
+            <div className="relative px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-center bg-white dark:bg-gray-800">
+              <span className="text-xl font-bold tracking-wide text-gray-900 dark:text-white">监控视频</span>
+              <button
+                onClick={handleVideoModalClose}
+                className="absolute right-4 w-8 h-8 flex items-center justify-center rounded-full bg-gray-50 hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <span className="material-symbols-outlined text-xl">close</span>
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="p-10 flex flex-col items-center justify-center text-center space-y-5">
+              <div className="w-20 h-20 bg-orange-50 rounded-full flex items-center justify-center mb-2">
+                <span className="material-symbols-outlined text-5xl text-orange-500">engineering</span>
+              </div>
+
+              <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">
+                正在建设中
+              </h3>
+
+              <button
+                onClick={handleVideoModalClose}
+                className="mt-4 px-10 py-2.5 bg-gradient-to-r from-orange-500 via-orange-400 to-amber-400 hover:from-orange-600 hover:via-orange-500 hover:to-amber-500 text-white font-bold rounded-lg shadow-md hover:shadow-lg transition-all active:scale-95"
+              >
+                我知道了
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
