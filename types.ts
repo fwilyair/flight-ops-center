@@ -41,6 +41,7 @@ export interface Flight {
   id: string;
   flightNo: string;
   codeshare?: string;
+  remarks?: string; // New field for flight remarks
   stand?: string;
   gate?: string;
   // Aircraft info
@@ -75,6 +76,7 @@ export interface Flight {
     // Slot times
     cobt?: string; // COBT
     ctot?: string; // CTOT
+    atot?: string; // ATOT
   };
   events: TimelineEvent[];
   annotations: Annotation[];

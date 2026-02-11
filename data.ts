@@ -5,8 +5,10 @@ export const MOCK_FLIGHTS: Flight[] = [
   // 1. 进港已完成 - 2个事件
   {
     id: '1',
-    flightNo: 'CA1538',
-    codeshare: 'CA1539',
+    flightNo: 'CA1538 / CA1539',
+    codeshare: 'ZH1538',
+    remarks: '前序航班延误，预计晚点30分钟。VIP旅客3人。',
+    stand: '203',
     registration: 'B-6789',
     aircraftType: 'A320',
     aircraftCategory: 'M',
@@ -27,7 +29,8 @@ export const MOCK_FLIGHTS: Flight[] = [
       std: '10:45',
       etd: '10:50',
       cobt: '10:20',
-      ctot: '10:35'
+      ctot: '10:35',
+      atot: '10:48'
     },
     events: [
       {
@@ -83,6 +86,7 @@ export const MOCK_FLIGHTS: Flight[] = [
   {
     id: '2',
     flightNo: 'MU5206',
+    remarks: '过站时间紧张，请关注保障进度。',
     codeshare: 'MU5207',
     // Dual status for Turnaround
     arrInfo: {
@@ -97,7 +101,9 @@ export const MOCK_FLIGHTS: Flight[] = [
     times: {
       sta: '09:40',
       std: '11:00',
-      cobt: '09:30'
+      cobt: '09:30',
+      ctot: '09:45',
+      atot: '09:55'
     },
     events: [
       { id: 'e3', label: '落地', type: 'LAND', timeActual: '09:40', timeScheduled: '09:40', status: 'overtime-completed' },
@@ -231,7 +237,9 @@ export const MOCK_FLIGHTS: Flight[] = [
   // 7. 调机航班
   {
     id: '7',
-    flightNo: '3U8662',
+    flightNo: '3U8888',
+    remarks: '重要货物，优先保障。',
+    stand: '205',
     codeshare: '3U8663',
     arrInfo: {
       status: '入位',

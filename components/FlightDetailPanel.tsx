@@ -5,6 +5,7 @@ interface FlightDetailPanelProps {
     flight: Flight | null;
     isOpen: boolean;
     onClose: () => void;
+    onFlightUpdate?: (flight: Flight) => void;
 }
 
 // Format time to HH:MM(DD) format
@@ -19,7 +20,17 @@ export const FlightDetailPanel: React.FC<FlightDetailPanelProps> = ({
     flight,
     isOpen,
     onClose,
+    onFlightUpdate,
 }) => {
+    const [isEditingRemarks, setIsEditingRemarks] = React.useState(false);
+    const [tempRemarks, setTempRemarks] = React.useState('');
+
+    // Reset editing state when flight changes or panel closes
+    React.useEffect(() => {
+        setIsEditingRemarks(false);
+        setTempRemarks('');
+    }, [flight?.id, isOpen]);
+
     if (!flight) return null;
 
     return (
@@ -181,6 +192,69 @@ export const FlightDetailPanel: React.FC<FlightDetailPanelProps> = ({
                             ))}
                         </div>
 
+                        {/* Remarks Section */}
+                        <div className="bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-slate-100 shadow-sm">
+                            <div className="flex items-center justify-between mb-2">
+                                <span className="text-sm font-extrabold text-slate-800 uppercase tracking-wide">
+                                    航班备注
+                                </span>
+                                {!isEditingRemarks && (
+                                    <button
+                                        onClick={() => {
+                                            setTempRemarks(flight.remarks || '');
+                                            setIsEditingRemarks(true);
+                                        }}
+                                        className="text-xs text-blue-600 hover:text-blue-700 font-bold hover:underline transition-all"
+                                    >
+                                        编辑
+                                    </button>
+                                )}
+                            </div>
+
+                            {isEditingRemarks ? (
+                                <div className="space-y-2 animate-in fade-in zoom-in-95 duration-200">
+                                    <textarea
+                                        value={tempRemarks}
+                                        onChange={(e) => setTempRemarks(e.target.value)}
+                                        className="w-full text-sm p-3 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none resize-none bg-white text-slate-700 leading-relaxed shadow-inner"
+                                        rows={3}
+                                        autoFocus
+                                        placeholder="请输入航班备注信息..."
+                                    />
+                                    <div className="flex justify-end gap-2">
+                                        <button
+                                            onClick={() => setIsEditingRemarks(false)}
+                                            className="px-3 py-1.5 text-xs font-bold text-slate-500 hover:bg-slate-100 hover:text-slate-700 rounded-md transition-colors"
+                                        >
+                                            取消
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                onFlightUpdate?.({ ...flight, remarks: tempRemarks });
+                                                setIsEditingRemarks(false);
+                                            }}
+                                            className="px-4 py-1.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 rounded-md shadow-sm transition-colors flex items-center gap-1"
+                                        >
+                                            <span className="material-symbols-outlined text-[14px]">check</span>
+                                            保存
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div
+                                    className={`text-sm leading-relaxed p-1 rounded-md transition-colors ${flight.remarks ? 'text-slate-700' : 'text-slate-400 italic'
+                                        } hover:bg-slate-50/50 cursor-pointer`}
+                                    onClick={() => {
+                                        setTempRemarks(flight.remarks || '');
+                                        setIsEditingRemarks(true);
+                                    }}
+                                    title="点击编辑备注"
+                                >
+                                    {flight.remarks || '暂无备注信息，点击添加...'}
+                                </div>
+                            )}
+                        </div>
+
 
 
 
@@ -224,15 +298,19 @@ export const FlightDetailPanel: React.FC<FlightDetailPanelProps> = ({
                                         {formatTime(flight.times?.atd)}
                                     </div>
                                 </div>
-                                {/* COBT & CTOT */}
-                                <div className="grid grid-cols-2">
-                                    <div className="p-3">
+                                {/* COBT & CTOT & ATOT */}
+                                <div className="grid grid-cols-3">
+                                    <div className="flex flex-col items-center p-3">
                                         <div className="text-gray-900 dark:text-gray-100 font-bold mb-1 italic">COBT</div>
                                         <div className="font-mono tabular-nums text-gray-900 dark:text-gray-100 font-bold text-lg italic">{formatTime(flight.times?.cobt)}</div>
                                     </div>
-                                    <div className="p-3 pl-5">
+                                    <div className="flex flex-col items-center p-3 border-l border-slate-100">
                                         <div className="text-gray-900 dark:text-gray-100 font-bold mb-1 italic">CTOT</div>
                                         <div className="font-mono tabular-nums text-gray-900 dark:text-gray-100 font-bold text-lg italic">{formatTime(flight.times?.ctot)}</div>
+                                    </div>
+                                    <div className="flex flex-col items-center p-3 border-l border-slate-100">
+                                        <div className="text-gray-900 dark:text-gray-100 font-bold mb-1 italic">ATOT</div>
+                                        <div className="font-mono tabular-nums text-gray-900 dark:text-gray-100 font-bold text-lg italic">{formatTime(flight.times?.atot)}</div>
                                     </div>
                                 </div>
                             </div>

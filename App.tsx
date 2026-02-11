@@ -15,6 +15,9 @@ const App: React.FC = () => {
     return `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
   });
 
+  // 航班列表状态（初始化为 Mock 数据）
+  const [flights, setFlights] = useState<Flight[]>(MOCK_FLIGHTS);
+
   // 搜索和日期状态
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDate, setSelectedDate] = useState(
@@ -39,6 +42,15 @@ const App: React.FC = () => {
 
   const handlePanelClose = () => {
     setIsPanelOpen(false);
+  };
+
+  const handleFlightUpdate = (updatedFlight: Flight) => {
+    setFlights(prev => prev.map(f => f.id === updatedFlight.id ? updatedFlight : f));
+
+    // 如果当前选中的航班就是更新的航班，也需要更新 selectedFlight 状态
+    if (selectedFlight?.id === updatedFlight.id) {
+      setSelectedFlight(updatedFlight);
+    }
   };
 
   // 胶囊详情弹窗状态
@@ -71,7 +83,7 @@ const App: React.FC = () => {
 
   // 过滤航班列表
   const filteredFlights = useMemo(() => {
-    return MOCK_FLIGHTS.filter(flight => {
+    return flights.filter(flight => {
       // 航班号过滤（不区分大小写）
       const matchesSearch = searchQuery === '' ||
         flight.flightNo.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -278,6 +290,7 @@ const App: React.FC = () => {
         flight={selectedFlight}
         isOpen={isPanelOpen}
         onClose={handlePanelClose}
+        onFlightUpdate={handleFlightUpdate}
       />
 
       {/* Capsule Detail Modal */}
