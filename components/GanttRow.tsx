@@ -55,7 +55,7 @@ const EventPill: React.FC<{ event: TimelineEvent; track: number; timeScale: numb
 
     return (
         <div
-            className={`absolute flex items-center z-10 hover:z-20 transition-all cursor-pointer select-none group`}
+            className={`absolute flex items-center z-10 hover:z-20 transition-all duration-200 cursor-pointer select-none group hover:scale-105`}
             style={{ left: `${leftPos}px`, top: `${topPos}px` }}
             onClick={(e) => {
                 e.stopPropagation();
@@ -335,7 +335,7 @@ export const GanttRow: React.FC<GanttRowProps> = ({ flight, timeScale, onClick, 
 
                         {/* Video Play Button */}
                         <button
-                            className="flex items-center justify-center size-8 rounded-full text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors -mt-1"
+                            className="flex items-center justify-center size-8 rounded-full text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-all duration-200 -mt-1 hover:scale-110 hover:shadow-md"
                             title="播放监控视频"
                             onClick={(e) => {
                                 e.stopPropagation();

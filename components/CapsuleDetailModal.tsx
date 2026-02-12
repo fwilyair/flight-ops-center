@@ -314,7 +314,7 @@ export const CapsuleDetailModal: React.FC<CapsuleDetailModalProps> = ({
                                 <button
                                     key={idx}
                                     onClick={() => handleShortcutClick(shortcut)}
-                                    className="flex-shrink-0 px-3 py-1.5 bg-white border border-gray-200 rounded-full text-xs font-medium text-gray-600 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-colors shadow-sm whitespace-nowrap max-w-[150px] truncate"
+                                    className="flex-shrink-0 px-3 py-1.5 bg-white border border-gray-200 rounded-full text-xs font-medium text-gray-600 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-all duration-200 shadow-sm whitespace-nowrap max-w-[150px] truncate hover:scale-105 hover:shadow-md"
                                     title={shortcut}
                                 >
                                     {shortcut}
@@ -343,7 +343,7 @@ export const CapsuleDetailModal: React.FC<CapsuleDetailModalProps> = ({
                             <button
                                 onClick={handleSubmitControl}
                                 disabled={isSubmitting || !controlText.trim()}
-                                className={`w-11 h-11 flex items-center justify-center rounded-xl bg-blue-600 text-white shadow-md hover:bg-blue-700 hover:shadow-lg transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none shrink-0`}
+                                className={`w-11 h-11 flex items-center justify-center rounded-xl bg-blue-600 text-white shadow-md hover:bg-blue-700 hover:shadow-lg transition-all duration-200 active:scale-95 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:hover:scale-100 shrink-0`}
                             >
                                 {isSubmitting ? (
                                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>

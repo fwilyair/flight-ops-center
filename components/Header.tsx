@@ -46,7 +46,7 @@ const StatusBadge = ({ color, label }: { color: string; label: string }) => {
   }
 
   return (
-    <div className={`flex h-8 w-[100px] shrink-0 items-center justify-center gap-x-2 rounded-full border px-0 ${bgClass} ${borderClass}`}>
+    <div className={`flex h-8 w-[100px] shrink-0 items-center justify-center gap-x-2 rounded-full border px-0 ${bgClass} ${borderClass} transition-all duration-200 hover:shadow-sm`}>
       <p className={`text-xs font-bold uppercase tracking-wide ${textClass}`}>{label}</p>
     </div>
   );
@@ -109,7 +109,7 @@ const TimeScaleSelector: React.FC<{
         value={value}
         onChange={(e) => onChange(Number(e.target.value) as 5 | 10 | 30 | 60)}
         className="h-9 pl-3 pr-8 rounded-lg border border-gray-300 text-sm font-mono 
-                   focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none cursor-pointer"
+                   focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none cursor-pointer transition-all duration-200 hover:scale-[1.02] hover:shadow-sm"
         style={{ background: 'var(--bg-secondary)' }}
       >
         <option value={5}>5分钟</option>

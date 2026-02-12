@@ -6,7 +6,7 @@ export const MOCK_FLIGHTS: Flight[] = [
   {
     id: '1',
     flightNo: 'CA1538 / CA1539',
-    codeshare: 'ZH1538',
+    codeshare: 'CA1539',
     remarks: '前序航班延误，预计晚点30分钟。VIP旅客3人。',
     stand: '203',
     registration: 'B-6789',

@@ -204,7 +204,7 @@ export const FlightDetailPanel: React.FC<FlightDetailPanelProps> = ({
                                             setTempRemarks(flight.remarks || '');
                                             setIsEditingRemarks(true);
                                         }}
-                                        className="text-xs text-blue-600 hover:text-blue-700 font-bold hover:underline transition-all"
+                                        className="text-xs text-blue-600 hover:text-blue-700 font-bold hover:underline transition-all duration-200 hover:scale-105"
                                     >
                                         编辑
                                     </button>
@@ -224,7 +224,7 @@ export const FlightDetailPanel: React.FC<FlightDetailPanelProps> = ({
                                     <div className="flex justify-end gap-2">
                                         <button
                                             onClick={() => setIsEditingRemarks(false)}
-                                            className="px-3 py-1.5 text-xs font-bold text-slate-500 hover:bg-slate-100 hover:text-slate-700 rounded-md transition-colors"
+                                            className="px-3 py-1.5 text-xs font-bold text-slate-500 hover:bg-slate-100 hover:text-slate-700 rounded-md transition-all duration-200 hover:scale-105"
                                         >
                                             取消
                                         </button>
@@ -233,7 +233,7 @@ export const FlightDetailPanel: React.FC<FlightDetailPanelProps> = ({
                                                 onFlightUpdate?.({ ...flight, remarks: tempRemarks });
                                                 setIsEditingRemarks(false);
                                             }}
-                                            className="px-4 py-1.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 rounded-md shadow-sm transition-colors flex items-center gap-1"
+                                            className="px-4 py-1.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 rounded-md shadow-sm transition-all duration-200 flex items-center gap-1 hover:scale-105 hover:shadow-md"
                                         >
                                             <span className="material-symbols-outlined text-[14px]">check</span>
                                             保存

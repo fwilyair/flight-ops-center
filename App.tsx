@@ -319,7 +319,7 @@ const App: React.FC = () => {
               <span className="text-xl font-bold tracking-wide text-gray-900 dark:text-white">监控视频</span>
               <button
                 onClick={handleVideoModalClose}
-                className="absolute right-4 w-8 h-8 flex items-center justify-center rounded-full bg-gray-50 hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+                className="absolute right-4 w-8 h-8 flex items-center justify-center rounded-full bg-gray-50 hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-all duration-200 hover:scale-110 hover:shadow-md"
               >
                 <span className="material-symbols-outlined text-xl">close</span>
               </button>
@@ -337,7 +337,7 @@ const App: React.FC = () => {
 
               <button
                 onClick={handleVideoModalClose}
-                className="mt-4 px-10 py-2.5 bg-gradient-to-r from-orange-500 via-orange-400 to-amber-400 hover:from-orange-600 hover:via-orange-500 hover:to-amber-500 text-white font-bold rounded-lg shadow-md hover:shadow-lg transition-all active:scale-95"
+                className="mt-4 px-10 py-2.5 bg-gradient-to-r from-orange-500 via-orange-400 to-amber-400 hover:from-orange-600 hover:via-orange-500 hover:to-amber-500 text-white font-bold rounded-lg shadow-md hover:shadow-lg transition-all duration-200 active:scale-95 hover:scale-105"
               >
                 我知道了
               </button>
