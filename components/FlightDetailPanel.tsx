@@ -250,7 +250,7 @@ export const FlightDetailPanel: React.FC<FlightDetailPanelProps> = ({
                                     }}
                                     title="点击编辑备注"
                                 >
-                                    {flight.remarks || '暂无备注信息，点击添加...'}
+                                    {flight.remarks || '点击编辑按钮添加航班备注'}
                                 </div>
                             )}
                         </div>

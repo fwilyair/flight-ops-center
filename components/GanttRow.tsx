@@ -5,6 +5,7 @@ import { timeToPixels, getColorForEventType } from '../utils';
 interface GanttRowProps {
     flight: Flight;
     timeScale: number;
+    currentTime?: string;
     onClick?: () => void;
     onEventClick?: (event: TimelineEvent) => void;
     onVideoClick?: () => void;
@@ -45,10 +46,23 @@ const FlightTypeBadge = ({ type }: { type: FlightType }) => {
     );
 };
 
-const EventPill: React.FC<{ event: TimelineEvent; track: number; timeScale: number; onEventClick?: (event: TimelineEvent) => void }> = ({ event, track, timeScale, onEventClick }) => {
+const EventPill: React.FC<{ event: TimelineEvent; track: number; timeScale: number; currentTime?: string; onEventClick?: (event: TimelineEvent) => void }> = ({ event, track, timeScale, currentTime, onEventClick }) => {
     const leftPos = timeToPixels(event.timeScheduled || event.timeActual || '', timeScale);
     const colors = getColorForEventType(event.type, event.status);
     const isDelayed = event.status === 'delayed';
+
+    let timeDiff: number | null = null;
+    let timeDiffColor = '';
+    const hasActualTime = event.timeActual && event.timeActual !== '--:--';
+    if (!hasActualTime && event.timeScheduled && event.timeScheduled !== '--:--' && currentTime) {
+        const [cH, cM] = currentTime.split(':').map(Number);
+        const [sH, sM] = event.timeScheduled.split(':').map(Number);
+        let diffMins = (cH * 60 + cM) - (sH * 60 + sM);
+        if (diffMins > 720) diffMins -= 1440;
+        if (diffMins < -720) diffMins += 1440;
+        timeDiff = diffMins;
+        timeDiffColor = diffMins > 0 ? 'text-red-500' : diffMins < 0 ? 'text-emerald-500' : 'text-gray-500';
+    }
 
     // 根据轨道索引计算垂直位置，每个轨道高度30px（22px胶囊 + 8px间距）
     const topPos = 4 + (track * 30);
@@ -79,11 +93,32 @@ const EventPill: React.FC<{ event: TimelineEvent; track: number; timeScale: numb
                         <span className="px-1 py-[1px] rounded bg-blue-600 text-white text-xs font-bold transform scale-95 origin-center">计</span>
                         <span className="tabular-nums font-mono font-bold text-gray-900 dark:text-gray-100 text-sm leading-none">{event.timeScheduled || '--:--'}</span>
                     </div>
-                    <div className="w-px h-3 bg-gray-300 dark:bg-gray-600 mx-0.5 opacity-50"></div>
-                    <div className="flex items-center gap-1 leading-none">
-                        <span className="px-1 py-[1px] rounded bg-green-600 text-white text-xs font-bold transform scale-95 origin-center">实</span>
-                        <span className="tabular-nums font-mono font-bold text-gray-900 dark:text-gray-100 text-sm leading-none">{event.timeActual}</span>
-                    </div>
+                    {hasActualTime ? (
+                        <>
+                            <div className="w-px h-3 bg-gray-300 dark:bg-gray-600 mx-0.5 opacity-50"></div>
+                            <div className="flex items-center gap-1 leading-none">
+                                <span className="px-1 py-[1px] rounded bg-green-600 text-white text-xs font-bold transform scale-95 origin-center">实</span>
+                                <span className="tabular-nums font-mono font-bold text-gray-900 dark:text-gray-100 text-sm leading-none">{event.timeActual}</span>
+                            </div>
+                        </>
+                    ) : timeDiff !== null ? (
+                        <>
+                            <div className="w-px h-3 bg-gray-300 dark:bg-gray-600 mx-0.5 opacity-50"></div>
+                            <div className="flex items-center gap-1 leading-none py-[1px] px-1">
+                                <span className={`tabular-nums font-mono font-bold text-sm tracking-tight leading-none ${timeDiffColor}`}>
+                                    {timeDiff > 0 ? `+${timeDiff}` : timeDiff}
+                                </span>
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            <div className="w-px h-3 bg-gray-300 dark:bg-gray-600 mx-0.5 opacity-50"></div>
+                            <div className="flex items-center gap-1 leading-none">
+                                <span className="px-1 py-[1px] rounded bg-green-600 text-white text-xs font-bold transform scale-95 origin-center">实</span>
+                                <span className="tabular-nums font-mono font-bold text-gray-900 dark:text-gray-100 text-sm leading-none">--:--</span>
+                            </div>
+                        </>
+                    )}
                 </div>
             </div>
         </div>
@@ -259,7 +294,7 @@ const FusedInfoBadge = ({ label, value, type = 'ARR', status }: { label: string;
     );
 };
 
-export const GanttRow: React.FC<GanttRowProps> = ({ flight, timeScale, onClick, onEventClick, onVideoClick }) => {
+export const GanttRow: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime, onClick, onEventClick, onVideoClick }) => {
     const isDelay = flight.arrInfo?.status === '延误' || flight.depInfo?.status === '延误';
 
     // 计算事件的轨道分配
@@ -406,7 +441,7 @@ export const GanttRow: React.FC<GanttRowProps> = ({ flight, timeScale, onClick, 
                     <AnnotationLine key={`anno-${idx}`} annotation={anno} index={idx} timeScale={timeScale} />
                 ))}
                 {flight.events.map((event) => (
-                    <EventPill key={event.id} event={event} track={eventTracks.get(event.id) || 0} timeScale={timeScale} onEventClick={onEventClick} />
+                    <EventPill key={event.id} event={event} track={eventTracks.get(event.id) || 0} timeScale={timeScale} currentTime={currentTime} onEventClick={onEventClick} />
                 ))}
             </div>
         </div >

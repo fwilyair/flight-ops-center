@@ -127,14 +127,14 @@ export const CapsuleDetailModal: React.FC<CapsuleDetailModalProps> = ({
         setControlText(text);
     };
 
-    const handleSubmitControl = () => {
+    const handleSubmitControl = (actionType: TaskLifecycleEvent['type'] = '管控') => {
         if (!controlText.trim() || !event) return;
 
         setIsSubmitting(true);
 
         // Simulate network delay for better UX
         setTimeout(() => {
-            console.log('Control submitted:', controlText);
+            console.log('Control submitted:', controlText, 'Action:', actionType);
 
             // Create new control event
             const now = new Date();
@@ -142,13 +142,13 @@ export const CapsuleDetailModal: React.FC<CapsuleDetailModalProps> = ({
 
             const newEvent: TaskLifecycleEvent = {
                 id: `ctrl_${Date.now()}`,
-                type: '管控',
+                type: actionType,
                 timestamp: timestamp,
                 description: controlText
             };
 
-            // Update local state (prepend to show at top)
-            setLocalLifecycle(prev => [newEvent, ...prev]);
+            // Update local state (append to show at bottom)
+            setLocalLifecycle(prev => [...prev, newEvent]);
 
             // Here you would typically call an API to persist this
 
@@ -334,23 +334,36 @@ export const CapsuleDetailModal: React.FC<CapsuleDetailModalProps> = ({
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter' && !e.shiftKey) {
                                             e.preventDefault();
-                                            handleSubmitControl();
+                                            handleSubmitControl('管控');
                                         }
                                     }}
                                 ></textarea>
                             </div>
 
-                            <button
-                                onClick={handleSubmitControl}
-                                disabled={isSubmitting || !controlText.trim()}
-                                className={`w-11 h-11 flex items-center justify-center rounded-xl bg-blue-600 text-white shadow-md hover:bg-blue-700 hover:shadow-lg transition-all duration-200 active:scale-95 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:hover:scale-100 shrink-0`}
-                            >
-                                {isSubmitting ? (
-                                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                                ) : (
-                                    <span className="material-symbols-outlined text-[20px] ml-0.5">send</span>
-                                )}
-                            </button>
+                            <div className="flex gap-2 shrink-0">
+                                <button
+                                    onClick={() => handleSubmitControl('管控')}
+                                    disabled={isSubmitting || !controlText.trim()}
+                                    className={`px-4 h-11 flex items-center justify-center rounded-xl bg-blue-600 text-white font-bold text-sm shadow-md hover:bg-blue-700 hover:shadow-lg transition-all duration-200 active:scale-95 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:hover:scale-100 whitespace-nowrap`}
+                                >
+                                    {isSubmitting ? (
+                                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mx-2"></div>
+                                    ) : (
+                                        "发送管控"
+                                    )}
+                                </button>
+                                <button
+                                    onClick={() => handleSubmitControl('催办')}
+                                    disabled={isSubmitting || !controlText.trim()}
+                                    className={`px-4 h-11 flex items-center justify-center rounded-xl bg-orange-500 text-white font-bold text-sm shadow-md hover:bg-orange-600 hover:shadow-lg transition-all duration-200 active:scale-95 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:hover:scale-100 whitespace-nowrap`}
+                                >
+                                    {isSubmitting ? (
+                                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mx-2"></div>
+                                    ) : (
+                                        "发送催办"
+                                    )}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

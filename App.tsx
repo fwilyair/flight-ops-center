@@ -263,6 +263,7 @@ const App: React.FC = () => {
                     key={flight.id}
                     flight={flight}
                     timeScale={timeScale}
+                    currentTime={currentTime}
                     onClick={() => handleFlightClick(flight)}
                     onEventClick={(event) => handleEventClick(event, flight)}
                     onVideoClick={handleVideoClick}
