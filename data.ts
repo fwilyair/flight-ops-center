@@ -13,7 +13,7 @@ export const MOCK_FLIGHTS: Flight[] = [
     aircraftType: 'A320',
     aircraftCategory: 'M',
     route: 'PEK - CTU - SHA',
-    tags: ['冰', 'Q', '控', 'C', 'I', 'D', 'V', '互天'],
+    tags: ['冰', 'Q', '控', 'C', 'I', 'D', 'V', '互天', '机', '重要', '冰', 'Q', '控', 'C'],
     arrInfo: {
       status: '到达',
       stand: '243'
@@ -78,7 +78,17 @@ export const MOCK_FLIGHTS: Flight[] = [
       },
     ],
     annotations: [
-      { type: 'connector', startTime: '09:00', endTime: '10:00', label: '放行', style: 'solid', color: 'gray' },
+      {
+        type: 'connector', startTime: '09:00', endTime: '10:00', label: '放行', style: 'solid', color: 'gray', markers: [
+          { id: 'pm1-1', label: '落地', time: '09:00', phase: 'arrival' },
+          { id: 'pm1-2', label: '滑行', time: '09:08', phase: 'arrival' },
+          { id: 'pm1-3', label: '入位', time: '09:15', phase: 'arrival' },
+          { id: 'pm1-4', label: '准备', time: '09:30', phase: 'departure' },
+          { id: 'pm1-5', label: '推出', time: '09:42', phase: 'departure' },
+          { id: 'pm1-6', label: '滑行', time: '09:48', phase: 'departure' },
+          { id: 'pm1-7', label: '起飞', time: '09:55', phase: 'departure' },
+        ]
+      },
       { type: 'connector', startTime: '10:00', endTime: '11:00', label: '起飞', style: 'solid', color: 'gray' }
     ]
   },
@@ -114,7 +124,15 @@ export const MOCK_FLIGHTS: Flight[] = [
       { id: 'e6', label: '起飞', type: 'DEP', timeActual: '--:--', timeScheduled: '11:00', status: 'warning' },
     ],
     annotations: [
-      { type: 'connector', startTime: '09:30', endTime: '10:30', label: '放行', style: 'solid', color: 'gray' },
+      {
+        type: 'connector', startTime: '09:30', endTime: '10:30', label: '放行', style: 'solid', color: 'gray', markers: [
+          { id: 'pm2-1', label: '落地', time: '09:35', phase: 'arrival' },
+          { id: 'pm2-2', label: '滑行', time: '09:42', phase: 'arrival' },
+          { id: 'pm2-3', label: '入位', time: '09:50', phase: 'arrival' },
+          { id: 'pm2-4', label: '准备', time: '10:05', phase: 'departure' },
+          { id: 'pm2-5', label: '推出', time: '10:15', phase: 'departure' },
+        ]
+      },
       { type: 'connector', startTime: '10:30', endTime: '11:30', label: '起飞', style: 'solid', color: 'gray' }
     ]
   },
@@ -145,7 +163,13 @@ export const MOCK_FLIGHTS: Flight[] = [
       { id: 'e9', label: '推出', type: 'ATD', timeActual: '--:--', timeScheduled: '10:45', status: 'warning' },
     ],
     annotations: [
-      { type: 'connector', startTime: '10:10', endTime: '11:10', label: '放行', style: 'solid', color: 'gray' },
+      {
+        type: 'connector', startTime: '10:10', endTime: '11:10', label: '放行', style: 'solid', color: 'gray', markers: [
+          { id: 'pm3-1', label: '落地', time: '10:12', phase: 'arrival' },
+          { id: 'pm3-2', label: '滑行', time: '10:18', phase: 'arrival' },
+          { id: 'pm3-3', label: '入位', time: '10:25', phase: 'arrival' },
+        ]
+      },
       { type: 'connector', startTime: '10:35', endTime: '11:35', label: '起飞', style: 'solid', color: 'gray' }
     ]
   },
@@ -178,7 +202,17 @@ export const MOCK_FLIGHTS: Flight[] = [
       { id: 'e14', label: '起飞', type: 'DEP', timeActual: '10:18', timeScheduled: '10:15', status: 'overtime-completed' },
     ],
     annotations: [
-      { type: 'connector', startTime: '09:30', endTime: '10:30', label: '放行', style: 'solid', color: 'gray' },
+      {
+        type: 'connector', startTime: '09:30', endTime: '10:30', label: '放行', style: 'solid', color: 'gray', markers: [
+          { id: 'pm4-1', label: '落地', time: '09:32', phase: 'arrival' },
+          { id: 'pm4-2', label: '滑行', time: '09:38', phase: 'arrival' },
+          { id: 'pm4-3', label: '入位', time: '09:45', phase: 'arrival' },
+          { id: 'pm4-4', label: '准备', time: '09:52', phase: 'departure' },
+          { id: 'pm4-5', label: '推出', time: '10:00', phase: 'departure' },
+          { id: 'pm4-6', label: '滑行', time: '10:08', phase: 'departure' },
+          { id: 'pm4-7', label: '起飞', time: '10:15', phase: 'departure' },
+        ]
+      },
       { type: 'connector', startTime: '10:08', endTime: '11:08', label: '起飞', style: 'solid', color: 'gray' }
     ]
   },

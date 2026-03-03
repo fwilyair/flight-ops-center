@@ -24,6 +24,13 @@ export interface TimelineEvent {
   lifecycle?: TaskLifecycleEvent[];
 }
 
+export interface ProcessMarker {
+  id: string;
+  label: string;       // e.g. '落地', '滑行', '入位'
+  time: string;        // HH:MM format
+  phase: 'arrival' | 'departure';
+}
+
 export interface Annotation {
   type: 'connector' | 'label';
   startEventId?: string; // if connecting from an event
@@ -33,6 +40,7 @@ export interface Annotation {
   label?: string;
   style: 'solid' | 'dotted';
   color?: string;
+  markers?: ProcessMarker[]; // Electronic process sheet markers on this baseline
 }
 
 export type FlightType = 'REG' | 'CARGO' | 'EXTRA' | 'FERRY' | 'DIV';

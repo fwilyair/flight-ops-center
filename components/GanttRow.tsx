@@ -1,5 +1,5 @@
 import React from 'react';
-import { Flight, TimelineEvent, Annotation, FlightType } from '../types';
+import { Flight, TimelineEvent, Annotation, FlightType, ProcessMarker } from '../types';
 import { timeToPixels, getColorForEventType } from '../utils';
 
 interface GanttRowProps {
@@ -10,6 +10,19 @@ interface GanttRowProps {
     onEventClick?: (event: TimelineEvent) => void;
     onVideoClick?: () => void;
 }
+
+const tagColorMap: Record<string, string> = {
+    '冰': 'bg-blue-500',
+    'Q': 'bg-blue-600',
+    '控': 'bg-yellow-400 text-yellow-900',
+    'C': 'bg-red-500',
+    'I': 'bg-purple-500',
+    'D': 'bg-orange-500',
+    'V': 'bg-teal-500',
+    '互天': 'bg-cyan-600',
+    '机': 'bg-indigo-500',
+    '重要': 'bg-rose-600',
+};
 
 const FlightStatusBadge = ({ status, type = 'ARR' }: { status: string; type?: 'ARR' | 'DEP' }) => {
     // 统一基础样式：固定高度、圆角、字体大小、边框
@@ -169,6 +182,74 @@ const calculateEventTracks = (events: TimelineEvent[], timeScale: number): Map<s
     return tracks;
 };
 
+const ProcessDiamond: React.FC<{
+    marker: ProcessMarker;
+    timeScale: number;
+    stagger: number; // -1, 0, or 1
+    isOverlappingLabel: boolean;
+}> = ({ marker, timeScale, stagger, isOverlappingLabel }) => {
+    const [isHovered, setIsHovered] = React.useState(false);
+    const leftPx = timeToPixels(marker.time, timeScale);
+
+    // Dynamic coloring based on phase
+    const colors = marker.phase === 'arrival'
+        ? { bg: 'bg-emerald-500/90', border: 'border-emerald-600', text: 'text-emerald-50' }
+        : { bg: 'bg-blue-500/90', border: 'border-blue-600', text: 'text-blue-50' };
+
+    // Prevent overlap logic: stagger vertically if close to others, and avoid label
+    const staggerOffset = stagger * 14;
+    let labelAvoidanceOffset = 0;
+    if (isOverlappingLabel) {
+        // If overlapping the label, push it further away based on stagger direction (or up if stagger is 0)
+        labelAvoidanceOffset = stagger < 0 ? -18 : 18;
+    }
+
+    // Calculate final vertical translation
+    const verticalOffset = staggerOffset + labelAvoidanceOffset;
+
+    return (
+        <div
+            className="absolute flex items-center justify-center z-20 pointer-events-auto"
+            style={{
+                left: `${leftPx}px`,
+                top: 0,
+                transform: `translate(-50%, calc(-50% + ${-verticalOffset}px))`,
+            }}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+        >
+            <div
+                className={`relative flex items-center justify-center w-[18px] h-[18px] border shadow-sm transition-transform duration-200 hover:scale-110 cursor-default ${colors.bg} ${colors.border}`}
+                style={{ transform: 'rotate(45deg)' }}
+            >
+                <span
+                    className={`text-[10px] font-bold leading-none ${colors.text} select-none`}
+                    style={{ transform: 'rotate(-45deg)', display: 'block' }}
+                >
+                    {marker.label[0]}
+                </span>
+            </div>
+
+            {/* Hover Tooltip */}
+            {isHovered && (
+                <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 z-50 pointer-events-none animate-in fade-in zoom-in duration-200">
+                    <div className="bg-white px-2 py-1.5 rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.15)] border border-gray-100 flex flex-col items-center min-w-[64px]">
+                        <span className="text-sm font-bold text-gray-800 whitespace-nowrap leading-tight">
+                            {marker.label}
+                        </span>
+                        <span className="text-[11px] text-gray-500 font-mono tracking-tighter leading-tight mt-0.5">
+                            {marker.time}
+                        </span>
+                        {/* Little triangle pointer */}
+                        <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-white border-b border-r border-gray-100" style={{ transform: 'rotate(45deg)' }}></div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
+
 const AnnotationLine: React.FC<{ annotation: Annotation; index: number; timeScale: number }> = ({ annotation, index, timeScale }) => {
     if (!annotation.startTime || !annotation.endTime) return null;
 
@@ -185,6 +266,27 @@ const AnnotationLine: React.FC<{ annotation: Annotation; index: number; timeScal
     const labelWidth = annotation.label ? annotation.label.length * 16 + 24 : 0;
     const leftLineWidth = (width - labelWidth) / 2;
     const rightLineWidth = (width - labelWidth) / 2;
+
+    // Pre-calculate marker overlaps
+    const processedMarkers = React.useMemo(() => {
+        if (!annotation.markers || annotation.markers.length === 0) return [];
+
+        // Sort by time
+        const sorted = [...annotation.markers].sort((a, b) => a.time.localeCompare(b.time));
+
+        return sorted.map((marker, i, arr) => {
+            const px = timeToPixels(marker.time, timeScale);
+            // Check label overlap
+            const isOverlappingLabel = annotation.label
+                ? (px > centerPx - labelWidth / 2 - 10 && px < centerPx + labelWidth / 2 + 10)
+                : false;
+
+            return {
+                ...marker,
+                isOverlappingLabel
+            };
+        });
+    }, [annotation.markers, annotation.label, centerPx, labelWidth, timeScale]);
 
     // 统一的基线样式 - 所有基线使用完全相同的颜色
     const lineColor = '#9CA3AF'; // Tailwind gray-400
@@ -242,7 +344,7 @@ const AnnotationLine: React.FC<{ annotation: Annotation; index: number; timeScal
             )}
 
             {/* The Time (At Tail) - vertically centered with the line */}
-            <div className="absolute" style={{ left: `${endPx + 6}px`, transform: 'translateY(-50%)', top: '50%' }}>
+            <div className="absolute" style={{ left: `${endPx + 6}px`, transform: 'translateY(-50%)', top: '0' }}>
                 <span
                     className="text-sm font-mono font-bold leading-none tabular-nums px-2 py-0.5 rounded-md shadow-sm"
                     style={{
@@ -254,6 +356,35 @@ const AnnotationLine: React.FC<{ annotation: Annotation; index: number; timeScal
                     {annotation.endTime}
                 </span>
             </div>
+
+            {/* Process Markers */}
+            {processedMarkers.map((m, i, arr) => {
+                // Determine stagger: if close to previous, alternate.
+                let stagger = 0;
+                if (i > 0) {
+                    const prevPx = timeToPixels(arr[i - 1].time, timeScale);
+                    const currPx = timeToPixels(m.time, timeScale);
+                    if (currPx - prevPx < 28) {
+                        stagger = i % 2 === 1 ? 1 : -1;
+                    }
+                } else if (i < arr.length - 1) {
+                    const nextPx = timeToPixels(arr[i + 1].time, timeScale);
+                    const currPx = timeToPixels(m.time, timeScale);
+                    if (nextPx - currPx < 28) {
+                        stagger = -1; // Give the first one a stagger if it overlaps the second
+                    }
+                }
+
+                return (
+                    <ProcessDiamond
+                        key={m.id}
+                        marker={m}
+                        timeScale={timeScale}
+                        stagger={stagger}
+                        isOverlappingLabel={m.isOverlappingLabel}
+                    />
+                );
+            })}
         </div>
     );
 };
@@ -306,8 +437,8 @@ export const GanttRow: React.FC<GanttRowProps> = ({ flight, timeScale, currentTi
     const annotationCount = flight.annotations?.length || 0;
 
     // Calculate row height based on tracks
-    // Base height needs to be taller to accommodate the 6px border-bottom and padding
-    const minHeight = 102;
+    // Base height needs to be taller to accommodate the 6px border-bottom and padding + new tag row
+    const minHeight = 130;
     const rowHeight = Math.max(minHeight, (trackCount * 30) + (annotationCount * 34) + 10);
 
     return (
@@ -320,7 +451,7 @@ export const GanttRow: React.FC<GanttRowProps> = ({ flight, timeScale, currentTi
         >
 
             <div
-                className={`sticky left-0 w-[260px] min-w-[260px] px-4 py-2 flex flex-col justify-center gap-1 z-40 transition-all duration-300 group-hover:z-50 rounded-l-xl rounded-r-2xl mr-2 relative overflow-hidden group-hover:scale-[1.02] group-hover:shadow-lg origin-left cursor-pointer`}
+                className={`sticky left-0 w-[260px] min-w-[260px] px-4 py-2 flex flex-col justify-center gap-1 z-40 transition-all duration-300 group-hover:z-50 rounded-l-xl rounded-r-2xl mr-2 relative group-hover:scale-[1.02] group-hover:shadow-lg origin-left cursor-pointer`}
                 style={{
                     background: '#f3f4f6',
                     borderRight: '1px solid #e5e7eb',
@@ -335,7 +466,7 @@ export const GanttRow: React.FC<GanttRowProps> = ({ flight, timeScale, currentTi
             >
                 {/* Airline Code Watermark */}
                 <div
-                    className="absolute inset-0 flex items-center justify-center z-0 pointer-events-none overflow-hidden"
+                    className="absolute inset-0 flex items-center justify-center z-0 pointer-events-none overflow-hidden rounded-l-xl rounded-r-2xl"
                 >
                     <div
                         className="text-[9rem] italic font-black text-slate-900/[0.04] dark:text-white/[0.04] select-none leading-none transform -rotate-10 scale-125 origin-center blur-[1px]"
@@ -432,6 +563,71 @@ export const GanttRow: React.FC<GanttRowProps> = ({ flight, timeScale, currentTi
                         {/* Flight Type Badge (Moved from Row 2) */}
                         <FlightTypeBadge type={flight.flightType} />
                     </div>
+
+                    {/* Row 4: Flight Tags */}
+                    {flight.tags && flight.tags.length > 0 && (
+                        <div className="relative group/tags w-full mt-1">
+                            {/* Tags Container (Fixed height, truncating explicitly) */}
+                            <div className="flex items-center gap-1 w-full h-[22px]">
+                                {(() => {
+                                    const MAX_VISIBLE = 10;
+                                    const hasMore = flight.tags.length > MAX_VISIBLE;
+                                    const displayTags = hasMore ? [...flight.tags.slice(0, 9), '...'] : flight.tags;
+
+                                    return displayTags.map((tag, idx) => {
+                                        const isMore = tag === '...';
+                                        const isDualChar = tag.length > 1 && !isMore;
+                                        const colorClass = isMore
+                                            ? 'bg-slate-300 text-slate-700 outline outline-[1.5px] outline-slate-200 outline-offset-[-1.5px]'
+                                            : (tagColorMap[tag] || 'bg-gray-400');
+                                        const textStyle = (tag === '控' || isMore) ? '' : 'text-white';
+
+                                        return (
+                                            <div
+                                                key={`tag-${idx}`}
+                                                className={`flex-shrink-0 flex items-center justify-center size-[19px] rounded-full font-bold cursor-default shadow-sm ${colorClass} ${textStyle}`}
+                                                title={isMore ? `还有 ${flight.tags.length - 9} 个标记` : tag}
+                                            >
+                                                <span
+                                                    className={`font-bold leading-none ${isMore ? 'text-[10px] tracking-widest pl-[1px] mb-[2px]' : isDualChar ? 'text-[9px] tracking-tighter' : 'text-[11px]'}`}
+                                                    style={{ transform: isDualChar ? 'scale(0.95)' : 'none' }}
+                                                >
+                                                    {tag}
+                                                </span>
+                                            </div>
+                                        );
+                                    });
+                                })()}
+                            </div>
+
+                            {/* Hover Tooltip (Absolute positioned to escape overflow if hovered) */}
+                            <div className="absolute top-[26px] left-0 z-[100] hidden group-hover/tags:flex flex-col animate-in fade-in slide-in-from-top-2 duration-200">
+                                <div className="bg-white px-2.5 py-2 rounded-lg shadow-xl border border-gray-100 min-w-max">
+                                    <div className="text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">航班标记</div>
+                                    <div className="flex items-center gap-1 flex-wrap max-w-[200px]">
+                                        {flight.tags.map((tag, idx) => {
+                                            const isDualChar = tag.length > 1;
+                                            const colorClass = tagColorMap[tag] || 'bg-gray-400';
+                                            return (
+                                                <div
+                                                    key={`hover-tag-${idx}`}
+                                                    className={`flex items-center justify-center size-[24px] rounded-full text-white font-bold shadow-sm ${colorClass}`}
+                                                >
+                                                    <span
+                                                        className={`font-bold leading-none ${isDualChar ? 'text-[10px] tracking-tighter' : 'text-xs'}`}
+                                                    >
+                                                        {tag}
+                                                    </span>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                    {/* Triangle pointer */}
+                                    <div className="absolute -top-[5px] left-3 w-2.5 h-2.5 bg-white border-t border-l border-gray-100" style={{ transform: 'rotate(45deg)' }}></div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 
