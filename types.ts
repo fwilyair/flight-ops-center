@@ -41,6 +41,7 @@ export interface Flight {
   id: string;
   flightNo: string;
   codeshare?: string;
+  tags?: string[]; // New field for flight tags (e.g., '冰', 'Q', '控')
   remarks?: string; // New field for flight remarks
   stand?: string;
   gate?: string;

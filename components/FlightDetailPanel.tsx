@@ -8,6 +8,17 @@ interface FlightDetailPanelProps {
     onFlightUpdate?: (flight: Flight) => void;
 }
 
+const tagColorMap: Record<string, string> = {
+    '冰': 'bg-blue-500',
+    'Q': 'bg-blue-600',
+    '控': 'bg-yellow-400 text-yellow-900',
+    'C': 'bg-cyan-500',
+    'I': 'bg-green-700',
+    'D': 'bg-red-600',
+    'V': 'bg-orange-600',
+    '互天': 'bg-purple-600'
+};
+
 // Format time to HH:MM(DD) format
 const formatTime = (time?: string): string => {
     if (!time || time === '--:--') return '--:--';
@@ -172,6 +183,25 @@ export const FlightDetailPanel: React.FC<FlightDetailPanelProps> = ({
                                 </span>
                                 <div className="h-px w-10 bg-gradient-to-l from-transparent to-slate-300"></div>
                             </div>
+
+                            {/* Flight Tags Area */}
+                            {flight.tags && flight.tags.length > 0 && (
+                                <div className="flex items-center justify-center gap-2 mt-4 mb-2 flex-wrap">
+                                    {flight.tags.map((tag, idx) => {
+                                        const colorClass = tagColorMap[tag] || 'bg-slate-500';
+                                        const isDualChar = tag.length > 1;
+                                        return (
+                                            <div
+                                                key={`${tag}-${idx}`}
+                                                className={`flex items-center justify-center size-[28px] rounded-full text-white font-bold shadow-sm transition-all duration-200 hover:scale-110 hover:shadow-md cursor-default ${colorClass} ${isDualChar ? 'text-[10px] tracking-tighter leading-none' : 'text-xs'}`}
+                                                title={`标记: ${tag}`}
+                                            >
+                                                {tag}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
                         </div>
 
                         {/* Aircraft & Gate Info - 5 items in one row */}

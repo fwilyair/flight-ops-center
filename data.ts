@@ -13,6 +13,7 @@ export const MOCK_FLIGHTS: Flight[] = [
     aircraftType: 'A320',
     aircraftCategory: 'M',
     route: 'PEK - CTU - SHA',
+    tags: ['冰', 'Q', '控', 'C', 'I', 'D', 'V', '互天'],
     arrInfo: {
       status: '到达',
       stand: '243'
@@ -97,6 +98,7 @@ export const MOCK_FLIGHTS: Flight[] = [
       status: '登机',
       gate: '32'
     },
+    tags: ['V', 'I', '控'],
     route: 'SHA - CTU - CAN',
     times: {
       sta: '09:40',
@@ -130,6 +132,7 @@ export const MOCK_FLIGHTS: Flight[] = [
       status: '延误',
       gate: '08' // Assuming gate is known
     },
+    tags: ['D'],
     route: 'HGH - CTU - SZX',
     times: {
       std: '10:10',
@@ -160,6 +163,7 @@ export const MOCK_FLIGHTS: Flight[] = [
       status: '关闭',
       gate: '15'
     },
+    tags: ['冰', 'C'],
     route: 'CKG - CTU - XIY',
     times: {
       std: '10:00',
@@ -192,6 +196,7 @@ export const MOCK_FLIGHTS: Flight[] = [
       status: '正常',
       gate: '22'
     },
+    tags: ['Q', '互天'],
     route: 'WUH - CTU - KMG',
     times: {
       std: '10:50',
