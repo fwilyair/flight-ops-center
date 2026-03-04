@@ -89,7 +89,7 @@ export const MOCK_FLIGHTS: Flight[] = [
           { id: 'pm1-7', label: '起飞', time: '09:55', phase: 'departure' },
         ]
       },
-      { type: 'connector', startTime: '10:00', endTime: '11:00', label: '起飞', style: 'solid', color: 'gray' }
+      { type: 'connector', startTime: '09:00', endTime: '09:52', label: '起飞', style: 'solid', color: 'gray' }
     ]
   },
 
@@ -133,7 +133,7 @@ export const MOCK_FLIGHTS: Flight[] = [
           { id: 'pm2-5', label: '推出', time: '10:15', phase: 'departure' },
         ]
       },
-      { type: 'connector', startTime: '10:30', endTime: '11:30', label: '起飞', style: 'solid', color: 'gray' }
+      { type: 'connector', startTime: '09:20', endTime: '10:20', label: '起飞', style: 'solid', color: 'gray' }
     ]
   },
 
@@ -213,7 +213,7 @@ export const MOCK_FLIGHTS: Flight[] = [
           { id: 'pm4-7', label: '起飞', time: '10:15', phase: 'departure' },
         ]
       },
-      { type: 'connector', startTime: '10:08', endTime: '11:08', label: '起飞', style: 'solid', color: 'gray' }
+      { type: 'connector', startTime: '09:25', endTime: '10:25', label: '起飞', style: 'solid', color: 'gray' }
     ]
   },
 

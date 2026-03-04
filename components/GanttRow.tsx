@@ -59,7 +59,106 @@ const FlightTypeBadge = ({ type }: { type: FlightType }) => {
     );
 };
 
-const EventPill: React.FC<{ event: TimelineEvent; track: number; timeScale: number; currentTime?: string; onEventClick?: (event: TimelineEvent) => void }> = ({ event, track, timeScale, currentTime, onEventClick }) => {
+// CalcPointWithTooltip: renders a purple calculated scale point with dashed line and hover tooltip
+const CalcPointWithTooltip: React.FC<{
+    calcRelPx: number;
+    calcPointTime: string;
+    calcColor: string;
+    dotVerticalOffset: number;
+    isInsideCapsule: boolean;
+    lineStartX: number;
+    lineWidth: number;
+}> = ({ calcRelPx, calcPointTime, calcColor, dotVerticalOffset, isInsideCapsule, lineStartX, lineWidth }) => {
+    const [isCalcDotHovered, setIsCalcDotHovered] = React.useState(false);
+
+    return (
+        <>
+            {/* Dashed line from green dot (x=0) to purple dot (x=calcRelPx) */}
+            {isInsideCapsule ? (
+                <>
+                    {/* Vertical dashed line: from dot down to capsule center */}
+                    <div
+                        className="absolute pointer-events-none"
+                        style={{
+                            left: `${calcRelPx}px`,
+                            top: `calc(50% + ${dotVerticalOffset}px)`,
+                            width: '2px',
+                            height: `${Math.abs(dotVerticalOffset)}px`,
+                            borderLeft: `2px dashed ${calcColor}`,
+                            opacity: 0.7,
+                            transform: 'translateX(-50%)',
+                            zIndex: 25,
+                        }}
+                    />
+                    {/* Horizontal dashed line: from capsule center at calcRelPx to green dot at 0 */}
+                    <div
+                        className="absolute pointer-events-none"
+                        style={{
+                            left: `${Math.min(0, calcRelPx)}px`,
+                            top: '50%',
+                            width: `${Math.abs(calcRelPx)}px`,
+                            height: '2px',
+                            borderTop: `2px dashed ${calcColor}`,
+                            opacity: 0.7,
+                            transform: 'translateY(-50%)',
+                            zIndex: 25,
+                        }}
+                    />
+                </>
+            ) : lineWidth > 0 && (
+                /* Simple horizontal dashed line */
+                <div
+                    className="absolute pointer-events-none"
+                    style={{
+                        left: `${lineStartX}px`,
+                        top: '50%',
+                        width: `${lineWidth}px`,
+                        height: '2px',
+                        borderTop: `2px dashed ${calcColor}`,
+                        opacity: 0.7,
+                        transform: 'translateY(-50%)',
+                        zIndex: 25,
+                    }}
+                />
+            )}
+
+            {/* Purple dot - elevated z-index to avoid occlusion */}
+            <div
+                className="absolute flex items-center justify-center pointer-events-auto"
+                style={{
+                    left: `${calcRelPx}px`,
+                    top: `calc(50% + ${dotVerticalOffset}px)`,
+                    transform: 'translate(-50%, -50%)',
+                    zIndex: 40,
+                }}
+                onMouseEnter={() => setIsCalcDotHovered(true)}
+                onMouseLeave={() => setIsCalcDotHovered(false)}
+            >
+                <div
+                    className="size-3.5 rounded-full shadow-md"
+                    style={{
+                        backgroundColor: calcColor,
+                        border: `2.5px solid white`,
+                        boxShadow: `0 0 0 1.5px ${calcColor}50, 0 2px 4px rgba(0,0,0,0.15)`,
+                    }}
+                />
+                {/* Hover tooltip - same style as process marker tooltip */}
+                {isCalcDotHovered && (
+                    <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 z-50 pointer-events-none">
+                        <div className="bg-white px-2 py-1.5 rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.15)] border border-gray-100 flex flex-col items-center min-w-[50px]">
+                            <span className="text-base font-bold text-gray-900 font-mono tracking-tighter leading-none">
+                                {calcPointTime}
+                            </span>
+                            <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-white border-b border-r border-gray-100" style={{ transform: 'rotate(45deg)' }}></div>
+                        </div>
+                    </div>
+                )}
+            </div>
+        </>
+    );
+};
+
+const EventPill: React.FC<{ event: TimelineEvent; track: number; timeScale: number; currentTime?: string; onEventClick?: (event: TimelineEvent) => void; calcPointTime?: string }> = ({ event, track, timeScale, currentTime, onEventClick, calcPointTime }) => {
     const leftPos = timeToPixels(event.timeScheduled || event.timeActual || '', timeScale);
     const colors = getColorForEventType(event.type, event.status);
     const isDelayed = event.status === 'delayed';
@@ -80,6 +179,8 @@ const EventPill: React.FC<{ event: TimelineEvent; track: number; timeScale: numb
     // 根据轨道索引计算垂直位置，每个轨道高度30px（22px胶囊 + 8px间距）
     const topPos = 4 + (track * 30);
 
+    const [isGreenDotHovered, setIsGreenDotHovered] = React.useState(false);
+
     return (
         <div
             className={`absolute flex items-center z-10 hover:z-20 transition-all duration-200 cursor-pointer select-none group hover:scale-105`}
@@ -90,7 +191,23 @@ const EventPill: React.FC<{ event: TimelineEvent; track: number; timeScale: numb
             }}
         >
             {/* 对齐时间刻度的圆点 (中心对齐 leftPos) - 尺寸增大 - 统一绿色 */}
-            <div className={`absolute left-0 top-1/2 -translate-x-1/2 -translate-y-1/2 size-2.5 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-gray-900 shadow-sm`}></div>
+            <div
+                className={`absolute left-0 top-1/2 -translate-x-1/2 -translate-y-1/2 size-2.5 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-gray-900 shadow-sm z-30 pointer-events-auto`}
+                onMouseEnter={() => setIsGreenDotHovered(true)}
+                onMouseLeave={() => setIsGreenDotHovered(false)}
+            >
+                {/* Green dot hover tooltip */}
+                {isGreenDotHovered && event.timeScheduled && event.timeScheduled !== '--:--' && (
+                    <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 z-50 pointer-events-none">
+                        <div className="bg-white px-2 py-1.5 rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.15)] border border-gray-100 flex flex-col items-center min-w-[50px]">
+                            <span className="text-base font-bold text-gray-900 font-mono tracking-tighter leading-none">
+                                {event.timeScheduled}
+                            </span>
+                            <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-white border-b border-r border-gray-100" style={{ transform: 'rotate(45deg)' }}></div>
+                        </div>
+                    </div>
+                )}
+            </div>
 
             <div className={`ml-4 flex items-stretch rounded-full shadow-sm hover:shadow-lg overflow-hidden border ${colors.border} ${isDelayed ? 'animate-pulse' : ''}`}>
                 {/* 主标签部分 - 彩色背景 */}
@@ -134,6 +251,44 @@ const EventPill: React.FC<{ event: TimelineEvent; track: number; timeScale: numb
                     )}
                 </div>
             </div>
+
+            {/* Calculated Scale Point - purple dot + dashed line from green dot to purple dot */}
+            {calcPointTime && (() => {
+                const eventLeftPx = leftPos;
+                const calcPx = timeToPixels(calcPointTime, timeScale);
+                const calcRelPx = calcPx - eventLeftPx; // relative to this component
+
+                const calcColor = '#A78BFA'; // violet-400 (low saturation purple)
+
+                // Calculate capsule dimensions for collision detection
+                const labelLength = event.label.length;
+                const labelWidth = labelLength * 18 + 24;
+                const timeWidth = 190;
+                const capsuleLeftRel = 16; // ml-4 offset
+                const capsuleRightRel = capsuleLeftRel + labelWidth + timeWidth;
+
+                // Check if calc point overlaps with capsule area
+                const isInsideCapsule = calcRelPx >= capsuleLeftRel - 6 && calcRelPx <= capsuleRightRel + 6;
+                const dotVerticalOffset = isInsideCapsule ? -30 : 0;
+
+                // Dashed line: from green dot (x=0) to purple dot (x=calcRelPx)
+                // Line always goes between the two dots
+                const lineStartX = Math.min(0, calcRelPx);
+                const lineEndX = Math.max(0, calcRelPx);
+                const lineWidth = lineEndX - lineStartX;
+
+                return (
+                    <CalcPointWithTooltip
+                        calcRelPx={calcRelPx}
+                        calcPointTime={calcPointTime}
+                        calcColor={calcColor}
+                        dotVerticalOffset={dotVerticalOffset}
+                        isInsideCapsule={isInsideCapsule}
+                        lineStartX={lineStartX}
+                        lineWidth={lineWidth}
+                    />
+                );
+            })()}
         </div>
     );
 };
@@ -234,11 +389,11 @@ const ProcessDiamond: React.FC<{
             {isHovered && (
                 <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 z-50 pointer-events-none animate-in fade-in zoom-in duration-200">
                     <div className="bg-white px-2 py-1.5 rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.15)] border border-gray-100 flex flex-col items-center min-w-[64px]">
-                        <span className="text-sm font-bold text-gray-800 whitespace-nowrap leading-tight">
-                            {marker.label}
-                        </span>
-                        <span className="text-[11px] text-gray-500 font-mono tracking-tighter leading-tight mt-0.5">
+                        <span className="text-base font-bold text-gray-900 font-mono tracking-tighter leading-none mb-1">
                             {marker.time}
+                        </span>
+                        <span className="text-[11px] font-semibold text-gray-500 whitespace-nowrap leading-none tracking-widest">
+                            {marker.label}
                         </span>
                         {/* Little triangle pointer */}
                         <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-white border-b border-r border-gray-100" style={{ transform: 'rotate(45deg)' }}></div>
@@ -636,9 +791,44 @@ export const GanttRow: React.FC<GanttRowProps> = ({ flight, timeScale, currentTi
                 {flight.annotations?.map((anno, idx) => (
                     <AnnotationLine key={`anno-${idx}`} annotation={anno} index={idx} timeScale={timeScale} />
                 ))}
-                {flight.events.map((event) => (
-                    <EventPill key={event.id} event={event} track={eventTracks.get(event.id) || 0} timeScale={timeScale} currentTime={currentTime} onEventClick={onEventClick} />
-                ))}
+                {(() => {
+                    // Calculate baseline diff for calc points
+                    // 放行时间 >= 起飞时间 (放行 - 起飞 >= 0)
+                    const releaseAnno = flight.annotations?.find(a => a.label === '放行');
+                    const takeoffAnno = flight.annotations?.find(a => a.label === '起飞');
+                    let baselineDiffMin: number | null = null;
+                    if (releaseAnno?.endTime && takeoffAnno?.endTime) {
+                        const [rH, rM] = releaseAnno.endTime.split(':').map(Number);
+                        const [tH, tM] = takeoffAnno.endTime.split(':').map(Number);
+                        const diff = (rH * 60 + rM) - (tH * 60 + tM); // 放行 - 起飞 >= 0
+                        if (diff >= 0 && diff <= 15) {
+                            baselineDiffMin = diff;
+                        }
+                    }
+
+                    return flight.events.map((event) => {
+                        let calcPointTime: string | undefined;
+                        if (baselineDiffMin !== null && event.timeScheduled && event.timeScheduled !== '--:--') {
+                            // 计算刻度点 = 事件计划时间 - 差值 (因为放行更晚，投影到起飞时间轴会更早)
+                            const [eH, eM] = event.timeScheduled.split(':').map(Number);
+                            const totalMin = eH * 60 + eM - baselineDiffMin;
+                            const cH = Math.floor((totalMin + 1440) / 60) % 24;
+                            const cM = ((totalMin % 60) + 60) % 60;
+                            calcPointTime = `${String(cH).padStart(2, '0')}:${String(cM).padStart(2, '0')}`;
+                        }
+                        return (
+                            <EventPill
+                                key={event.id}
+                                event={event}
+                                track={eventTracks.get(event.id) || 0}
+                                timeScale={timeScale}
+                                currentTime={currentTime}
+                                onEventClick={onEventClick}
+                                calcPointTime={calcPointTime}
+                            />
+                        );
+                    });
+                })()}
             </div>
         </div >
     );
