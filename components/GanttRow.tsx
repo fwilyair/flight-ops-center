@@ -128,8 +128,9 @@ const EventPill: React.FC<{ event: TimelineEvent; track: number; timeScale: numb
         timeDiffColor = diffMins > 0 ? 'text-red-500' : diffMins < 0 ? 'text-emerald-500' : 'text-gray-500';
     }
 
-    // 根据轨道索引计算垂直位置，每个轨道高度30px（22px胶囊 + 8px间距）
-    const topPos = 4 + (track * trackSpacing);
+    // 根据轨道索引计算垂直位置
+    const topPadding = trackSpacing > 30 ? 22 : 4; // 有计算刻度点时增加顶部偏移
+    const topPos = topPadding + (track * trackSpacing);
 
     const [isGreenDotHovered, setIsGreenDotHovered] = React.useState(false);
 
@@ -521,7 +522,8 @@ export const GanttRow: React.FC<GanttRowProps> = ({ flight, timeScale, currentTi
     // Calculate row height based on tracks
     // Base height needs to be taller to accommodate the 6px border-bottom and padding + new tag row
     const minHeight = 130;
-    const rowHeight = Math.max(minHeight, (trackCount * trackSpacing) + (annotationCount * 34) + 10);
+    const topPaddingRow = hasCalcPoints ? 22 : 4;
+    const rowHeight = Math.max(minHeight, topPaddingRow + (trackCount * trackSpacing) + (annotationCount * 34) + 10);
 
     return (
         <div
@@ -751,7 +753,8 @@ export const GanttRow: React.FC<GanttRowProps> = ({ flight, timeScale, currentTi
                         const calcPointTime = `${String(cH).padStart(2, '0')}:${String(cM).padStart(2, '0')}`;
 
                         const track = eventTracks.get(event.id) || 0;
-                        const capsuleTopY = 4 + track * trackSpacing; // top of capsule
+                        const topPaddingCalc = trackSpacing > 30 ? 22 : 4;
+                        const capsuleTopY = topPaddingCalc + track * trackSpacing; // top of capsule
                         const greenDotPx = timeToPixels(event.timeScheduled, timeScale);
                         const purpleDotPx = timeToPixels(calcPointTime, timeScale);
                         const greenDotY = capsuleTopY + 11; // center of capsule
