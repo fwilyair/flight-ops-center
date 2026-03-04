@@ -809,11 +809,11 @@ export const GanttRow: React.FC<GanttRowProps> = ({ flight, timeScale, currentTi
                     return flight.events.map((event) => {
                         let calcPointTime: string | undefined;
                         if (baselineDiffMin !== null && event.timeScheduled && event.timeScheduled !== '--:--') {
-                            // 计算刻度点 = 事件计划时间 - 差值 (因为放行更晚，投影到起飞时间轴会更早)
+                            // 计算刻度点 = 事件计划时间 + 差值 (放行更晚，计算刻度点在实际刻度点右边)
                             const [eH, eM] = event.timeScheduled.split(':').map(Number);
-                            const totalMin = eH * 60 + eM - baselineDiffMin;
-                            const cH = Math.floor((totalMin + 1440) / 60) % 24;
-                            const cM = ((totalMin % 60) + 60) % 60;
+                            const totalMin = eH * 60 + eM + baselineDiffMin;
+                            const cH = Math.floor(totalMin / 60) % 24;
+                            const cM = totalMin % 60;
                             calcPointTime = `${String(cH).padStart(2, '0')}:${String(cM).padStart(2, '0')}`;
                         }
                         return (
