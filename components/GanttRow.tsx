@@ -728,7 +728,6 @@ export const GanttRow: React.FC<GanttRowProps> = ({ flight, timeScale, currentTi
                     if (diff < 0 || diff > 15) return null;
 
                     const calcColor = '#A78BFA';
-                    const CALC_POINT_TOP = -6; // fixed Y position above all tracks
 
                     return flight.events.map((event) => {
                         if (!event.timeScheduled || event.timeScheduled === '--:--') return null;
@@ -738,33 +737,36 @@ export const GanttRow: React.FC<GanttRowProps> = ({ flight, timeScale, currentTi
                         const cM = totalMin % 60;
                         const calcPointTime = `${String(cH).padStart(2, '0')}:${String(cM).padStart(2, '0')}`;
 
+                        const track = eventTracks.get(event.id) || 0;
+                        const capsuleTopY = 4 + track * 30; // top of capsule
                         const greenDotPx = timeToPixels(event.timeScheduled, timeScale);
                         const purpleDotPx = timeToPixels(calcPointTime, timeScale);
-                        const greenDotY = 4 + (eventTracks.get(event.id) || 0) * 30 + 11; // center of capsule
+                        const greenDotY = capsuleTopY + 11; // center of capsule
+                        const purpleDotY = capsuleTopY - 10; // above the capsule
 
                         return (
                             <React.Fragment key={`calc-${event.id}`}>
-                                {/* L-shaped dashed line: from green dot up to calc point level, then horizontal to purple dot */}
-                                {/* Vertical segment: from green dot up to calc point Y */}
+                                {/* L-shaped dashed line: green dot → up → horizontal → purple dot */}
+                                {/* Vertical segment: from green dot center UP to purple dot level */}
                                 <div
                                     className="absolute pointer-events-none"
                                     style={{
-                                        left: `${purpleDotPx}px`,
-                                        top: `${CALC_POINT_TOP + 5}px`,
+                                        left: `${greenDotPx}px`,
+                                        top: `${purpleDotY}px`,
                                         width: '2px',
-                                        height: `${greenDotY - CALC_POINT_TOP - 5}px`,
+                                        height: `${greenDotY - purpleDotY}px`,
                                         borderLeft: `2px dashed ${calcColor}`,
                                         opacity: 0.6,
                                         transform: 'translateX(-50%)',
                                         zIndex: 45,
                                     }}
                                 />
-                                {/* Horizontal segment: from vertical line to green dot */}
+                                {/* Horizontal segment: from green dot X to purple dot X, at purple dot level */}
                                 <div
                                     className="absolute pointer-events-none"
                                     style={{
                                         left: `${Math.min(greenDotPx, purpleDotPx)}px`,
-                                        top: `${greenDotY}px`,
+                                        top: `${purpleDotY}px`,
                                         width: `${Math.abs(purpleDotPx - greenDotPx)}px`,
                                         height: '2px',
                                         borderTop: `2px dashed ${calcColor}`,
@@ -773,7 +775,7 @@ export const GanttRow: React.FC<GanttRowProps> = ({ flight, timeScale, currentTi
                                         zIndex: 45,
                                     }}
                                 />
-                                {/* Purple dot at fixed top position */}
+                                {/* Purple dot above its own capsule */}
                                 <CalcPointWithTooltip
                                     calcRelPx={purpleDotPx}
                                     calcPointTime={calcPointTime}
@@ -782,7 +784,7 @@ export const GanttRow: React.FC<GanttRowProps> = ({ flight, timeScale, currentTi
                                     isInsideCapsule={false}
                                     lineStartX={0}
                                     lineWidth={0}
-                                    absoluteTop={CALC_POINT_TOP}
+                                    absoluteTop={purpleDotY}
                                 />
                             </React.Fragment>
                         );
