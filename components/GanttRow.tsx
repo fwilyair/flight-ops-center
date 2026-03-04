@@ -267,9 +267,9 @@ const EventPill: React.FC<{ event: TimelineEvent; track: number; timeScale: numb
                 const capsuleLeftRel = 16; // ml-4 offset
                 const capsuleRightRel = capsuleLeftRel + labelWidth + timeWidth;
 
-                // Check if calc point overlaps with capsule area
-                const isInsideCapsule = calcRelPx >= capsuleLeftRel - 6 && calcRelPx <= capsuleRightRel + 6;
-                const dotVerticalOffset = isInsideCapsule ? -30 : 0;
+                // 计算刻度点总是在绿点右边（加了时间差），几乎一定与胶囊重叠，所以始终放在上方
+                const isInsideCapsule = true;
+                const dotVerticalOffset = -30;
 
                 // Dashed line: from green dot (x=0) to purple dot (x=calcRelPx)
                 // Line always goes between the two dots
