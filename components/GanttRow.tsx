@@ -87,11 +87,10 @@ const CalcPointWithTooltip: React.FC<{
                 onMouseLeave={() => setIsCalcDotHovered(false)}
             >
                 <div
-                    className="size-3.5 rounded-full shadow-md"
+                    className="size-3.5 rounded-full shadow-md animate-[calcBreath_2s_ease-in-out_infinite]"
                     style={{
                         backgroundColor: calcColor,
                         border: `2.5px solid white`,
-                        boxShadow: `0 0 0 1.5px ${calcColor}50, 0 2px 4px rgba(0,0,0,0.15)`,
                     }}
                 />
                 {/* Hover tooltip - same style as process marker tooltip */}

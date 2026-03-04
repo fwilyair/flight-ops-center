@@ -156,6 +156,21 @@
     .current-time-line {
       animation: pulse-glow 2s ease-in-out infinite;
     }
+
+    /* 计算刻度点呼吸动画 */
+    @keyframes calcBreath {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 1.5px rgba(167, 139, 250, 0.3), 0 2px 4px rgba(0, 0, 0, 0.15);
+        transform: scale(1);
+      }
+
+      50% {
+        box-shadow: 0 0 0 4px rgba(167, 139, 250, 0.2), 0 0 12px rgba(167, 139, 250, 0.35);
+        transform: scale(1.15);
+      }
+    }
   </style>
   <script type="importmap">
 {
