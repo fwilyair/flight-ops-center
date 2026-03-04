@@ -110,7 +110,7 @@ const CalcPointWithTooltip: React.FC<{
     );
 };
 
-const EventPill: React.FC<{ event: TimelineEvent; track: number; timeScale: number; currentTime?: string; onEventClick?: (event: TimelineEvent) => void }> = ({ event, track, timeScale, currentTime, onEventClick }) => {
+const EventPill: React.FC<{ event: TimelineEvent; track: number; timeScale: number; currentTime?: string; onEventClick?: (event: TimelineEvent) => void; trackSpacing?: number }> = ({ event, track, timeScale, currentTime, onEventClick, trackSpacing = 30 }) => {
     const leftPos = timeToPixels(event.timeScheduled || event.timeActual || '', timeScale);
     const colors = getColorForEventType(event.type, event.status);
     const isDelayed = event.status === 'delayed';
@@ -129,7 +129,7 @@ const EventPill: React.FC<{ event: TimelineEvent; track: number; timeScale: numb
     }
 
     // 根据轨道索引计算垂直位置，每个轨道高度30px（22px胶囊 + 8px间距）
-    const topPos = 4 + (track * 30);
+    const topPos = 4 + (track * trackSpacing);
 
     const [isGreenDotHovered, setIsGreenDotHovered] = React.useState(false);
 
@@ -503,13 +503,25 @@ export const GanttRow: React.FC<GanttRowProps> = ({ flight, timeScale, currentTi
     const maxTrack = Math.max(0, ...Array.from(eventTracks.values()));
     const trackCount = maxTrack + 1;
 
+    // 判断是否有计算刻度点（需要更大的轨道间距来容纳紫色圆点）
+    const releaseAnno = flight.annotations?.find(a => a.label === '放行');
+    const takeoffAnno = flight.annotations?.find(a => a.label === '起飞');
+    let hasCalcPoints = false;
+    if (releaseAnno?.endTime && takeoffAnno?.endTime) {
+        const [rH, rM] = releaseAnno.endTime.split(':').map(Number);
+        const [tH, tM] = takeoffAnno.endTime.split(':').map(Number);
+        const diff = (rH * 60 + rM) - (tH * 60 + tM);
+        hasCalcPoints = diff >= 0 && diff <= 15;
+    }
+    const trackSpacing = hasCalcPoints ? 48 : 30;
+
     // 计算基线区域高度
     const annotationCount = flight.annotations?.length || 0;
 
     // Calculate row height based on tracks
     // Base height needs to be taller to accommodate the 6px border-bottom and padding + new tag row
     const minHeight = 130;
-    const rowHeight = Math.max(minHeight, (trackCount * 30) + (annotationCount * 34) + 10);
+    const rowHeight = Math.max(minHeight, (trackCount * trackSpacing) + (annotationCount * 34) + 10);
 
     return (
         <div
@@ -714,6 +726,7 @@ export const GanttRow: React.FC<GanttRowProps> = ({ flight, timeScale, currentTi
                         timeScale={timeScale}
                         currentTime={currentTime}
                         onEventClick={onEventClick}
+                        trackSpacing={trackSpacing}
                     />
                 ))}
 
@@ -738,7 +751,7 @@ export const GanttRow: React.FC<GanttRowProps> = ({ flight, timeScale, currentTi
                         const calcPointTime = `${String(cH).padStart(2, '0')}:${String(cM).padStart(2, '0')}`;
 
                         const track = eventTracks.get(event.id) || 0;
-                        const capsuleTopY = 4 + track * 30; // top of capsule
+                        const capsuleTopY = 4 + track * trackSpacing; // top of capsule
                         const greenDotPx = timeToPixels(event.timeScheduled, timeScale);
                         const purpleDotPx = timeToPixels(calcPointTime, timeScale);
                         const greenDotY = capsuleTopY + 11; // center of capsule
