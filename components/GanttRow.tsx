@@ -162,54 +162,40 @@ const EventPill: React.FC<{ event: TimelineEvent; track: number; timeScale: numb
             </div>
 
             <div className="relative ml-4">
-                {/* Capsule outline */}
-                {hasActualTime ? (
-                    event.id === 'e3' ? (
-                        /* 方案A 翡翠色柔光晕圈 - 落地 */
-                        <div className="absolute inset-[-3px] rounded-full pointer-events-none z-0"
-                            style={{ boxShadow: '0 0 0 2.5px rgba(16, 185, 129, 0.45), 0 0 10px rgba(16, 185, 129, 0.25)' }} />
-                    ) : event.id === 'e4' ? (
-                        /* 方案B 翡翠色静态虚线 - 靠桥 */
-                        <svg className="absolute inset-[-3px] pointer-events-none z-0" style={{ width: 'calc(100% + 6px)', height: 'calc(100% + 6px)' }}>
-                            <rect x="1.5" y="1.5" rx="12" ry="12" fill="none"
-                                stroke="rgba(16, 185, 129, 0.75)" strokeWidth="2.5" strokeDasharray="10 8"
-                                style={{ width: 'calc(100% - 3px)', height: 'calc(100% - 3px)' }} />
-                        </svg>
-                    ) : event.id === 'e5' ? (
-                        /* 方案C 渐变色描边 - 开始卸载 */
-                        <svg className="absolute inset-[-3px] pointer-events-none z-0" style={{ width: 'calc(100% + 6px)', height: 'calc(100% + 6px)' }}>
-                            <defs>
-                                <linearGradient id="greenGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" stopColor="#10B981" />
-                                    <stop offset="100%" stopColor="#0891B2" />
-                                </linearGradient>
-                            </defs>
-                            <rect x="1.5" y="1.5" rx="12" ry="12" fill="none"
-                                stroke="url(#greenGrad)" strokeWidth="2.5"
-                                style={{ width: 'calc(100% - 3px)', height: 'calc(100% - 3px)' }} />
-                        </svg>
-                    ) : (
-                        /* 其他已完成: 默认绿色实线 */
-                        <div className="absolute inset-[-2px] rounded-full border-[2px] border-emerald-500 pointer-events-none z-0" />
-                    )
-                ) : (
-                    /* 进行中/未完成: 淡橙黄色虚线旋转轮廓 */
-                    <svg className="absolute inset-[-3px] pointer-events-none z-0" style={{ width: 'calc(100% + 6px)', height: 'calc(100% + 6px)' }}>
-                        <rect
-                            x="1.5" y="1.5"
-                            rx="12" ry="12"
-                            fill="none"
-                            stroke="rgba(234, 160, 0, 0.85)"
-                            strokeWidth="2.5"
-                            strokeDasharray="10 8"
-                            style={{
-                                width: 'calc(100% - 3px)',
-                                height: 'calc(100% - 3px)',
-                                animation: 'dashMarch 2s linear infinite',
-                            }}
-                        />
-                    </svg>
-                )}
+                {/* Capsule outline: 0=无框线, 1=虚线转动(已发管控), 2=渐变实线(已收回执) */}
+                {(() => {
+                    // 用 event.id 的字符码之和 mod 3 做稳定随机分配
+                    const hash = event.id.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+                    const outlineType = hash % 3;
+                    if (outlineType === 1) {
+                        // 已发送管控、未收回执: 橙黄虚线旋转
+                        return (
+                            <svg className="absolute inset-[-3px] pointer-events-none z-0" style={{ width: 'calc(100% + 6px)', height: 'calc(100% + 6px)' }}>
+                                <rect x="1.5" y="1.5" rx="12" ry="12" fill="none"
+                                    stroke="rgba(234, 160, 0, 0.85)" strokeWidth="2.5" strokeDasharray="10 8"
+                                    style={{ width: 'calc(100% - 3px)', height: 'calc(100% - 3px)', animation: 'dashMarch 2s linear infinite' }} />
+                            </svg>
+                        );
+                    } else if (outlineType === 2) {
+                        // 已收到回执: 渐变实线 (方案C)
+                        const gradId = `grad-${event.id}`;
+                        return (
+                            <svg className="absolute inset-[-3px] pointer-events-none z-0" style={{ width: 'calc(100% + 6px)', height: 'calc(100% + 6px)' }}>
+                                <defs>
+                                    <linearGradient id={gradId} x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stopColor="#10B981" />
+                                        <stop offset="100%" stopColor="#0891B2" />
+                                    </linearGradient>
+                                </defs>
+                                <rect x="1.5" y="1.5" rx="12" ry="12" fill="none"
+                                    stroke={`url(#${gradId})`} strokeWidth="2.5"
+                                    style={{ width: 'calc(100% - 3px)', height: 'calc(100% - 3px)' }} />
+                            </svg>
+                        );
+                    }
+                    // outlineType === 0: 无框线
+                    return null;
+                })()}
                 <div className={`flex items-stretch rounded-full shadow-sm hover:shadow-lg overflow-hidden ${isDelayed ? 'animate-pulse' : ''}`}>
                     {/* 主标签部分 - 彩色背景 */}
                     <div className={`flex items-center px-2 py-[2px] ${colors.bg}`}>
