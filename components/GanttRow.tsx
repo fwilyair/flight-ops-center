@@ -172,7 +172,7 @@ const EventPill: React.FC<{ event: TimelineEvent; track: number; timeScale: numb
                         return (
                             <svg className="absolute inset-[-3px] pointer-events-none z-0" style={{ width: 'calc(100% + 6px)', height: 'calc(100% + 6px)' }}>
                                 <rect x="1.5" y="1.5" rx="12" ry="12" fill="none"
-                                    stroke="rgba(234, 160, 0, 0.85)" strokeWidth="2.5" strokeDasharray="10 8"
+                                    stroke="rgba(234, 160, 0, 0.85)" strokeWidth="2.5" strokeDasharray="14 12"
                                     style={{ width: 'calc(100% - 3px)', height: 'calc(100% - 3px)', animation: 'dashMarch 2s linear infinite' }} />
                             </svg>
                         );
