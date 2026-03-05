@@ -161,7 +161,7 @@ const EventPill: React.FC<{ event: TimelineEvent; track: number; timeScale: numb
                 )}
             </div>
 
-            <div className={`ml-4 flex items-stretch rounded-full shadow-sm hover:shadow-lg overflow-hidden border ${colors.border} ${isDelayed ? 'animate-pulse' : ''}`}>
+            <div className={`ml-4 flex items-stretch rounded-full shadow-sm hover:shadow-lg overflow-hidden ${isDelayed ? 'animate-pulse' : ''}`}>
                 {/* 主标签部分 - 彩色背景 */}
                 <div className={`flex items-center px-2 py-[2px] ${colors.bg}`}>
                     <span className="text-sm font-bold text-white leading-none tracking-tight">
@@ -484,7 +484,7 @@ const FusedInfoBadge = ({ label, value, type = 'ARR', status }: { label: string;
     }
 
     return (
-        <div className={`flex items-center rounded-full overflow-hidden shadow-sm border ${border} h-[26px]`}>
+        <div className={`flex items-center rounded-full overflow-hidden shadow-sm h-[26px]`}>
             <div className={`${bgDark} ${textDark} px-2 h-full flex items-center justify-center text-xs font-bold tracking-wide whitespace-nowrap`}>
                 {label}
             </div>
