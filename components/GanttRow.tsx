@@ -161,48 +161,72 @@ const EventPill: React.FC<{ event: TimelineEvent; track: number; timeScale: numb
                 )}
             </div>
 
-            <div className={`ml-4 flex items-stretch rounded-full shadow-sm hover:shadow-lg overflow-hidden ${isDelayed ? 'animate-pulse' : ''}`}>
-                {/* 主标签部分 - 彩色背景 */}
-                <div className={`flex items-center px-2 py-[2px] ${colors.bg}`}>
-                    <span className="text-sm font-bold text-white leading-none tracking-tight">
-                        {event.label}
-                    </span>
-                </div>
-
-                {/* 时间部分 - 浅色背景 */}
-                <div className={`flex items-center gap-1.5 px-2 py-[2px] ${colors.lightBg}`}>
-                    <div className="flex items-center gap-1 leading-none">
-                        <span className="px-1 py-[1px] rounded bg-blue-600 text-white text-xs font-bold transform scale-95 origin-center">计</span>
-                        <span className="tabular-nums font-mono font-bold text-gray-900 dark:text-gray-100 text-sm leading-none">{event.timeScheduled || '--:--'}</span>
+            <div className="relative ml-4">
+                {/* Capsule outline */}
+                {hasActualTime ? (
+                    /* 已完成: 绿色实线轮廓 */
+                    <div className="absolute inset-[-2px] rounded-full border-[1.5px] border-emerald-400/70 pointer-events-none z-0" />
+                ) : (
+                    /* 进行中/未完成: 淡橙黄色虚线旋转轮廓 */
+                    <svg className="absolute inset-[-3px] pointer-events-none z-0" style={{ width: 'calc(100% + 6px)', height: 'calc(100% + 6px)' }}>
+                        <rect
+                            x="1.5" y="1.5"
+                            rx="999" ry="999"
+                            fill="none"
+                            stroke="rgba(251, 191, 36, 0.55)"
+                            strokeWidth="1.5"
+                            strokeDasharray="6 4"
+                            style={{
+                                width: 'calc(100% - 3px)',
+                                height: 'calc(100% - 3px)',
+                                animation: 'dashMarch 0.8s linear infinite',
+                            }}
+                        />
+                    </svg>
+                )}
+                <div className={`flex items-stretch rounded-full shadow-sm hover:shadow-lg overflow-hidden ${isDelayed ? 'animate-pulse' : ''}`}>
+                    {/* 主标签部分 - 彩色背景 */}
+                    <div className={`flex items-center px-2 py-[2px] ${colors.bg}`}>
+                        <span className="text-sm font-bold text-white leading-none tracking-tight">
+                            {event.label}
+                        </span>
                     </div>
-                    {hasActualTime ? (
-                        <>
-                            <div className="w-px h-3 bg-gray-300 dark:bg-gray-600 mx-0.5 opacity-50"></div>
-                            <div className="flex items-center gap-1 leading-none">
-                                <span className="px-1 py-[1px] rounded bg-green-600 text-white text-xs font-bold transform scale-95 origin-center">实</span>
-                                <span className="tabular-nums font-mono font-bold text-gray-900 dark:text-gray-100 text-sm leading-none">{event.timeActual}</span>
-                            </div>
-                        </>
-                    ) : timeDiff !== null ? (
-                        <>
-                            <div className="w-px h-3 bg-gray-300 dark:bg-gray-600 mx-0.5 opacity-50"></div>
-                            <div className="flex items-center gap-1 leading-none py-[1px] px-1">
-                                <span className={`tabular-nums font-mono font-bold text-sm tracking-tight leading-none ${timeDiffColor}`}>
-                                    {timeDiff > 0 ? `+${timeDiff}` : timeDiff}
-                                </span>
-                            </div>
-                        </>
-                    ) : (
-                        <>
-                            <div className="w-px h-3 bg-gray-300 dark:bg-gray-600 mx-0.5 opacity-50"></div>
-                            <div className="flex items-center gap-1 leading-none">
-                                <span className="px-1 py-[1px] rounded bg-green-600 text-white text-xs font-bold transform scale-95 origin-center">实</span>
-                                <span className="tabular-nums font-mono font-bold text-gray-900 dark:text-gray-100 text-sm leading-none">--:--</span>
-                            </div>
-                        </>
-                    )}
+
+                    {/* 时间部分 - 浅色背景 */}
+                    <div className={`flex items-center gap-1.5 px-2 py-[2px] ${colors.lightBg}`}>
+                        <div className="flex items-center gap-1 leading-none">
+                            <span className="px-1 py-[1px] rounded bg-blue-600 text-white text-xs font-bold transform scale-95 origin-center">计</span>
+                            <span className="tabular-nums font-mono font-bold text-gray-900 dark:text-gray-100 text-sm leading-none">{event.timeScheduled || '--:--'}</span>
+                        </div>
+                        {hasActualTime ? (
+                            <>
+                                <div className="w-px h-3 bg-gray-300 dark:bg-gray-600 mx-0.5 opacity-50"></div>
+                                <div className="flex items-center gap-1 leading-none">
+                                    <span className="px-1 py-[1px] rounded bg-green-600 text-white text-xs font-bold transform scale-95 origin-center">实</span>
+                                    <span className="tabular-nums font-mono font-bold text-gray-900 dark:text-gray-100 text-sm leading-none">{event.timeActual}</span>
+                                </div>
+                            </>
+                        ) : timeDiff !== null ? (
+                            <>
+                                <div className="w-px h-3 bg-gray-300 dark:bg-gray-600 mx-0.5 opacity-50"></div>
+                                <div className="flex items-center gap-1 leading-none py-[1px] px-1">
+                                    <span className={`tabular-nums font-mono font-bold text-sm tracking-tight leading-none ${timeDiffColor}`}>
+                                        {timeDiff > 0 ? `+${timeDiff}` : timeDiff}
+                                    </span>
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <div className="w-px h-3 bg-gray-300 dark:bg-gray-600 mx-0.5 opacity-50"></div>
+                                <div className="flex items-center gap-1 leading-none">
+                                    <span className="px-1 py-[1px] rounded bg-green-600 text-white text-xs font-bold transform scale-95 origin-center">实</span>
+                                    <span className="tabular-nums font-mono font-bold text-gray-900 dark:text-gray-100 text-sm leading-none">--:--</span>
+                                </div>
+                            </>
+                        )}
+                    </div>
                 </div>
-            </div>
+            </div>{/* capsule inner + outline wrapper */}
 
         </div>
     );
