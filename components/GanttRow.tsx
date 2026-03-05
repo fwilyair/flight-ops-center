@@ -165,7 +165,7 @@ const EventPill: React.FC<{ event: TimelineEvent; track: number; timeScale: numb
                 {/* Capsule outline */}
                 {hasActualTime ? (
                     /* 已完成: 绿色实线轮廓 */
-                    <div className="absolute inset-[-2px] rounded-full border-[1.5px] border-emerald-400/70 pointer-events-none z-0" />
+                    <div className="absolute inset-[-2px] rounded-full border-[2px] border-emerald-500 pointer-events-none z-0" />
                 ) : (
                     /* 进行中/未完成: 淡橙黄色虚线旋转轮廓 */
                     <svg className="absolute inset-[-3px] pointer-events-none z-0" style={{ width: 'calc(100% + 6px)', height: 'calc(100% + 6px)' }}>
@@ -173,7 +173,7 @@ const EventPill: React.FC<{ event: TimelineEvent; track: number; timeScale: numb
                             x="1.5" y="1.5"
                             rx="12" ry="12"
                             fill="none"
-                            stroke="rgba(251, 191, 36, 0.5)"
+                            stroke="rgba(234, 160, 0, 0.85)"
                             strokeWidth="2.5"
                             strokeDasharray="10 8"
                             style={{
