@@ -27,6 +27,7 @@ export interface TimelineEvent {
 export interface ProcessMarker {
   id: string;
   label: string;       // e.g. '落地', '滑行', '入位'
+  shortLabel?: string; // e.g. '开' for '推出开车'
   time: string;        // HH:MM format
   phase: 'arrival' | 'departure';
 }

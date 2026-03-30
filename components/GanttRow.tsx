@@ -332,7 +332,7 @@ const ProcessDiamond: React.FC<{
                     className={`text-[10px] font-bold leading-none ${colors.text} select-none`}
                     style={{ transform: 'rotate(-45deg)', display: 'block' }}
                 >
-                    {marker.label[0]}
+                    {marker.shortLabel || marker.label[0]}
                 </span>
             </div>
 
@@ -360,9 +360,25 @@ const AnnotationLine: React.FC<{ annotation: Annotation; index: number; timeScal
     if (!annotation.startTime || !annotation.endTime) return null;
 
     const startPx = timeToPixels(annotation.startTime, timeScale);
-    const endPx = timeToPixels(annotation.endTime, timeScale);
-    const width = endPx - startPx;
-    const centerPx = startPx + width / 2;
+    const logicalEndPx = timeToPixels(annotation.endTime, timeScale);
+
+    // 计算实际需要绘制的终点（为了避让右侧的里程碑节点而向右延伸）
+    let extendedEndPx = logicalEndPx;
+    if (annotation.markers && annotation.markers.length > 0) {
+        const sorted = [...annotation.markers].sort((a, b) => a.time.localeCompare(b.time));
+        const lastMarkerPx = timeToPixels(sorted[sorted.length - 1].time, timeScale);
+        
+        // 我们期望在最后一个菱形(center=lastMarkerPx, width=18)的右侧留出适当空间
+        // 时间标签默认从 extendedEndPx + 6 开始，要想避让，要求：
+        // extendedEndPx + 6 >= lastMarkerPx + 20 (保证离中心20px，离右边缘11px)
+        const minTimeLabelLeftPx = lastMarkerPx + 20;
+        if (minTimeLabelLeftPx > logicalEndPx + 6) {
+            extendedEndPx = minTimeLabelLeftPx - 6;
+        }
+    }
+
+    const logicalWidth = logicalEndPx - startPx;
+    const centerPx = startPx + logicalWidth / 2;
 
     // Position at bottom of row (stacked for multiple annotations)
     // 底部起始偏移 21px（标签距底8px），基线间距 34px（标签间距8px）
@@ -370,8 +386,10 @@ const AnnotationLine: React.FC<{ annotation: Annotation; index: number; timeScal
 
     // 估算文字宽度（每个字符约16px，加上更宽的padding）
     const labelWidth = annotation.label ? annotation.label.length * 16 + 24 : 0;
-    const leftLineWidth = (width - labelWidth) / 2;
-    const rightLineWidth = (width - labelWidth) / 2;
+    const leftLineWidth = (logicalWidth - labelWidth) / 2;
+    // 右侧连线从 中心+标签一半 走到 extendedEndPx
+    const rightSolidLineWidth = logicalEndPx - (centerPx + labelWidth / 2);
+    const rightDashedLineWidth = extendedEndPx - logicalEndPx;
 
     // Pre-calculate marker overlaps
     const processedMarkers = React.useMemo(() => {
@@ -435,13 +453,13 @@ const AnnotationLine: React.FC<{ annotation: Annotation; index: number; timeScal
                 </div>
             )}
 
-            {/* Right Line Segment */}
-            {rightLineWidth > 10 && (
+            {/* Right Solid Line Segment */}
+            {rightSolidLineWidth > 10 && (
                 <div
                     style={{
                         position: 'absolute',
                         left: `${centerPx + labelWidth / 2}px`,
-                        width: `${rightLineWidth}px`,
+                        width: `${rightSolidLineWidth}px`,
                         height: '3px',
                         backgroundColor: lineColor,
                         borderRadius: '1.5px'
@@ -449,8 +467,24 @@ const AnnotationLine: React.FC<{ annotation: Annotation; index: number; timeScal
                 ></div>
             )}
 
+            {/* Extended Dashed Line Segment */}
+            {rightDashedLineWidth > 0 && (
+                <div
+                    style={{
+                        position: 'absolute',
+                        left: `${Math.max(logicalEndPx, centerPx + labelWidth / 2)}px`,
+                        width: `${rightDashedLineWidth}px`,
+                        height: '3px',
+                        backgroundImage: `linear-gradient(to right, ${lineColor} 50%, transparent 50%)`,
+                        backgroundSize: '10px 3px',
+                        backgroundRepeat: 'repeat-x',
+                        borderRadius: '1.5px'
+                    }}
+                ></div>
+            )}
+
             {/* The Time (At Tail) - vertically centered with the line */}
-            <div className="absolute" style={{ left: `${endPx + 6}px`, transform: 'translateY(-50%)', top: '0' }}>
+            <div className="absolute" style={{ left: `${extendedEndPx + 6}px`, transform: 'translateY(-50%)', top: '0' }}>
                 <span
                     className="text-sm font-mono font-bold leading-none tabular-nums px-2 py-0.5 rounded-md shadow-sm"
                     style={{

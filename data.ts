@@ -80,13 +80,12 @@ export const MOCK_FLIGHTS: Flight[] = [
     annotations: [
       {
         type: 'connector', startTime: '09:00', endTime: '10:00', label: '放行', style: 'solid', color: 'gray', markers: [
-          { id: 'pm1-1', label: '落地', time: '09:00', phase: 'arrival' },
-          { id: 'pm1-2', label: '滑行', time: '09:08', phase: 'arrival' },
-          { id: 'pm1-3', label: '入位', time: '09:15', phase: 'arrival' },
-          { id: 'pm1-4', label: '准备', time: '09:30', phase: 'departure' },
-          { id: 'pm1-5', label: '推出', time: '09:42', phase: 'departure' },
-          { id: 'pm1-6', label: '滑行', time: '09:48', phase: 'departure' },
-          { id: 'pm1-7', label: '起飞', time: '09:55', phase: 'departure' },
+          { id: 'pm1-1', label: '滑行', shortLabel: '滑', time: '09:08', phase: 'arrival' },
+          { id: 'pm1-2', label: '入位', shortLabel: '入', time: '09:15', phase: 'arrival' },
+          { id: 'pm1-3', label: '准备好', shortLabel: '准', time: '09:30', phase: 'departure' },
+          { id: 'pm1-4', label: '推出', shortLabel: '推', time: '09:42', phase: 'departure' },
+          { id: 'pm1-5', label: '推出开车', shortLabel: '开', time: '09:50', phase: 'departure' },
+          { id: 'pm1-6', label: '滑行', shortLabel: '滑', time: '09:55', phase: 'departure' },
         ]
       },
       { type: 'connector', startTime: '09:00', endTime: '09:52', label: '起飞', style: 'solid', color: 'gray' }
@@ -120,17 +119,18 @@ export const MOCK_FLIGHTS: Flight[] = [
     events: [
       { id: 'e3', label: '落地', type: 'LAND', timeActual: '09:40', timeScheduled: '09:40', status: 'overtime-completed' },
       { id: 'e4', label: '靠桥', type: 'IN-BLK', timeActual: '10:00', timeScheduled: '09:50', status: 'overtime-completed' },
-      { id: 'e5', label: '开始卸载', type: 'UNLOAD', timeActual: '10:05', timeScheduled: '10:00', status: 'overtime-completed' },
+      { id: 'e5', label: '开始卸载', type: 'UNLOAD', timeActual: '10:45', timeScheduled: '10:00', status: 'overtime-completed' },
       { id: 'e6', label: '起飞', type: 'DEP', timeActual: '--:--', timeScheduled: '11:00', status: 'warning' },
     ],
     annotations: [
       {
         type: 'connector', startTime: '09:30', endTime: '10:30', label: '放行', style: 'solid', color: 'gray', markers: [
-          { id: 'pm2-1', label: '落地', time: '09:35', phase: 'arrival' },
-          { id: 'pm2-2', label: '滑行', time: '09:42', phase: 'arrival' },
-          { id: 'pm2-3', label: '入位', time: '09:50', phase: 'arrival' },
-          { id: 'pm2-4', label: '准备', time: '10:05', phase: 'departure' },
-          { id: 'pm2-5', label: '推出', time: '10:15', phase: 'departure' },
+          { id: 'pm2-1', label: '滑行', shortLabel: '滑', time: '09:35', phase: 'arrival' },
+          { id: 'pm2-2', label: '入位', shortLabel: '入', time: '09:42', phase: 'arrival' },
+          { id: 'pm2-3', label: '准备好', shortLabel: '准', time: '09:50', phase: 'departure' },
+          { id: 'pm2-4', label: '推出', shortLabel: '推', time: '10:05', phase: 'departure' },
+          { id: 'pm2-5', label: '推出开车', shortLabel: '开', time: '10:15', phase: 'departure' },
+          { id: 'pm2-6', label: '滑行', shortLabel: '滑', time: '10:35', phase: 'departure' },
         ]
       },
       { type: 'connector', startTime: '09:20', endTime: '10:20', label: '起飞', style: 'solid', color: 'gray' }
@@ -165,7 +165,6 @@ export const MOCK_FLIGHTS: Flight[] = [
     annotations: [
       {
         type: 'connector', startTime: '10:10', endTime: '11:10', label: '放行', style: 'solid', color: 'gray', markers: [
-          { id: 'pm3-1', label: '落地', time: '10:12', phase: 'arrival' },
           { id: 'pm3-2', label: '滑行', time: '10:18', phase: 'arrival' },
           { id: 'pm3-3', label: '入位', time: '10:25', phase: 'arrival' },
         ]
@@ -204,13 +203,11 @@ export const MOCK_FLIGHTS: Flight[] = [
     annotations: [
       {
         type: 'connector', startTime: '09:30', endTime: '10:30', label: '放行', style: 'solid', color: 'gray', markers: [
-          { id: 'pm4-1', label: '落地', time: '09:32', phase: 'arrival' },
           { id: 'pm4-2', label: '滑行', time: '09:38', phase: 'arrival' },
           { id: 'pm4-3', label: '入位', time: '09:45', phase: 'arrival' },
           { id: 'pm4-4', label: '准备', time: '09:52', phase: 'departure' },
           { id: 'pm4-5', label: '推出', time: '10:00', phase: 'departure' },
           { id: 'pm4-6', label: '滑行', time: '10:08', phase: 'departure' },
-          { id: 'pm4-7', label: '起飞', time: '10:15', phase: 'departure' },
         ]
       },
       { type: 'connector', startTime: '09:25', endTime: '10:25', label: '起飞', style: 'solid', color: 'gray' }
