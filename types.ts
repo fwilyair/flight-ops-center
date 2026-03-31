@@ -46,12 +46,20 @@ export interface Annotation {
 
 export type FlightType = 'REG' | 'CARGO' | 'EXTRA' | 'FERRY' | 'DIV';
 
+export interface RemarkEntry {
+  id: string;
+  content: string;
+  timestamp: string;
+  author: string;
+}
+
 export interface Flight {
   id: string;
   flightNo: string;
   codeshare?: string;
   tags?: string[]; // New field for flight tags (e.g., '冰', 'Q', '控')
-  remarks?: string; // New field for flight remarks
+  remarks?: string; // Current/Latest remark (Legacy)
+  remarksHistory?: RemarkEntry[]; // New field for flight remarks history
   stand?: string;
   gate?: string;
   // Aircraft info

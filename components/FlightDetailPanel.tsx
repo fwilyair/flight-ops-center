@@ -223,15 +223,15 @@ export const FlightDetailPanel: React.FC<FlightDetailPanelProps> = ({
                         </div>
 
                         {/* Remarks Section */}
-                        <div className="bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-slate-100 shadow-sm">
-                            <div className="flex items-center justify-between mb-2">
+                        <div className="bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-slate-100 shadow-sm transition-all duration-300">
+                            <div className="flex items-center justify-between mb-3 border-b border-slate-100/50 pb-2">
                                 <span className="text-sm font-extrabold text-slate-800 uppercase tracking-wide">
                                     航班备注
                                 </span>
                                 {!isEditingRemarks && (
                                     <button
                                         onClick={() => {
-                                            setTempRemarks(flight.remarks || '');
+                                            setTempRemarks('');
                                             setIsEditingRemarks(true);
                                         }}
                                         className="text-xs text-blue-600 hover:text-blue-700 font-bold hover:underline transition-all duration-200 hover:scale-105"
@@ -241,48 +241,102 @@ export const FlightDetailPanel: React.FC<FlightDetailPanelProps> = ({
                                 )}
                             </div>
 
+                            {/* View Mode History */}
+                            {!isEditingRemarks && (flight.remarksHistory && flight.remarksHistory.length > 0) && (
+                                <div className="space-y-3 mb-3 max-h-[200px] overflow-y-auto pr-1">
+                                    {flight.remarksHistory.map((item) => (
+                                        <div key={item.id} className="group relative pl-3 border-l-2 border-slate-200 hover:border-blue-300 transition-colors py-0.5">
+                                            <div className="flex items-center justify-between gap-2 mb-0.5">
+                                                <span className="text-[10px] font-bold text-slate-400 font-mono italic">
+                                                    {item.timestamp}
+                                                </span>
+                                                <span className="text-[10px] font-black text-blue-400 tracking-tighter uppercase px-1 leading-none rounded bg-blue-50/50 border border-blue-100/30">
+                                                    {item.author}
+                                                </span>
+                                            </div>
+                                            <p className="text-sm text-slate-700 leading-tight break-all font-medium">
+                                                {item.content}
+                                            </p>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {!isEditingRemarks && (!flight.remarksHistory || flight.remarksHistory.length === 0) && (
+                                <div
+                                    className="text-sm leading-relaxed p-2 rounded-md text-slate-400 italic hover:bg-slate-50/50 cursor-pointer mb-2"
+                                    onClick={() => {
+                                        setTempRemarks('');
+                                        setIsEditingRemarks(true);
+                                    }}
+                                >
+                                    点击编辑按钮添加航班备注历史...
+                                </div>
+                            )}
+
                             {isEditingRemarks ? (
-                                <div className="space-y-2 animate-in fade-in zoom-in-95 duration-200">
+                                <div className="space-y-3 animate-in fade-in zoom-in-95 duration-200">
+                                    {/* Quick Phrases */}
+                                    <div className="flex flex-wrap gap-2">
+                                        {[
+                                            '提升保障效率',
+                                            '本场大雨延误',
+                                            'VIP旅客到位',
+                                            '机位临时变更',
+                                            '前序延误到达'
+                                        ].map((phrase) => (
+                                            <button
+                                                key={phrase}
+                                                onClick={() => setTempRemarks(phrase)}
+                                                className="px-2 py-1 text-[10px] font-bold bg-blue-50 text-blue-600 hover:bg-blue-100 rounded border border-blue-100 transition-colors"
+                                            >
+                                                {phrase}
+                                            </button>
+                                        ))}
+                                    </div>
+
                                     <textarea
                                         value={tempRemarks}
                                         onChange={(e) => setTempRemarks(e.target.value)}
                                         className="w-full text-sm p-3 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none resize-none bg-white text-slate-700 leading-relaxed shadow-inner"
-                                        rows={3}
+                                        rows={2}
                                         autoFocus
-                                        placeholder="请输入航班备注信息..."
+                                        placeholder="请输入新备注内容..."
                                     />
                                     <div className="flex justify-end gap-2">
                                         <button
                                             onClick={() => setIsEditingRemarks(false)}
-                                            className="px-3 py-1.5 text-xs font-bold text-slate-500 hover:bg-slate-100 hover:text-slate-700 rounded-md transition-all duration-200 hover:scale-105"
+                                            className="px-3 py-1.5 text-xs font-bold text-slate-500 hover:bg-slate-100 hover:text-slate-700 rounded-md transition-all duration-200"
                                         >
                                             取消
                                         </button>
                                         <button
                                             onClick={() => {
-                                                onFlightUpdate?.({ ...flight, remarks: tempRemarks });
+                                                if (tempRemarks.trim()) {
+                                                    const now = new Date();
+                                                    const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+                                                    const newEntry = {
+                                                        id: Math.random().toString(36).substr(2, 9),
+                                                        content: tempRemarks,
+                                                        timestamp: timeStr,
+                                                        author: 'USER'
+                                                    };
+                                                    const updatedHistory = [newEntry, ...(flight.remarksHistory || [])];
+                                                    onFlightUpdate?.({
+                                                        ...flight,
+                                                        remarks: tempRemarks,
+                                                        remarksHistory: updatedHistory
+                                                    });
+                                                }
                                                 setIsEditingRemarks(false);
                                             }}
-                                            className="px-4 py-1.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 rounded-md shadow-sm transition-all duration-200 flex items-center gap-1 hover:scale-105 hover:shadow-md"
+                                            className="px-4 py-1.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 rounded-md shadow-sm transition-all duration-200 hover:scale-105"
                                         >
-                                            <span className="material-symbols-outlined text-[14px]">check</span>
-                                            保存
+                                            发送
                                         </button>
                                     </div>
                                 </div>
-                            ) : (
-                                <div
-                                    className={`text-sm leading-relaxed p-1 rounded-md transition-colors ${flight.remarks ? 'text-slate-700' : 'text-slate-400 italic'
-                                        } hover:bg-slate-50/50 cursor-pointer`}
-                                    onClick={() => {
-                                        setTempRemarks(flight.remarks || '');
-                                        setIsEditingRemarks(true);
-                                    }}
-                                    title="点击编辑备注"
-                                >
-                                    {flight.remarks || '点击编辑按钮添加航班备注'}
-                                </div>
-                            )}
+                            ) : null}
                         </div>
 
 

@@ -7,7 +7,7 @@ export const MOCK_FLIGHTS: Flight[] = [
     id: '1',
     flightNo: 'CA1538 / CA1539',
     codeshare: 'CA1539',
-    remarks: '前序航班延误，预计晚点30分钟。VIP旅客3人。',
+    remarks: '',
     stand: '203',
     registration: 'B-6789',
     aircraftType: 'A320',
@@ -96,7 +96,7 @@ export const MOCK_FLIGHTS: Flight[] = [
   {
     id: '2',
     flightNo: 'MU5206',
-    remarks: '过站时间紧张，请关注保障进度。',
+    remarks: '',
     codeshare: 'MU5207',
     // Dual status for Turnaround
     arrInfo: {
@@ -274,7 +274,7 @@ export const MOCK_FLIGHTS: Flight[] = [
   {
     id: '7',
     flightNo: '3U8888',
-    remarks: '重要货物，优先保障。',
+    remarks: '',
     stand: '205',
     codeshare: '3U8663',
     arrInfo: {
