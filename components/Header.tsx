@@ -176,7 +176,7 @@ export const Header: React.FC<{
         {/* Logo Container (Positioned on top of the liquid) */}
         <div className="absolute inset-y-0 left-0 w-full flex items-center pl-8">
           {/* Added drop-shadow for better contrast against light liquid */}
-          <img src="/logo.png" alt="Logo" className="h-8 w-auto object-contain brightness-0 invert opacity-95 relative z-10 drop-shadow-sm" />
+          <img src="./logo.png" alt="Logo" className="h-8 w-auto object-contain brightness-0 invert opacity-95 relative z-10 drop-shadow-sm" />
         </div>
       </div>
 
