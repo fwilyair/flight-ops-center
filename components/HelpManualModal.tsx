@@ -143,15 +143,15 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
                 <div className="p-6 rounded-2xl bg-slate-50 dark:bg-gray-800/80 border border-slate-200 dark:border-gray-700 space-y-5 shadow-sm">
                   <div className="flex items-center gap-5">
                     <div className="bg-red-600 text-white text-sm font-bold px-3 py-1.5 rounded-lg font-mono shadow-sm shrink-0">13:57</div>
-                    <span className="text-sm font-semibold text-gray-800 dark:text-gray-200 leading-relaxed">当前时间红框游标：指示系统当前实时时间，全屏下方贯穿红色闪烁虚线，页面载入时自动居中对齐。</span>
+                    <span className="text-sm font-semibold text-gray-800 dark:text-gray-200 leading-relaxed">实时显示系统当前时间，贯穿红色闪烁虚线，加载自动居中。</span>
                   </div>
                   <div className="flex items-center gap-5">
                     <div className="bg-emerald-600 text-white text-sm font-bold px-3 py-1.5 rounded-lg font-mono shadow-sm shrink-0">11:00</div>
-                    <span className="text-sm font-semibold text-gray-800 dark:text-gray-200 leading-relaxed">计划时间引导气泡：鼠标悬浮在事件胶囊绿点上时，顶部时间轴同步高亮计划时间。</span>
+                    <span className="text-sm font-semibold text-gray-800 dark:text-gray-200 leading-relaxed">悬浮事件绿点时，顶部时间轴同步高亮计划时间。</span>
                   </div>
                   <div className="flex items-center gap-5">
                     <div className="bg-purple-600 text-white text-sm font-bold px-3 py-1.5 rounded-lg font-mono shadow-sm shrink-0">11:10</div>
-                    <span className="text-sm font-semibold text-gray-800 dark:text-gray-200 leading-relaxed">推算时间引导气泡：鼠标悬浮在推算刻度紫点上时，顶部时间轴同步高亮推算目标时间。</span>
+                    <span className="text-sm font-semibold text-gray-800 dark:text-gray-200 leading-relaxed">悬浮推算紫点时，顶部时间轴同步高亮推算目标时间。</span>
                   </div>
                 </div>
               </section>
