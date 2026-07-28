@@ -1,94 +1,86 @@
-# ✈️ Flight Operations Center (SAGS) - 航班运行控制中心
+<div align="center">
+  <img src="./public/logo.png" height="48" alt="Flight Operations Center logo" />
 
-![Thumbnail](./public/thumbnail.png)
+  # Flight Operations Center
 
-一个高保真、生产级别的航班运行管控制定板前端项目，基于 React 和 Vite 构建。项目专注于直观的数据可视化和实时的甘特图时间轴追踪，旨在通过精美的浅色主题 UI 和高级交互体验，全面提升航班调度的效率与体验。
+  **航班运行控制中心**
 
-## ✨ 核心特性 / Features
+  把航班保障节点、运行偏差与关键基线，放进一条可以缩放、拖拽与穿透查看的时间轴。
 
-- **📊 动态甘特图时间轴 (Dynamic Gantt Timeline)**:
-  - 支持分钟级到小时级的平滑缩放与时间轴拖拽。
-  - 动态渲染航班保障节点（如靠桥、卸载、上客、关舱门等）的时间胶囊。
-  - 胶囊支持交互点击，弹出详细信息的模态框 (`CapsuleDetailModal`)。
-  
-- **🪪 增强型航班信息卡片 (Detailed Flight Cards)**:
-  - 综合展示航班号、机号、起降机位、航班状态及延误告警。
-  - **智能标签系统 (Smart Tag System)**: 使用动态彩色徽章标记航班属性（如"V", "冰", "机"等），超出空间时优雅地折叠为带有 `Hover Tooltip` 的省略号圆点。
-  
-- **🟢 电子进程单实时追踪 (Real-time Process Markers)**:
-  - **双基线管理**: 在时间轴上同时渲染“放行”与“起飞”两条关键时间基线。
-  - **菱形动态节点**: 基线上通过菱形节点追踪实时状态（进港节点为绿色，出港节点为蓝色）。
-  - **防重叠算法 (Anti-overlap)**: 当节点过于密集时，自动收缩为 `20px` 的圆点，悬停时使用浮窗悬浮显示时间与详细信息节点标签，解决视觉遮挡问题。
+  [**在线体验**](https://fwilyair.github.io/flight-ops-center/) · [查看源码](https://github.com/fwilyair/flight-ops-center)
+</div>
 
-- **⏱️ 智能基线偏差计算刻度 (Calculated Scale Points)**:
-  - 自动对比航班的“放行”与“起飞”时间差，当偏差在 `0~15` 分钟内时，在时间轴上生成预判的“计算刻度点”（淡紫色紫点）。
-  - 通过 L 型虚线连接实际事件的时间点与计算刻度点，为签派员提供直观的时间富裕度/紧迫度视觉参考。
-  - 针对胶囊内部遮挡情况，计算刻度点会自动在 Z 轴与 Y 轴进行防遮挡提拔显示。
+<div align="center">
+  <img src="./public/posters/flight-ops-zine-poster.png" width="560" alt="Flight Operations Center — Every Minute Has a Heading" />
+</div>
 
-- **🎨 现代浅色主题美学 (Premium Light Theme UI)**:
-  - 采用 Tailwind CSS 构建，融入了玻璃拟物化 (Glassmorphism) 组件设计。
-  - 考究的字体排版体系（支持 `font-mono` 表盘数字及紧凑的字距）。
-  - 平滑的微动画过渡 (Micro-animations) 与极致细腻的阴影反馈，告别传统 B 端系统的沉闷感。
+## 关于项目
 
-## 🚀 技术栈 / Tech Stack
+Flight Operations Center 是一个面向航班运行场景的交互式可视化前端原型。它使用甘特时间轴组织航班保障事件，在同一视图中呈现计划时间、实际时间、关键基线、偏差预判和运行告警，帮助使用者更快理解一架航班当前发生了什么、接下来将发生什么。
 
-- **核心框架**: React 18, Vite
-- **样式引擎**: Tailwind CSS
-- **图标组件**: Lucide React
-- **开发语言**: TypeScript
-- **状态管理 & 交互**: React Hooks, CSS 绝对定位与基于时间的像素渲染算法 (Time-to-Pixels)
+当前版本使用本地模拟数据，重点展示信息组织方式、时间轴交互和运行协同体验。
 
-## 📦 快速开始 / Getting Started
+## 核心亮点
 
-### 环境依赖
+| 模块 | 能力 |
+| --- | --- |
+| **动态甘特时间轴** | 支持时间比例切换、横向拖拽与保障节点胶囊展示，在分钟级时间线上观察航班进程。 |
+| **双基线与进程节点** | 同时呈现放行、起飞基线与菱形节点，并处理密集节点的错位和悬浮说明。 |
+| **智能计算刻度** | 根据运行偏差生成计算点，以 L 型虚线连接原始时间与预判时间，直观呈现时间余量。 |
+| **航班详情与协同** | 支持航班详情抽屉、保障时间表、备注历史、快捷短语、监控入口和内置使用手册。 |
 
-- Node.js (v16.0 或更高版本)
-- npm / yarn / pnpm
+## 可以怎么操作
 
-### 安装与运行
+- 按航班号搜索并按日期筛选航班
+- 在 5 分钟、10 分钟、30 分钟和 1 小时时间比例间切换
+- 点击时间胶囊查看节点详情
+- 点击航班卡片打开详情抽屉并维护备注
+- 悬停查看基线节点、计算点和运行偏差信息
+- 通过顶部入口打开图例与使用手册
 
-1. 克隆仓库:
+## 技术栈
 
-   ```bash
-   git clone <your-repo-url>
-   ```
+- React 19
+- TypeScript
+- Vite 6
+- Tailwind CSS 浏览器运行时
+- React Hooks、CSS 动画与基于时间的像素布局
 
-2. 进入项目目录:
+## 本地运行
 
-   ```bash
-   cd flight-ops-center
-   ```
+```bash
+git clone https://github.com/fwilyair/flight-ops-center.git
+cd flight-ops-center
+npm install
+npm run dev
+```
 
-3. 安装依赖:
+生产构建：
 
-   ```bash
-   npm install
-   ```
+```bash
+npm run build
+```
 
-4. 启动开发服务器:
+## 项目结构
 
-   ```bash
-   npm run dev
-   ```
+```text
+.
+├── App.tsx
+├── components/
+│   ├── GanttRow.tsx
+│   ├── Header.tsx
+│   ├── FlightDetailPanel.tsx
+│   ├── CapsuleDetailModal.tsx
+│   └── HelpManualModal.tsx
+├── data.ts
+├── types.ts
+├── index.tsx
+└── public/
+    ├── logo.png
+    └── posters/
+        └── flight-ops-zine-poster.png
+```
 
-5. 在浏览器中访问 `http://localhost:3000` (或控制台提示的具体端口) 即可预览。
+## 项目状态
 
-## 📐 核心架构 / Architecture
-
-主要核心组件位于 `/components/` 目录下:
-
-- **`GanttRow.tsx`**: 核心逻辑与渲染引擎。负责单行航班视图、事件胶囊 (`EventPill`)、计算刻度 (`CalcPointWithTooltip`)、以及动态排布的防重叠轨道算法处理。
-- **`AnnotationLine.tsx`**: 负责渲染放行、起飞基线以及悬停自适应的菱形电子进程节点。
-- **`FlightDetailPanel.tsx`**: 左侧信息展板，包含精细计算宽度的动态自适应标签组和航班基础数据。
-- **`Header.tsx`**: 系统顶部导航和控制元件，包含时间刻度缩放和图例状态控制器。
-- **`CapsuleDetailModal.tsx`**: 点击事件胶囊后弹出的高保真卡片信息弹窗。
-
-静态数据模型与 Mock 数据定义在 `data.ts` 与 `types.ts`。
-
-## 🤝 参与贡献 / Contributing
-
-欢迎提交 Issue 和 Pull Request，我们致力于打造民航业内最优雅、最丝滑的前端交互体验。
-
-## 📄 开源协议 / License
-
-本项目基于 [MIT License](LICENSE) 协议开源。
+这是一个前端交互原型，数据来自仓库内的模拟数据，尚未连接真实航班运行系统或生产接口。
