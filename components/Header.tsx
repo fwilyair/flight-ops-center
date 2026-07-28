@@ -131,7 +131,8 @@ export const Header: React.FC<{
   onDateChange: (date: string) => void;
   timeScale: 5 | 10 | 30 | 60;
   onTimeScaleChange: (scale: 5 | 10 | 30 | 60) => void;
-}> = ({ searchQuery, onSearchChange, selectedDate, onDateChange, timeScale, onTimeScaleChange }) => {
+  onOpenHelp?: () => void;
+}> = ({ searchQuery, onSearchChange, selectedDate, onDateChange, timeScale, onTimeScaleChange, onOpenHelp }) => {
   return (
     <header className="flex-none flex items-center justify-end whitespace-nowrap border-b px-6 py-2.5 z-50 relative overflow-hidden" style={{ background: 'var(--bg-header)', borderColor: 'var(--border-color)', boxShadow: 'var(--shadow-sm)' }}>
       {/* Inject custom animations for liquid blobs */}
@@ -179,7 +180,7 @@ export const Header: React.FC<{
         </div>
       </div>
 
-      {/* 右侧：图例 + 搜索 + 日期 */}
+      {/* 右侧：图例 + 搜索 + 日期 + 使用手册 */}
       <div className="flex items-center gap-4 relative z-10">
         {/* 图例容器 */}
         <div className="flex gap-3 mr-4 pr-6" style={{ borderRight: '1px solid var(--border-color)' }}>
@@ -218,6 +219,18 @@ export const Header: React.FC<{
 
         {/* 时间轴比例尺选择器 */}
         <TimeScaleSelector value={timeScale} onChange={onTimeScaleChange} />
+
+        {/* 使用手册入口按钮 */}
+        <button
+          onClick={onOpenHelp}
+          className="flex items-center gap-1.5 px-3 h-9 rounded-lg bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 text-xs font-bold transition-all duration-200 hover:scale-105 hover:shadow-sm group cursor-pointer"
+          title="打开使用手册与图例说明"
+        >
+          <span className="material-symbols-outlined text-[18px] text-blue-600 dark:text-blue-400 group-hover:rotate-12 transition-transform">
+            help
+          </span>
+          <span>使用手册</span>
+        </button>
       </div>
     </header>
   );

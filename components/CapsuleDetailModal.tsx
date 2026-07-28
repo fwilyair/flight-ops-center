@@ -262,7 +262,7 @@ export const CapsuleDetailModal: React.FC<CapsuleDetailModalProps> = ({
                                         <div key={lc.id} className={`${alignment} flex flex-col items-center gap-1 my-3`}>
                                             <div className="text-xs text-gray-500 font-bold font-mono mb-1">{timeStr}</div>
                                             <div className={`${bubbleStyle} px-6 py-2 rounded-full text-sm font-medium shadow-sm flex items-center gap-2`}>
-                                                <span className="font-bold">{lc.type}</span>
+                                                <span className="font-bold">{lc.type === '催办' ? '穿透管控' : lc.type}</span>
                                                 <span className="w-px h-3 bg-current opacity-30"></span>
                                                 <span>{lc.description}</span>
                                             </div>
@@ -276,7 +276,7 @@ export const CapsuleDetailModal: React.FC<CapsuleDetailModalProps> = ({
                                         <div key={lc.id} className={`${alignment} ${containerBase} flex-row-reverse`}>
                                             {/* Integrated Bubble: [Label | Content] */}
                                             <div className={`${bubbleStyle} px-6 py-2 rounded-3xl text-sm leading-relaxed shadow-sm max-w-[90%] flex items-start gap-3`}>
-                                                <span className="font-bold whitespace-nowrap">{lc.type}</span>
+                                                <span className="font-bold whitespace-nowrap">{lc.type === '管控' ? '多级管控' : lc.type}</span>
                                                 <span className="w-px h-4 bg-current opacity-30 mt-1 flex-shrink-0"></span>
                                                 <span>{lc.description}</span>
                                             </div>
@@ -292,7 +292,9 @@ export const CapsuleDetailModal: React.FC<CapsuleDetailModalProps> = ({
                                     <div key={lc.id} className={`${alignment} ${containerBase}`}>
                                         {/* Integrated Bubble: [Label | Content] */}
                                         <div className={`${bubbleStyle} px-6 py-2 rounded-3xl text-sm leading-relaxed shadow-sm max-w-[90%] flex items-start gap-3`}>
-                                            <span className="font-bold whitespace-nowrap">{lc.type}</span>
+                                            <span className="font-bold whitespace-nowrap">
+                                                {lc.type === '管控' ? '多级管控' : lc.type === '催办' ? '穿透管控' : lc.type}
+                                            </span>
                                             <span className="w-px h-4 bg-current opacity-30 mt-1 flex-shrink-0"></span>
                                             <span>{lc.description}</span>
                                         </div>
@@ -349,7 +351,7 @@ export const CapsuleDetailModal: React.FC<CapsuleDetailModalProps> = ({
                                     {isSubmitting ? (
                                         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mx-2"></div>
                                     ) : (
-                                        "发送管控"
+                                        "多级管控"
                                     )}
                                 </button>
                                 <button
@@ -360,7 +362,7 @@ export const CapsuleDetailModal: React.FC<CapsuleDetailModalProps> = ({
                                     {isSubmitting ? (
                                         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mx-2"></div>
                                     ) : (
-                                        "发送催办"
+                                        "穿透管控"
                                     )}
                                 </button>
                             </div>

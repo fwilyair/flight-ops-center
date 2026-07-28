@@ -1,8 +1,9 @@
-import React, { useRef, useEffect, useState, useMemo } from 'react';
+import React, { useRef, useEffect, useState, useMemo, useCallback } from 'react';
 import { Header } from './components/Header';
-import { GanttRow } from './components/GanttRow';
+import { GanttRow, EventHoverInfo } from './components/GanttRow';
 import { FlightDetailPanel } from './components/FlightDetailPanel';
 import { CapsuleDetailModal } from './components/CapsuleDetailModal';
+import { HelpManualModal } from './components/HelpManualModal';
 import { MOCK_FLIGHTS } from './data';
 import { timeToPixels } from './utils';
 import { START_TIME_HOUR, Flight, TimelineEvent } from './types';
@@ -15,6 +16,9 @@ const App: React.FC = () => {
     return `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
   });
 
+  // 使用手册弹窗状态
+  const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
+
   // 航班列表状态（初始化为 Mock 数据）
   const [flights, setFlights] = useState<Flight[]>(MOCK_FLIGHTS);
 
@@ -26,6 +30,13 @@ const App: React.FC = () => {
 
   // 时间轴比例尺状态 (分钟数)
   const [timeScale, setTimeScale] = useState<5 | 10 | 30 | 60>(10);
+
+  // 悬浮在事件胶囊上时的虚线与时间标签信息
+  const [hoveredEventInfo, setHoveredEventInfo] = useState<EventHoverInfo | null>(null);
+
+  const handleEventHover = useCallback((info: EventHoverInfo | null) => {
+    setHoveredEventInfo(info);
+  }, []);
 
   // 航班详情面板状态
   const [selectedFlight, setSelectedFlight] = useState<Flight | null>(null);
@@ -174,6 +185,7 @@ const App: React.FC = () => {
         onDateChange={setSelectedDate}
         timeScale={timeScale}
         onTimeScaleChange={setTimeScale}
+        onOpenHelp={() => setIsHelpModalOpen(true)}
       />
 
       <main className="flex-1 relative overflow-hidden flex flex-col">
@@ -206,6 +218,41 @@ const App: React.FC = () => {
                     );
                   })}
                 </div>
+
+                {/* Hover Time Indicator Badges in Timeline Header */}
+                {hoveredEventInfo && (
+                  <>
+                    {/* Green Dot Scheduled Time Badge */}
+                    <div
+                      className="absolute z-50 flex flex-col items-center pointer-events-none animate-in fade-in zoom-in-95 duration-150"
+                      style={{
+                        left: `${hoveredEventInfo.greenDotPx}px`,
+                        top: '50%',
+                        transform: 'translate(-50%, -50%)'
+                      }}
+                    >
+                      <div className="bg-emerald-600 text-white text-sm font-bold px-1.5 h-[22px] flex items-center justify-center rounded shadow-sm tabular-nums font-mono border border-emerald-500 whitespace-nowrap leading-none pb-[1px]">
+                        {hoveredEventInfo.timeScheduled}
+                      </div>
+                    </div>
+
+                    {/* Purple Dot Calc Point Time Badge */}
+                    {hoveredEventInfo.calcPointTime && hoveredEventInfo.purpleDotPx !== undefined && (
+                      <div
+                        className="absolute z-50 flex flex-col items-center pointer-events-none animate-in fade-in zoom-in-95 duration-150"
+                        style={{
+                          left: `${hoveredEventInfo.purpleDotPx}px`,
+                          top: '50%',
+                          transform: 'translate(-50%, -50%)'
+                        }}
+                      >
+                        <div className="bg-purple-600 text-white text-sm font-bold px-1.5 h-[22px] flex items-center justify-center rounded shadow-sm tabular-nums font-mono border border-purple-500 whitespace-nowrap leading-none pb-[1px]">
+                          {hoveredEventInfo.calcPointTime}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
 
                 {/* Current Time Indicator in Timeline Header */}
                 <div
@@ -251,6 +298,39 @@ const App: React.FC = () => {
                 }}
               ></div>
 
+              {/* Hover Guide Lines (Green & Purple dashed vertical lines extending to timeline header) */}
+              {hoveredEventInfo && (
+                <>
+                  {/* Green Dot Vertical Line */}
+                  <div
+                    className="absolute pointer-events-none z-30 animate-in fade-in duration-150"
+                    style={{
+                      left: `${260 + hoveredEventInfo.greenDotPx}px`,
+                      top: 0,
+                      height: `${hoveredEventInfo.greenDotY}px`,
+                      width: '2px',
+                      borderLeft: '2px dashed #10B981',
+                      transform: 'translateX(-50%)',
+                    }}
+                  />
+
+                  {/* Purple Dot Vertical Line */}
+                  {hoveredEventInfo.purpleDotPx !== undefined && hoveredEventInfo.purpleDotY !== undefined && (
+                    <div
+                      className="absolute pointer-events-none z-30 animate-in fade-in duration-150"
+                      style={{
+                        left: `${260 + hoveredEventInfo.purpleDotPx}px`,
+                        top: 0,
+                        height: `${hoveredEventInfo.purpleDotY}px`,
+                        width: '2px',
+                        borderLeft: '2px dashed #8B5CF6',
+                        transform: 'translateX(-50%)',
+                      }}
+                    />
+                  )}
+                </>
+              )}
+
               {/* Current Time Line (Vertical Red Line) - Follows scroll */}
               <div
                 className="current-time-line absolute top-0 bottom-0 w-[2px] bg-red-500 z-30 pointer-events-none shadow-[0_0_10px_rgba(239,68,68,0.6)]"
@@ -267,6 +347,7 @@ const App: React.FC = () => {
                     onClick={() => handleFlightClick(flight)}
                     onEventClick={(event) => handleEventClick(event, flight)}
                     onVideoClick={handleVideoClick}
+                    onEventHover={handleEventHover}
                   />
                 ))}
 
@@ -282,8 +363,12 @@ const App: React.FC = () => {
 
       {/* Mobile FAB */}
       <div className="fixed bottom-6 right-6 z-50 lg:hidden">
-        <button className="text-white p-3 rounded-full shadow-lg transition-colors flex items-center justify-center" style={{ background: 'var(--accent-primary)' }}>
-          <span className="material-symbols-outlined">info</span>
+        <button
+          onClick={() => setIsHelpModalOpen(true)}
+          className="text-white p-3 rounded-full shadow-lg transition-colors flex items-center justify-center"
+          style={{ background: 'var(--accent-primary)' }}
+        >
+          <span className="material-symbols-outlined">help</span>
         </button>
       </div>
       {/* Flight Detail Panel */}
@@ -346,6 +431,11 @@ const App: React.FC = () => {
           </div>
         </div>
       )}
+      {/* Help Manual Modal */}
+      <HelpManualModal
+        isOpen={isHelpModalOpen}
+        onClose={() => setIsHelpModalOpen(false)}
+      />
     </div>
   );
 };

@@ -2,13 +2,24 @@ import React from 'react';
 import { Flight, TimelineEvent, Annotation, FlightType, ProcessMarker } from '../types';
 import { timeToPixels, getColorForEventType } from '../utils';
 
-interface GanttRowProps {
+export interface EventHoverInfo {
+    eventId: string;
+    timeScheduled: string;
+    calcPointTime?: string;
+    greenDotPx: number;
+    purpleDotPx?: number;
+    greenDotY: number;
+    purpleDotY?: number;
+}
+
+export interface GanttRowProps {
     flight: Flight;
     timeScale: number;
     currentTime?: string;
     onClick?: () => void;
     onEventClick?: (event: TimelineEvent) => void;
     onVideoClick?: () => void;
+    onEventHover?: (info: EventHoverInfo | null) => void;
 }
 
 const tagColorMap: Record<string, string> = {
@@ -69,7 +80,8 @@ const CalcPointWithTooltip: React.FC<{
     lineStartX: number;
     lineWidth: number;
     absoluteTop?: number;
-}> = ({ calcRelPx, calcPointTime, calcColor, absoluteTop }) => {
+    onHoverChange?: (isHovered: boolean) => void;
+}> = ({ calcRelPx, calcPointTime, calcColor, absoluteTop, onHoverChange }) => {
     const [isCalcDotHovered, setIsCalcDotHovered] = React.useState(false);
 
     return (
@@ -81,10 +93,19 @@ const CalcPointWithTooltip: React.FC<{
                     left: `${calcRelPx}px`,
                     top: absoluteTop !== undefined ? `${absoluteTop}px` : `calc(50% + 0px)`,
                     transform: 'translate(-50%, -50%)',
-                    zIndex: 50,
+                    zIndex: 30,
                 }}
-                onMouseEnter={() => setIsCalcDotHovered(true)}
-                onMouseLeave={() => setIsCalcDotHovered(false)}
+                onMouseEnter={() => {
+                    setIsCalcDotHovered(true);
+                    onHoverChange?.(true);
+                }}
+                onMouseLeave={(e) => {
+                    setIsCalcDotHovered(false);
+                    if (e.relatedTarget && e.currentTarget.contains(e.relatedTarget as Node)) {
+                        return;
+                    }
+                    onHoverChange?.(false);
+                }}
             >
                 <div
                     className="size-3.5 rounded-full shadow-md animate-[calcBreath_2s_ease-in-out_infinite]"
@@ -109,7 +130,17 @@ const CalcPointWithTooltip: React.FC<{
     );
 };
 
-const EventPill: React.FC<{ event: TimelineEvent; track: number; timeScale: number; currentTime?: string; onEventClick?: (event: TimelineEvent) => void; trackSpacing?: number }> = ({ event, track, timeScale, currentTime, onEventClick, trackSpacing = 30 }) => {
+const EventPill: React.FC<{
+    event: TimelineEvent;
+    track: number;
+    timeScale: number;
+    currentTime?: string;
+    onEventClick?: (event: TimelineEvent) => void;
+    onContextMenu?: (e: React.MouseEvent, event: TimelineEvent) => void;
+    isDimmed?: boolean;
+    trackSpacing?: number;
+    onHoverChange?: (isHovered: boolean) => void;
+}> = ({ event, track, timeScale, currentTime, onEventClick, onContextMenu, isDimmed, trackSpacing = 30, onHoverChange }) => {
     const leftPos = timeToPixels(event.timeScheduled || event.timeActual || '', timeScale);
     const colors = getColorForEventType(event.type, event.status);
     const isDelayed = event.status === 'delayed';
@@ -135,11 +166,21 @@ const EventPill: React.FC<{ event: TimelineEvent; track: number; timeScale: numb
 
     return (
         <div
-            className={`absolute flex items-center z-10 hover:z-20 transition-all duration-200 cursor-pointer select-none group hover:scale-105 overflow-visible`}
+            className={`absolute flex items-center z-10 hover:z-20 cursor-pointer select-none group overflow-visible ${isDimmed ? 'opacity-40 grayscale-[80%]' : ''}`}
             style={{ left: `${leftPos}px`, top: `${topPos}px` }}
             onClick={(e) => {
                 e.stopPropagation();
                 onEventClick?.(event);
+            }}
+            onContextMenu={(e) => {
+                onContextMenu?.(e, event);
+            }}
+            onMouseEnter={() => onHoverChange?.(true)}
+            onMouseLeave={(e) => {
+                if (e.relatedTarget && e.currentTarget.contains(e.relatedTarget as Node)) {
+                    return;
+                }
+                onHoverChange?.(false);
             }}
         >
             {/* 对齐时间刻度的圆点 (中心对齐 leftPos) - 尺寸增大 - 统一绿色 */}
@@ -415,9 +456,36 @@ const AnnotationLine: React.FC<{ annotation: Annotation; index: number; timeScal
     // 统一的基线样式 - 所有基线使用完全相同的颜色
     const lineColor = '#9CA3AF'; // Tailwind gray-400
 
+    // 参考示例效果：胶囊形 (rounded-full) 显眼底色
+    // 放行 (14:01 示例): 深青绿/Teal (#007B88)
+    // 起飞 (14:31 示例): 深海军蓝/Navy (#1E4267)
+    const isRelease = annotation.label?.includes('放行') || index === 0;
+    const isTakeoff = !isRelease && (annotation.label?.includes('起飞') || index === 1);
+
+    const badgeStyle: React.CSSProperties = isRelease
+        ? {
+            color: '#FFFFFF',
+            backgroundColor: '#007B88', // 深青/Teal
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.15)',
+        }
+        : isTakeoff
+        ? {
+            color: '#FFFFFF',
+            backgroundColor: '#1E4267', // 深蓝/Navy
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.15)',
+        }
+        : {
+            color: '#FFFFFF',
+            backgroundColor: '#374151',
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.15)',
+        };
+
+    // 保持时间（数字）与文字标签字体、字号、高度、Padding、基线对齐完全一致
+    const badgeClassName = "text-sm font-bold tabular-nums px-3 py-1 rounded-full leading-none shadow-sm select-none flex items-center justify-center";
+
     return (
         <div
-            className="absolute left-0 w-full flex items-center pointer-events-none"
+            className="absolute left-0 w-full flex items-center pointer-events-none z-20"
             style={{ bottom: `${bottomOffset}px` }}
         >
             {/* Left Line Segment */}
@@ -437,16 +505,12 @@ const AnnotationLine: React.FC<{ annotation: Annotation; index: number; timeScal
             {/* The Label (Centered) with background */}
             {annotation.label && (
                 <div
-                    className="absolute -translate-x-1/2 flex items-center justify-center z-10"
+                    className="absolute -translate-x-1/2 flex items-center justify-center z-20"
                     style={{ left: `${centerPx}px` }}
                 >
                     <span
-                        className="text-sm font-bold px-2 py-0.5 rounded-md leading-none shadow-sm"
-                        style={{
-                            color: '#4B5563', // gray-600
-                            backgroundColor: '#F3F4F6', // gray-100
-                            border: '1px solid #E5E7EB' // gray-200
-                        }}
+                        className={badgeClassName}
+                        style={badgeStyle}
                     >
                         {annotation.label}
                     </span>
@@ -484,14 +548,10 @@ const AnnotationLine: React.FC<{ annotation: Annotation; index: number; timeScal
             )}
 
             {/* The Time (At Tail) - vertically centered with the line */}
-            <div className="absolute" style={{ left: `${extendedEndPx + 6}px`, transform: 'translateY(-50%)', top: '0' }}>
+            <div className="absolute z-20" style={{ left: `${extendedEndPx + 2}px`, transform: 'translateY(-50%)', top: '0' }}>
                 <span
-                    className="text-sm font-mono font-bold leading-none tabular-nums px-2 py-0.5 rounded-md shadow-sm"
-                    style={{
-                        color: '#4B5563', // gray-600
-                        backgroundColor: '#F3F4F6', // gray-100
-                        border: '1px solid #E5E7EB' // gray-200
-                    }}
+                    className={badgeClassName}
+                    style={badgeStyle}
                 >
                     {annotation.endTime}
                 </span>
@@ -565,23 +625,105 @@ const FusedInfoBadge = ({ label, value, type = 'ARR', status }: { label: string;
     );
 };
 
-export const GanttRow: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime, onClick, onEventClick, onVideoClick }) => {
-    const isDelay = flight.arrInfo?.status === '延误' || flight.depInfo?.status === '延误';
+const ContextMenu: React.FC<{
+    x: number;
+    y: number;
+    onClose: () => void;
+    isDimmed: boolean;
+    onToggleDim: () => void;
+}> = ({ x, y, onClose, isDimmed, onToggleDim }) => {
+    React.useEffect(() => {
+        const handleClick = () => onClose();
+        window.addEventListener('click', handleClick);
+        return () => window.removeEventListener('click', handleClick);
+    }, [onClose]);
+
+    return (
+        <div
+            className="fixed z-[100] bg-white border border-gray-200 rounded-lg shadow-xl py-1 min-w-[120px] animate-in fade-in zoom-in-95 duration-100"
+            style={{ left: `${x}px`, top: `${y}px` }}
+            onClick={(e) => e.stopPropagation()}
+        >
+            <button
+                className="w-full text-left px-4 py-2 text-sm hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center gap-2"
+                onClick={() => {
+                    onToggleDim();
+                    onClose();
+                }}
+            >
+                <span className="material-symbols-outlined text-lg">
+                    {isDimmed ? 'settings_backup_restore' : 'visibility_off'}
+                </span>
+                {isDimmed ? '恢复' : '可控/可消除'}
+            </button>
+        </div>
+    );
+};
+
+export const GanttRow: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime, onClick, onEventClick, onVideoClick, onEventHover }) => {
+    const [dimmedEventIds, setDimmedEventIds] = React.useState<Set<string>>(new Set());
+    const [contextMenu, setContextMenu] = React.useState<{ x: number, y: number, eventId: string } | null>(null);
+    const [hoveredEventId, setHoveredEventId] = React.useState<string | null>(null);
+    const hoverTimerRef = React.useRef<NodeJS.Timeout | null>(null);
+    const rowRef = React.useRef<HTMLDivElement>(null);
+
+    const handleHoverChange = React.useCallback((eventId: string, isHovered: boolean) => {
+        if (hoverTimerRef.current) {
+            clearTimeout(hoverTimerRef.current);
+            hoverTimerRef.current = null;
+        }
+
+        if (isHovered) {
+            setHoveredEventId(eventId);
+        } else {
+            hoverTimerRef.current = setTimeout(() => {
+                setHoveredEventId(null);
+            }, 250);
+        }
+    }, []);
+
+    React.useEffect(() => {
+        return () => {
+            if (hoverTimerRef.current) {
+                clearTimeout(hoverTimerRef.current);
+            }
+        };
+    }, []);
+
+    const toggleDimmed = (id: string) => {
+        setDimmedEventIds(prev => {
+            const next = new Set(prev);
+            if (next.has(id)) next.delete(id);
+            else next.add(id);
+            return next;
+        });
+    };
+
+    const handleContextMenu = (e: React.MouseEvent, event: TimelineEvent) => {
+        e.preventDefault();
+        setContextMenu({
+            x: e.clientX,
+            y: e.clientY,
+            eventId: event.id
+        });
+    };
+
+    const isDelay = flight.tags?.includes('D') || flight.arrInfo?.status === '延误' || flight.depInfo?.status === '延误';
 
     // 计算事件的轨道分配
-    const eventTracks = calculateEventTracks(flight.events, timeScale);
+    const eventTracks = React.useMemo(() => calculateEventTracks(flight.events, timeScale), [flight.events, timeScale]);
     const maxTrack = Math.max(0, ...Array.from(eventTracks.values()));
     const trackCount = maxTrack + 1;
 
     // 判断是否有计算刻度点（需要更大的轨道间距来容纳紫色圆点）
-    const releaseAnno = flight.annotations?.find(a => a.label === '放行');
-    const takeoffAnno = flight.annotations?.find(a => a.label === '起飞');
+    const releaseAnno = React.useMemo(() => flight.annotations?.find(a => a.label === '放行'), [flight.annotations]);
+    const takeoffAnno = React.useMemo(() => flight.annotations?.find(a => a.label === '起飞'), [flight.annotations]);
     let hasCalcPoints = false;
     if (releaseAnno?.endTime && takeoffAnno?.endTime) {
         const [rH, rM] = releaseAnno.endTime.split(':').map(Number);
         const [tH, tM] = takeoffAnno.endTime.split(':').map(Number);
         const diff = (rH * 60 + rM) - (tH * 60 + tM);
-        hasCalcPoints = diff >= 0 && diff <= 15;
+        hasCalcPoints = diff > 15;
     }
     const trackSpacing = hasCalcPoints ? 48 : 30;
 
@@ -594,8 +736,59 @@ export const GanttRow: React.FC<GanttRowProps> = ({ flight, timeScale, currentTi
     const topPaddingRow = hasCalcPoints ? 22 : 4;
     const rowHeight = Math.max(minHeight, topPaddingRow + (trackCount * trackSpacing) + (annotationCount * 34) + 10);
 
+    // 当鼠标悬浮在胶囊或点上时，报告绿点/紫点的位置与时间信息
+    React.useEffect(() => {
+        if (!hoveredEventId) {
+            onEventHover?.(null);
+            return;
+        }
+
+        const event = flight.events.find(e => e.id === hoveredEventId);
+        if (!event || !event.timeScheduled || event.timeScheduled === '--:--') {
+            onEventHover?.(null);
+            return;
+        }
+
+        const track = eventTracks.get(event.id) || 0;
+        const topPaddingCalc = trackSpacing > 30 ? 22 : 4;
+        const capsuleTopY = topPaddingCalc + track * trackSpacing;
+        const greenDotPx = timeToPixels(event.timeScheduled, timeScale);
+        const rowTop = rowRef.current?.offsetTop || 0;
+        const greenDotY = rowTop + capsuleTopY + 11;
+
+        let purpleDotPx: number | undefined = undefined;
+        let purpleDotY: number | undefined = undefined;
+        let calcPointTime: string | undefined = undefined;
+
+        if (releaseAnno?.endTime && takeoffAnno?.endTime) {
+            const [rH, rM] = releaseAnno.endTime.split(':').map(Number);
+            const [tH, tM] = takeoffAnno.endTime.split(':').map(Number);
+            const diff = (rH * 60 + rM) - (tH * 60 + tM);
+            if (diff > 15) {
+                const [eH, eM] = event.timeScheduled.split(':').map(Number);
+                const totalMin = eH * 60 + eM + diff;
+                const cH = Math.floor(totalMin / 60) % 24;
+                const cM = totalMin % 60;
+                calcPointTime = `${String(cH).padStart(2, '0')}:${String(cM).padStart(2, '0')}`;
+                purpleDotPx = timeToPixels(calcPointTime, timeScale);
+                purpleDotY = rowTop + capsuleTopY - 10;
+            }
+        }
+
+        onEventHover?.({
+            eventId: event.id,
+            timeScheduled: event.timeScheduled,
+            calcPointTime,
+            greenDotPx,
+            purpleDotPx,
+            greenDotY,
+            purpleDotY,
+        });
+    }, [hoveredEventId, flight, timeScale, trackSpacing, releaseAnno, takeoffAnno, eventTracks, onEventHover]);
+
     return (
         <div
+            ref={rowRef}
             className="flex group transition-all duration-200 relative mb-3 rounded-xl shadow-sm hover:shadow-md border border-slate-100"
             style={{
                 height: `${rowHeight}px`,
@@ -606,7 +799,7 @@ export const GanttRow: React.FC<GanttRowProps> = ({ flight, timeScale, currentTi
             <div
                 className={`sticky left-0 w-[260px] min-w-[260px] px-4 py-2 flex flex-col justify-center gap-1 z-40 transition-all duration-300 group-hover:z-50 rounded-l-xl rounded-r-2xl mr-2 relative group-hover:scale-[1.02] group-hover:shadow-lg origin-left cursor-pointer`}
                 style={{
-                    background: '#f3f4f6',
+                    background: isDelay ? '#FDF2F8' : '#f3f4f6', // Light pink for delay
                     borderRight: '1px solid #e5e7eb',
                     borderTop: '1px solid #e5e7eb',
                     borderBottom: '1px solid #e5e7eb',
@@ -673,17 +866,17 @@ export const GanttRow: React.FC<GanttRowProps> = ({ flight, timeScale, currentTi
                                 <>
                                     {flight.arrInfo ? (
                                         <FusedInfoBadge
-                                            label={flight.arrInfo.status}
+                                            label={isDelay ? '延误' : flight.arrInfo.status}
                                             value={flight.arrInfo.stand || '-'}
                                             type="ARR"
-                                            status={flight.arrInfo.status}
+                                            status={isDelay ? '延误' : flight.arrInfo.status}
                                         />
                                     ) : flight.depInfo ? (
                                         <FusedInfoBadge
-                                            label={flight.depInfo.status}
+                                            label={isDelay ? '延误' : flight.depInfo.status}
                                             value={flight.depInfo.gate || '-'}
                                             type="DEP"
-                                            status={flight.depInfo.status}
+                                            status={isDelay ? '延误' : flight.depInfo.status}
                                         />
                                     ) : null}
                                 </>
@@ -694,10 +887,10 @@ export const GanttRow: React.FC<GanttRowProps> = ({ flight, timeScale, currentTi
                         {flight.codeshare && flight.arrInfo && flight.depInfo && (
                             <div className="w-fit">
                                 <FusedInfoBadge
-                                    label={flight.depInfo.status}
+                                    label={isDelay ? '延误' : flight.depInfo.status}
                                     value={flight.depInfo.gate || '-'}
                                     type="DEP"
-                                    status={flight.depInfo.status}
+                                    status={isDelay ? '延误' : flight.depInfo.status}
                                 />
                             </div>
                         )}
@@ -797,9 +990,22 @@ export const GanttRow: React.FC<GanttRowProps> = ({ flight, timeScale, currentTi
                         timeScale={timeScale}
                         currentTime={currentTime}
                         onEventClick={onEventClick}
+                        onContextMenu={handleContextMenu}
+                        isDimmed={dimmedEventIds.has(event.id)}
                         trackSpacing={trackSpacing}
+                        onHoverChange={(isHovered) => handleHoverChange(event.id, isHovered)}
                     />
                 ))}
+
+                {contextMenu && (
+                    <ContextMenu
+                        x={contextMenu.x}
+                        y={contextMenu.y}
+                        isDimmed={dimmedEventIds.has(contextMenu.eventId)}
+                        onToggleDim={() => toggleDimmed(contextMenu.eventId)}
+                        onClose={() => setContextMenu(null)}
+                    />
+                )}
 
                 {/* Calculated Scale Points - rendered as separate layer ABOVE all capsules */}
                 {(() => {
@@ -809,7 +1015,7 @@ export const GanttRow: React.FC<GanttRowProps> = ({ flight, timeScale, currentTi
                     const [rH, rM] = releaseAnno.endTime.split(':').map(Number);
                     const [tH, tM] = takeoffAnno.endTime.split(':').map(Number);
                     const diff = (rH * 60 + rM) - (tH * 60 + tM);
-                    if (diff < 0 || diff > 15) return null;
+                    if (diff <= 15) return null;
 
                     const calcColor = '#A78BFA';
 
@@ -843,7 +1049,7 @@ export const GanttRow: React.FC<GanttRowProps> = ({ flight, timeScale, currentTi
                                         borderLeft: `2px dashed ${calcColor}`,
                                         opacity: 0.6,
                                         transform: 'translateX(-50%)',
-                                        zIndex: 45,
+                                        zIndex: 30,
                                     }}
                                 />
                                 {/* Horizontal segment: from green dot X to purple dot X, at purple dot level */}
@@ -857,7 +1063,7 @@ export const GanttRow: React.FC<GanttRowProps> = ({ flight, timeScale, currentTi
                                         borderTop: `2px dashed ${calcColor}`,
                                         opacity: 0.6,
                                         transform: 'translateY(-50%)',
-                                        zIndex: 45,
+                                        zIndex: 30,
                                     }}
                                 />
                                 {/* Purple dot above its own capsule */}
@@ -870,6 +1076,7 @@ export const GanttRow: React.FC<GanttRowProps> = ({ flight, timeScale, currentTi
                                     lineStartX={0}
                                     lineWidth={0}
                                     absoluteTop={purpleDotY}
+                                    onHoverChange={(isHovered) => handleHoverChange(event.id, isHovered)}
                                 />
                             </React.Fragment>
                         );

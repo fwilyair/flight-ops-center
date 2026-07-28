@@ -79,7 +79,7 @@ export const MOCK_FLIGHTS: Flight[] = [
     ],
     annotations: [
       {
-        type: 'connector', startTime: '09:00', endTime: '10:00', label: '放行', style: 'solid', color: 'gray', markers: [
+        type: 'connector', startTime: '09:00', endTime: '10:15', label: '放行', style: 'solid', color: 'gray', markers: [
           { id: 'pm1-1', label: '滑行', shortLabel: '滑', time: '09:08', phase: 'arrival' },
           { id: 'pm1-2', label: '入位', shortLabel: '入', time: '09:15', phase: 'arrival' },
           { id: 'pm1-3', label: '准备好', shortLabel: '准', time: '09:30', phase: 'departure' },
@@ -88,7 +88,7 @@ export const MOCK_FLIGHTS: Flight[] = [
           { id: 'pm1-6', label: '滑行', shortLabel: '滑', time: '09:55', phase: 'departure' },
         ]
       },
-      { type: 'connector', startTime: '09:00', endTime: '09:52', label: '起飞', style: 'solid', color: 'gray' }
+      { type: 'connector', startTime: '09:00', endTime: '09:50', label: '起飞', style: 'solid', color: 'gray' }
     ]
   },
 

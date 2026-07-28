@@ -22,6 +22,7 @@ export interface TimelineEvent {
   department?: string;
   personnel?: string[];
   lifecycle?: TaskLifecycleEvent[];
+  isDimmed?: boolean; // 新增：是否已弱化显示
 }
 
 export interface ProcessMarker {
