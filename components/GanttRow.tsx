@@ -712,7 +712,7 @@ export const GanttRow: React.FC<GanttRowProps> = ({ flight, timeScale, currentTi
 
     // 计算事件的轨道分配
     const eventTracks = React.useMemo(() => calculateEventTracks(flight.events, timeScale), [flight.events, timeScale]);
-    const maxTrack = Math.max(0, ...Array.from(eventTracks.values()));
+    const maxTrack = Math.max(0, ...(Array.from(eventTracks.values()) as number[]));
     const trackCount = maxTrack + 1;
 
     // 判断是否有计算刻度点（需要更大的轨道间距来容纳紫色圆点）

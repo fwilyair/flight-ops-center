@@ -148,8 +148,6 @@ const App: React.FC = () => {
   const currentTimePx = timeToPixels(currentTime, timeScale);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-
-
   useEffect(() => {
     // Update current time every minute
     const interval = setInterval(() => {
@@ -190,7 +188,7 @@ const App: React.FC = () => {
 
       <main className="flex-1 relative overflow-hidden flex flex-col">
         {/* Main Scrollable Area */}
-        <div ref={scrollContainerRef} className="flex-1 overflow-x-auto overflow-y-auto relative no-scrollbar">
+        <div ref={scrollContainerRef} className="flex-1 overflow-x-auto overflow-y-auto relative">
 
           <div className="min-w-max h-full flex flex-col relative">
 
