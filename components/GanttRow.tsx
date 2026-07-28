@@ -356,7 +356,7 @@ const ProcessDiamond: React.FC<{
 
     return (
         <div
-            className="absolute flex items-center justify-center z-20 pointer-events-auto"
+            className={`absolute flex items-center justify-center pointer-events-auto transition-all ${isHovered ? 'z-50' : 'z-20'}`}
             style={{
                 left: `${leftPx}px`,
                 top: 0,
@@ -485,8 +485,8 @@ const AnnotationLine: React.FC<{ annotation: Annotation; index: number; timeScal
 
     return (
         <div
-            className="absolute left-0 w-full flex items-center pointer-events-none z-20"
-            style={{ bottom: `${bottomOffset}px` }}
+            className="absolute left-0 w-full flex items-center pointer-events-none"
+            style={{ bottom: `${bottomOffset}px`, zIndex: 30 - index }}
         >
             {/* Left Line Segment */}
             {leftLineWidth > 10 && (
