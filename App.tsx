@@ -24,6 +24,7 @@ const App: React.FC = () => {
 
   // 搜索和日期状态
   const [searchQuery, setSearchQuery] = useState('');
+  const deferredSearchQuery = React.useDeferredValue(searchQuery);
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split('T')[0]
   );
@@ -42,27 +43,25 @@ const App: React.FC = () => {
   const [selectedFlight, setSelectedFlight] = useState<Flight | null>(null);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
 
-  const handleFlightClick = (flight: Flight) => {
-    if (selectedFlight?.id === flight.id && isPanelOpen) {
-      setIsPanelOpen(false);
-    } else {
-      setSelectedFlight(flight);
+  const handleFlightClick = useCallback((flight: Flight) => {
+    setSelectedFlight(prev => {
+      if (prev?.id === flight.id) {
+        setIsPanelOpen(p => !p);
+        return prev;
+      }
       setIsPanelOpen(true);
-    }
-  };
+      return flight;
+    });
+  }, []);
 
-  const handlePanelClose = () => {
+  const handlePanelClose = useCallback(() => {
     setIsPanelOpen(false);
-  };
+  }, []);
 
-  const handleFlightUpdate = (updatedFlight: Flight) => {
+  const handleFlightUpdate = useCallback((updatedFlight: Flight) => {
     setFlights(prev => prev.map(f => f.id === updatedFlight.id ? updatedFlight : f));
-
-    // 如果当前选中的航班就是更新的航班，也需要更新 selectedFlight 状态
-    if (selectedFlight?.id === updatedFlight.id) {
-      setSelectedFlight(updatedFlight);
-    }
-  };
+    setSelectedFlight(prev => prev?.id === updatedFlight.id ? updatedFlight : prev);
+  }, []);
 
   // 胶囊详情弹窗状态
   const [selectedEvent, setSelectedEvent] = useState<TimelineEvent | null>(null);
@@ -70,42 +69,42 @@ const App: React.FC = () => {
   const [capsuleCodeshare, setCapsuleCodeshare] = useState<string | undefined>(undefined);
   const [isCapsuleModalOpen, setIsCapsuleModalOpen] = useState(false);
 
-  const handleEventClick = (event: TimelineEvent, flight: Flight) => {
+  const handleEventClick = useCallback((event: TimelineEvent, flight: Flight) => {
     setSelectedEvent(event);
     setCapsuleFlightNo(flight.flightNo.split(' / ')[0]);
     setCapsuleCodeshare(flight.codeshare);
     setIsCapsuleModalOpen(true);
-  };
+  }, []);
 
-  const handleCapsuleModalClose = () => {
+  const handleCapsuleModalClose = useCallback(() => {
     setIsCapsuleModalOpen(false);
-  };
+  }, []);
 
   // 视频监控弹窗状态
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
 
-  const handleVideoClick = () => {
+  const handleVideoClick = useCallback(() => {
     setIsVideoModalOpen(true);
-  };
+  }, []);
 
-  const handleVideoModalClose = () => {
+  const handleVideoModalClose = useCallback(() => {
     setIsVideoModalOpen(false);
-  };
+  }, []);
 
   // 过滤航班列表
   const filteredFlights = useMemo(() => {
     return flights.filter(flight => {
       // 航班号过滤（不区分大小写）
-      const matchesSearch = searchQuery === '' ||
-        flight.flightNo.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (flight.codeshare?.toLowerCase().includes(searchQuery.toLowerCase()));
+      const matchesSearch = deferredSearchQuery === '' ||
+        flight.flightNo.toLowerCase().includes(deferredSearchQuery.toLowerCase()) ||
+        (flight.codeshare?.toLowerCase().includes(deferredSearchQuery.toLowerCase()));
 
       // 日期过滤（暂时返回 true，后续可扩展）
       const matchesDate = true;
 
       return matchesSearch && matchesDate;
     });
-  }, [searchQuery, selectedDate]);
+  }, [flights, deferredSearchQuery, selectedDate]);
 
   // 计算所有航班事件的最大时间，确保时间轴足够长
   const calculateMaxTime = () => {

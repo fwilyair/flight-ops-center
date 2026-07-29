@@ -660,7 +660,7 @@ const ContextMenu: React.FC<{
     );
 };
 
-export const GanttRow: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime, onClick, onEventClick, onVideoClick, onEventHover }) => {
+const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime, onClick, onEventClick, onVideoClick, onEventHover }) => {
     const [dimmedEventIds, setDimmedEventIds] = React.useState<Set<string>>(new Set());
     const [contextMenu, setContextMenu] = React.useState<{ x: number, y: number, eventId: string } | null>(null);
     const [hoveredEventId, setHoveredEventId] = React.useState<string | null>(null);
@@ -792,7 +792,9 @@ export const GanttRow: React.FC<GanttRowProps> = ({ flight, timeScale, currentTi
             className="flex group transition-all duration-200 relative mb-3 rounded-xl shadow-sm hover:shadow-md border border-slate-100"
             style={{
                 height: `${rowHeight}px`,
-                background: '#ffffff' // Pure white card background
+                background: '#ffffff', // Pure white card background
+                contentVisibility: 'auto',
+                containIntrinsicSize: `1px ${rowHeight}px`
             }}
         >
 
@@ -1086,3 +1088,15 @@ export const GanttRow: React.FC<GanttRowProps> = ({ flight, timeScale, currentTi
         </div >
     );
 };
+
+export const GanttRow = React.memo(GanttRowInner, (prevProps, nextProps) => {
+    return (
+        prevProps.flight === nextProps.flight &&
+        prevProps.timeScale === nextProps.timeScale &&
+        prevProps.currentTime === nextProps.currentTime &&
+        prevProps.onClick === nextProps.onClick &&
+        prevProps.onEventClick === nextProps.onEventClick &&
+        prevProps.onVideoClick === nextProps.onVideoClick &&
+        prevProps.onEventHover === nextProps.onEventHover
+    );
+});
