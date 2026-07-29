@@ -143,15 +143,21 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
                 <div className="p-6 rounded-2xl bg-slate-50 dark:bg-gray-800/80 border border-slate-200 dark:border-gray-700 space-y-5 shadow-sm">
                   <div className="flex items-center gap-5">
                     <div className="bg-red-600 text-white text-sm font-bold px-3 py-1.5 rounded-lg font-mono shadow-sm shrink-0">13:57</div>
-                    <span className="text-sm font-semibold text-gray-800 dark:text-gray-200 leading-relaxed">实时显示系统当前时间，贯穿红色闪烁虚线，加载自动居中。</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                      实时显示系统<b className="font-bold text-gray-900 dark:text-white">当前时间</b>，贯穿红色闪烁虚线，加载自动居中。
+                    </span>
                   </div>
                   <div className="flex items-center gap-5">
                     <div className="bg-emerald-600 text-white text-sm font-bold px-3 py-1.5 rounded-lg font-mono shadow-sm shrink-0">11:00</div>
-                    <span className="text-sm font-semibold text-gray-800 dark:text-gray-200 leading-relaxed">悬浮事件绿点时，顶部时间轴同步高亮计划时间。</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                      悬浮事件绿点时，顶部时间轴同步高亮<b className="font-bold text-gray-900 dark:text-white">计划时间</b>。
+                    </span>
                   </div>
                   <div className="flex items-center gap-5">
                     <div className="bg-purple-600 text-white text-sm font-bold px-3 py-1.5 rounded-lg font-mono shadow-sm shrink-0">11:10</div>
-                    <span className="text-sm font-semibold text-gray-800 dark:text-gray-200 leading-relaxed">悬浮推算紫点时，顶部时间轴同步高亮修正计划时间。</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                      悬浮推算紫点时，顶部时间轴同步高亮<b className="font-bold text-gray-900 dark:text-white">修正计划时间</b>。
+                    </span>
                   </div>
                 </div>
               </section>
