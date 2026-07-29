@@ -660,7 +660,7 @@ const ContextMenu: React.FC<{
     );
 };
 
-export const GanttRow: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime, onClick, onEventClick, onVideoClick, onEventHover }) => {
+const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime, onClick, onEventClick, onVideoClick, onEventHover }) => {
     const [dimmedEventIds, setDimmedEventIds] = React.useState<Set<string>>(new Set());
     const [contextMenu, setContextMenu] = React.useState<{ x: number, y: number, eventId: string } | null>(null);
     const [hoveredEventId, setHoveredEventId] = React.useState<string | null>(null);
@@ -1086,3 +1086,15 @@ export const GanttRow: React.FC<GanttRowProps> = ({ flight, timeScale, currentTi
         </div >
     );
 };
+
+export const GanttRow = React.memo(GanttRowInner, (prevProps, nextProps) => {
+    return (
+        prevProps.flight === nextProps.flight &&
+        prevProps.timeScale === nextProps.timeScale &&
+        prevProps.currentTime === nextProps.currentTime &&
+        prevProps.onClick === nextProps.onClick &&
+        prevProps.onEventClick === nextProps.onEventClick &&
+        prevProps.onVideoClick === nextProps.onVideoClick &&
+        prevProps.onEventHover === nextProps.onEventHover
+    );
+});
