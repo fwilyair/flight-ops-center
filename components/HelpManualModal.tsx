@@ -31,7 +31,6 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
             </div>
             <div>
               <h2 className="text-xl font-bold text-gray-900 dark:text-white leading-tight">穿透管控-使用手册</h2>
-              <p className="text-xs text-gray-500 dark:text-gray-400">图例说明、事件规则与核心交互指南</p>
             </div>
           </div>
           <button
@@ -89,7 +88,7 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
               <section className="space-y-4">
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2.5">
                   <span className="w-2 h-5 bg-blue-600 rounded-full"></span>
-                  事件状态颜色标准
+                  系统颜色图例
                 </h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
                   <div className="p-4 rounded-2xl border border-yellow-200 bg-yellow-50/70 dark:bg-yellow-900/20 flex flex-col justify-between gap-2 shadow-sm hover:shadow-md transition-all">
@@ -138,7 +137,7 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
               <section className="space-y-4">
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2.5">
                   <span className="w-2 h-5 bg-blue-600 rounded-full"></span>
-                  时间轴与游标指示
+                  时间轴与游标
                 </h3>
                 <div className="p-6 rounded-2xl bg-slate-50 dark:bg-gray-800/80 border border-slate-200 dark:border-gray-700 space-y-5 shadow-sm">
                   <div className="flex items-center gap-5">
@@ -171,7 +170,7 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
               <section className="space-y-4">
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2.5">
                   <span className="w-2 h-5 bg-blue-600 rounded-full"></span>
-                  事件胶囊框线状态规则
+                  任务胶囊框线规则
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                   <div className="p-5 rounded-2xl border-0 bg-gray-50/60 dark:bg-gray-800/50 flex flex-col gap-4 shadow-sm hover:shadow-md transition-all">
@@ -222,7 +221,7 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
               <section className="space-y-4">
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2.5">
                   <span className="w-2 h-5 bg-blue-600 rounded-full"></span>
-                  时间刻度点与关联线图例
+                  时间刻度点规则
                 </h3>
                 <div className="p-6 rounded-2xl bg-slate-50 dark:bg-gray-800/80 border border-slate-200 dark:border-gray-700 space-y-5 shadow-sm">
                   <div className="flex items-center gap-4">
