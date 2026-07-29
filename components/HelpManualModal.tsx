@@ -244,7 +244,7 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
                 <div className="p-3.5 sm:p-4 rounded-xl border border-blue-100 bg-blue-50/50 dark:bg-blue-900/10 dark:border-blue-900/30 flex items-start gap-3.5 shadow-sm hover:shadow-md transition-all">
                   <div className="w-9 h-9 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-base shrink-0 shadow-sm">1</div>
                   <div>
-                    <h4 className="font-bold text-gray-900 dark:text-white text-sm sm:text-base">航班卡片点击与详情抽屉</h4>
+                    <h4 className="font-bold text-gray-900 dark:text-white text-sm sm:text-base">航班卡片与详情抽屉</h4>
                     <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mt-0.5 leading-normal">
                       点击左侧航班卡片展开<b className="font-bold text-gray-900 dark:text-white">航班详情抽屉</b>，提供<b className="font-bold text-gray-900 dark:text-white">航班备注、快捷短语、查看保障时间轴</b>等功能。
                     </p>
@@ -274,9 +274,9 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
                 <div className="p-3.5 sm:p-4 rounded-xl border border-amber-100 bg-amber-50/50 dark:bg-amber-900/10 dark:border-amber-900/30 flex items-start gap-3.5 shadow-sm hover:shadow-md transition-all">
                   <div className="w-9 h-9 rounded-lg bg-amber-600 text-white flex items-center justify-center font-bold text-base shrink-0 shadow-sm">4</div>
                   <div>
-                    <h4 className="font-bold text-gray-900 dark:text-white text-sm sm:text-base">时间轴缩放与搜索过滤 (顶部工具栏)</h4>
+                    <h4 className="font-bold text-gray-900 dark:text-white text-sm sm:text-base">时间轴缩放与搜索</h4>
                     <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mt-0.5 leading-normal">
-                      在<b>顶部工具栏</b>自由切换时间轴刻度比例（5分钟/10分钟/30分钟/1小时），并支持输入航班号实时搜索与筛选。
+                      提供<b className="font-bold text-gray-900 dark:text-white">时间轴刻度比例</b>缩放、<b className="font-bold text-gray-900 dark:text-white">航班号搜索(日期必选)</b>等功能。
                     </p>
                   </div>
                 </div>
