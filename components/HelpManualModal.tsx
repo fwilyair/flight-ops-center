@@ -244,9 +244,9 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
                 <div className="p-3.5 sm:p-4 rounded-xl border border-blue-100 bg-blue-50/50 dark:bg-blue-900/10 dark:border-blue-900/30 flex items-start gap-3.5 shadow-sm hover:shadow-md transition-all">
                   <div className="w-9 h-9 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-base shrink-0 shadow-sm">1</div>
                   <div>
-                    <h4 className="font-bold text-gray-900 dark:text-white text-sm sm:text-base">航班卡片点击与详情抽屉 (左侧固定栏)</h4>
+                    <h4 className="font-bold text-gray-900 dark:text-white text-sm sm:text-base">航班卡片点击与详情抽屉</h4>
                     <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mt-0.5 leading-normal">
-                      点击左侧航班卡片（<b>延误航班填充淡粉色底色</b>）可展开<b>“航班详情抽屉”</b>，支持<b>编辑航班备注</b>、选择快捷短语、查看保障时间表与监控视频。
+                      点击左侧航班卡片展开<b className="font-bold text-gray-900 dark:text-white">航班详情抽屉</b>，提供<b className="font-bold text-gray-900 dark:text-white">航班备注、快捷短语、查看保障时间轴</b>等功能。
                     </p>
                   </div>
                 </div>
