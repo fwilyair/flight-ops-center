@@ -150,13 +150,13 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
                   <div className="flex items-center gap-5">
                     <div className="bg-emerald-600 text-white text-sm font-bold px-3 py-1.5 rounded-lg font-mono shadow-sm shrink-0">11:00</div>
                     <span className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-                      悬浮事件绿点时，顶部时间轴同步高亮<b className="font-bold text-gray-900 dark:text-white">计划时间</b>。
+                      <b className="font-bold text-gray-900 dark:text-white">计划时间</b>，胶囊绿色悬浮，顶部时间轴同步高亮。
                     </span>
                   </div>
                   <div className="flex items-center gap-5">
                     <div className="bg-purple-600 text-white text-sm font-bold px-3 py-1.5 rounded-lg font-mono shadow-sm shrink-0">11:10</div>
                     <span className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-                      悬浮推算紫点时，顶部时间轴同步高亮<b className="font-bold text-gray-900 dark:text-white">修正计划时间</b>。
+                      <b className="font-bold text-gray-900 dark:text-white">修正计划时间</b>，胶囊紫色悬浮，顶部时间轴同步高亮。
                     </span>
                   </div>
                 </div>
