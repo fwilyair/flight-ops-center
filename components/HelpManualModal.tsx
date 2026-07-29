@@ -53,7 +53,7 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
             }`}
           >
             <span className="material-symbols-outlined text-lg">dashboard</span>
-            系统总览与状态
+            系统总览
           </button>
           <button
             onClick={() => setActiveTab('events')}
@@ -64,7 +64,7 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
             }`}
           >
             <span className="material-symbols-outlined text-lg">view_timeline</span>
-            事件胶囊与刻度
+            任务胶囊
           </button>
           <button
             onClick={() => setActiveTab('interactions')}
@@ -75,7 +75,7 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
             }`}
           >
             <span className="material-symbols-outlined text-lg">touch_app</span>
-            核心操作与管控
+            穿透管控
           </button>
         </div>
 
