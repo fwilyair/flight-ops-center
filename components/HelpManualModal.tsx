@@ -20,8 +20,8 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
         onClick={onClose}
       />
 
-      {/* Main Modal Container - Fixed height matching tallest tab to prevent jumping and scrollbars */}
-      <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-4xl h-[660px] max-h-[90vh] flex flex-col overflow-hidden border border-gray-100 dark:border-gray-800 animate-in zoom-in-95 duration-200">
+      {/* Main Modal Container - Auto height to fit content of each tab snugly */}
+      <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden border border-gray-100 dark:border-gray-800 animate-in zoom-in-95 duration-200">
         
         {/* Modal Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-slate-50/80 dark:bg-gray-800/80 backdrop-blur-md shrink-0">
@@ -80,11 +80,11 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
         </div>
 
         {/* Modal Body / Tab Content */}
-        <div className="flex-1 overflow-y-auto no-scrollbar p-7 space-y-7 text-gray-700 dark:text-gray-300">
+        <div className="overflow-y-auto no-scrollbar p-6 text-gray-700 dark:text-gray-300">
 
           {/* TAB 1: OVERVIEW */}
           {activeTab === 'overview' && (
-            <div className="space-y-7 animate-in fade-in duration-150 flex flex-col justify-between h-full">
+            <div className="space-y-6 animate-in fade-in duration-150">
               {/* Status Header Bar */}
               <section className="space-y-4">
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2.5">
