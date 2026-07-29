@@ -254,9 +254,9 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
                 <div className="p-3.5 sm:p-4 rounded-xl border border-purple-100 bg-purple-50/50 dark:bg-purple-900/10 dark:border-purple-900/30 flex items-start gap-3.5 shadow-sm hover:shadow-md transition-all">
                   <div className="w-9 h-9 rounded-lg bg-purple-600 text-white flex items-center justify-center font-bold text-base shrink-0 shadow-sm">2</div>
                   <div>
-                    <h4 className="font-bold text-gray-900 dark:text-white text-sm sm:text-base">保障胶囊点击与管控命令 (甘特图事件)</h4>
+                    <h4 className="font-bold text-gray-900 dark:text-white text-sm sm:text-base">保障胶囊与航班管控</h4>
                     <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mt-0.5 leading-normal">
-                      点击甘特图保障胶囊可打开<b>“胶囊详情与管控弹窗”</b>，查看全生命周期事件轨迹，并下发<b>“多级管控”</b>或<b>“穿透管控”</b>指令。
+                      点击<b className="font-bold text-gray-900 dark:text-white">保障任务胶囊</b>打开<b className="font-bold text-gray-900 dark:text-white">胶囊详情与航班管控</b>，提供查看<b className="font-bold text-gray-900 dark:text-white">全生命周期管控记录</b>、下发<b className="font-bold text-gray-900 dark:text-white">「多级管控」</b>或<b className="font-bold text-gray-900 dark:text-white">「穿透管控」</b>指令等功能。
                     </p>
                   </div>
                 </div>
