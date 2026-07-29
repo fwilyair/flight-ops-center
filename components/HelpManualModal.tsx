@@ -220,7 +220,7 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
                     <span className="w-4 h-4 rounded-full bg-emerald-500 ring-2 ring-white shadow-sm shrink-0"></span>
                     <div>
                       <span className="font-bold text-base text-gray-900 dark:text-white">绿色计划时刻圆点：</span>
-                      <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">计划时间</span>
+                      <span className="text-sm font-normal text-gray-600 dark:text-gray-400">计划时间</span>
                     </div>
                   </div>
 
@@ -228,7 +228,7 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
                     <span className="w-4 h-4 rounded-full bg-[#A78BFA] ring-2 ring-white shadow-sm shrink-0 animate-pulse"></span>
                     <div>
                       <span className="font-bold text-base text-purple-900 dark:text-purple-300">紫色推算目标圆点：</span>
-                      <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">放行时间&gt;起飞时间 15 分钟及以上时，根据差值计算的目标时间</span>
+                      <span className="text-sm font-normal text-gray-600 dark:text-gray-400">放行时间&gt;起飞时间 15 分钟及以上时，根据差值计算的目标时间</span>
                     </div>
                   </div>
                 </div>
