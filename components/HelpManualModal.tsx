@@ -104,7 +104,7 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
                       <span className="w-3.5 h-3.5 rounded-full bg-red-600 shrink-0"></span>
                       <span className="font-bold text-sm text-red-900 dark:text-red-300">超时未完成</span>
                     </div>
-                    <p className="text-xs font-semibold text-red-700 dark:text-red-400">任务超时且进行中</p>
+                    <p className="text-xs font-semibold text-red-700 dark:text-red-400">任务超时且未完成</p>
                   </div>
 
                   <div className="p-4 rounded-2xl border border-purple-200 bg-purple-50/70 dark:bg-purple-900/20 flex flex-col justify-between gap-2 shadow-sm hover:shadow-md transition-all">
