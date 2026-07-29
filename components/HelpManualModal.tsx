@@ -264,9 +264,9 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
                 <div className="p-3.5 sm:p-4 rounded-xl border border-emerald-100 bg-emerald-50/50 dark:bg-emerald-900/10 dark:border-emerald-900/30 flex items-start gap-3.5 shadow-sm hover:shadow-md transition-all">
                   <div className="w-9 h-9 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-base shrink-0 shadow-sm">3</div>
                   <div>
-                    <h4 className="font-bold text-gray-900 dark:text-white text-sm sm:text-base">右键菜单与弱化显示 (现场控制)</h4>
+                    <h4 className="font-bold text-gray-900 dark:text-white text-sm sm:text-base">右键菜单与弱化显示</h4>
                     <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mt-0.5 leading-normal">
-                      在胶囊上<b>右键单击</b>弹出快捷菜单，选择<b>“可控/可消除”</b>可将该事件降低透明度并置灰弱化，便于快速筛选风险事件，再次右键恢复。
+                      任务胶囊上右键弹出<b className="font-bold text-gray-900 dark:text-white">可控/可消除</b>，将该任务置灰弱化，再次右键可<b className="font-bold text-gray-900 dark:text-white">恢复</b>。
                     </p>
                   </div>
                 </div>
