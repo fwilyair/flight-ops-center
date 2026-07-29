@@ -151,7 +151,7 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
                   </div>
                   <div className="flex items-center gap-5">
                     <div className="bg-purple-600 text-white text-sm font-bold px-3 py-1.5 rounded-lg font-mono shadow-sm shrink-0">11:10</div>
-                    <span className="text-sm font-semibold text-gray-800 dark:text-gray-200 leading-relaxed">悬浮推算紫点时，顶部时间轴同步高亮推算目标时间。</span>
+                    <span className="text-sm font-semibold text-gray-800 dark:text-gray-200 leading-relaxed">悬浮推算紫点时，顶部时间轴同步高亮修正计划时间。</span>
                   </div>
                 </div>
               </section>
