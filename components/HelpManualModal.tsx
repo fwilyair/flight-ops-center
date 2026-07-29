@@ -174,7 +174,7 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
                   事件胶囊框线状态规则
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                  <div className="p-5 rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-800/50 flex flex-col gap-4 shadow-sm hover:shadow-md transition-all">
+                  <div className="p-5 rounded-2xl border-0 bg-gray-50/60 dark:bg-gray-800/50 flex flex-col gap-4 shadow-sm hover:shadow-md transition-all">
                     <div className="flex items-center justify-between">
                       <span className="font-bold text-base text-gray-900 dark:text-white">1. 无框线</span>
                     </div>
@@ -185,18 +185,27 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
                     <p className="text-sm font-semibold text-gray-600 dark:text-gray-400">默认状态</p>
                   </div>
 
-                  <div className="p-5 rounded-2xl border border-amber-200 dark:border-amber-800 bg-amber-50/40 dark:bg-amber-900/10 flex flex-col gap-4 shadow-sm hover:shadow-md transition-all">
+                  <div className="relative p-5 rounded-2xl bg-amber-50/40 dark:bg-amber-900/10 flex flex-col gap-4 shadow-sm hover:shadow-md transition-all">
+                    {/* Outer card rotating animated SVG dashed border */}
+                    <svg className="absolute inset-0 w-full h-full pointer-events-none rounded-2xl overflow-visible">
+                      <rect x="1" y="1" width="calc(100% - 2px)" height="calc(100% - 2px)" rx="16" ry="16" fill="none" stroke="#F59E0B" strokeWidth="2" strokeDasharray="6 4" style={{ animation: 'dashMarch 2s linear infinite' }} />
+                    </svg>
+
                     <div className="flex items-center justify-between">
                       <span className="font-bold text-base text-amber-900 dark:text-amber-300">2. 橙黄虚线旋转框</span>
                     </div>
-                    <div className="relative h-11 rounded-full bg-amber-100 dark:bg-amber-900/40 border-2 border-dashed border-amber-500 flex items-center justify-between px-4 text-sm font-bold text-amber-900 dark:text-amber-200 shadow-inner">
+                    <div className="relative h-11 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-between px-4 text-sm font-bold text-amber-900 dark:text-amber-200 shadow-inner">
+                      {/* Inner capsule rotating animated SVG dashed border */}
+                      <svg className="absolute inset-0 w-full h-full pointer-events-none rounded-full overflow-visible">
+                        <rect x="1" y="1" width="calc(100% - 2px)" height="calc(100% - 2px)" rx="22" ry="22" fill="none" stroke="#F59E0B" strokeWidth="2" strokeDasharray="6 4" style={{ animation: 'dashMarch 2s linear infinite' }} />
+                      </svg>
                       <span>推出开车</span>
                       <span>计 14:20 | 实 --:--</span>
                     </div>
                     <p className="text-sm font-semibold text-amber-700 dark:text-amber-400">已发管控/未回执</p>
                   </div>
 
-                  <div className="p-5 rounded-2xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50/40 dark:bg-emerald-900/10 flex flex-col gap-4 shadow-sm hover:shadow-md transition-all">
+                  <div className="p-5 rounded-2xl border-2 border-emerald-500 bg-emerald-50/40 dark:bg-emerald-900/10 flex flex-col gap-4 shadow-sm hover:shadow-md transition-all">
                     <div className="flex items-center justify-between">
                       <span className="font-bold text-base text-emerald-900 dark:text-emerald-300">3. 渐变实线框</span>
                     </div>
