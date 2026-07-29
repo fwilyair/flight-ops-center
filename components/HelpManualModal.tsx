@@ -144,7 +144,7 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
                   <div className="flex items-center gap-5">
                     <div className="bg-red-600 text-white text-sm font-bold px-3 py-1.5 rounded-lg font-mono shadow-sm shrink-0">13:57</div>
                     <span className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-                      实时显示系统<b className="font-bold text-gray-900 dark:text-white">当前时间</b>，贯穿红色闪烁虚线，加载自动居中。
+                      <b className="font-bold text-gray-900 dark:text-white">当前时间</b>，红色实线，自动居中。
                     </span>
                   </div>
                   <div className="flex items-center gap-5">
