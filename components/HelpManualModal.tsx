@@ -276,7 +276,7 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
                   <div>
                     <h4 className="font-bold text-gray-900 dark:text-white text-sm sm:text-base">时间轴缩放与搜索</h4>
                     <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mt-0.5 leading-normal">
-                      提供<b className="font-bold text-gray-900 dark:text-white">时间轴刻度比例</b>缩放、<b className="font-bold text-gray-900 dark:text-white">航班号搜索(日期必选)</b>等功能。
+                      提供<b className="font-bold text-gray-900 dark:text-white">时间轴刻度比例缩放</b>、<b className="font-bold text-gray-900 dark:text-white">航班号搜索(日期必选)</b>等功能。
                     </p>
                   </div>
                 </div>
