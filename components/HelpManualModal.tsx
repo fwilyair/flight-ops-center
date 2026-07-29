@@ -256,7 +256,7 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
                   <div>
                     <h4 className="font-bold text-gray-900 dark:text-white text-sm sm:text-base">保障胶囊与航班管控</h4>
                     <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mt-0.5 leading-normal">
-                      点击<b className="font-bold text-gray-900 dark:text-white">保障任务胶囊</b>打开<b className="font-bold text-gray-900 dark:text-white">胶囊详情与航班管控</b>，提供查看<b className="font-bold text-gray-900 dark:text-white">全生命周期管控记录</b>、下发<b className="font-bold text-gray-900 dark:text-white">「多级管控」</b>或<b className="font-bold text-gray-900 dark:text-white">「穿透管控」</b>指令等功能。
+                      点击<b className="font-bold text-gray-900 dark:text-white">任务胶囊</b>打开<b className="font-bold text-gray-900 dark:text-white">胶囊详情与航班管控</b>，提供查看<b className="font-bold text-gray-900 dark:text-white">全生命周期管控记录</b>、下发<b className="font-bold text-gray-900 dark:text-white">「多级管控」</b>或<b className="font-bold text-gray-900 dark:text-white">「穿透管控」</b>指令等功能。
                     </p>
                   </div>
                 </div>
