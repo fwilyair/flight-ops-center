@@ -272,7 +272,7 @@ const App: React.FC = () => {
 
               {/* Past Time Shade (Left of Current Time) - Tech Dot Pattern */}
               <div
-                className="absolute top-0 bottom-0 z-10 pointer-events-none"
+                className="absolute top-0 bottom-0 z-0 pointer-events-none"
                 style={{
                   left: '260px',
                   width: `${currentTimePx}px`,
@@ -287,7 +287,7 @@ const App: React.FC = () => {
                 }}
               ></div>
               <div
-                className="absolute top-0 bottom-0 z-10 pointer-events-none dark:hidden"
+                className="absolute top-0 bottom-0 z-0 pointer-events-none dark:hidden"
                 style={{
                   left: '260px',
                   width: `${currentTimePx}px`,
