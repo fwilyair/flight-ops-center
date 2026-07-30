@@ -160,7 +160,7 @@ const App: React.FC = () => {
   const isProgrammaticScrollRef = useRef<boolean>(false);
   const programmaticScrollTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // 滚动至当前时间处理函数
+  // 滚动至当前时间处理函数（精确定位到右侧甘特图可视区域正中间）
   const scrollToCurrentTime = useCallback((smooth = true) => {
     if (scrollContainerRef.current) {
       isUserScrolledRef.current = false; // 用户按下空格或初始化时重置手动标志，恢复自动跟随
@@ -170,9 +170,9 @@ const App: React.FC = () => {
         clearTimeout(programmaticScrollTimerRef.current);
       }
 
-      const viewportWidth = window.innerWidth - 220;
-      const targetOffset = viewportWidth * 0.4;
-      const targetScroll = Math.max(0, currentTimePx - targetOffset);
+      const containerWidth = scrollContainerRef.current.clientWidth;
+      const visibleGanttWidth = Math.max(0, containerWidth - 260); // 扣除左侧 260px 航班信息卡片固定列
+      const targetScroll = Math.max(0, currentTimePx - (visibleGanttWidth / 2));
 
       if (smooth) {
         scrollContainerRef.current.scrollTo({ left: targetScroll, behavior: 'smooth' });
