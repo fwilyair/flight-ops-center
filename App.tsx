@@ -195,12 +195,24 @@ const App: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // 当当前时间推进且用户处于自动跟随状态（未手动横向滚动）时，保持页面同步向前推进
+  // 当当前时间推进且用户处于自动跟随状态（未手动横向滚动）时，无延迟同步调整 scrollLeft
+  // 确保红色当前时间游标在屏幕上绝对固定在 30% 位置，甘特图卡片随时间向左后退
   useEffect(() => {
     if (!isUserScrolledRef.current) {
-      scrollToCurrentTime(true);
+      scrollToCurrentTime(false);
     }
   }, [currentTimePx, scrollToCurrentTime]);
+
+  // 窗口大小改变时，保持 30% 固定位置
+  useEffect(() => {
+    const handleResize = () => {
+      if (!isUserScrolledRef.current) {
+        scrollToCurrentTime(false);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [scrollToCurrentTime]);
 
   // 监听容器滚动，区分用户手动操作与程序自动滚动
   const handleScroll = useCallback(() => {
