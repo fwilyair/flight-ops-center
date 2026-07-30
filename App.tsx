@@ -172,7 +172,8 @@ const App: React.FC = () => {
 
       const containerWidth = scrollContainerRef.current.clientWidth;
       const visibleGanttWidth = Math.max(0, containerWidth - 260); // 扣除左侧 260px 航班信息卡片固定列
-      const targetScroll = Math.max(0, currentTimePx - (visibleGanttWidth / 2));
+      // 当前时间定位在可视区域左侧 30% 处（过去时间占 30%，未来保障时间占 70%）
+      const targetScroll = Math.max(0, currentTimePx - (visibleGanttWidth * 0.3));
 
       if (smooth) {
         scrollContainerRef.current.scrollTo({ left: targetScroll, behavior: 'smooth' });
