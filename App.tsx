@@ -156,16 +156,32 @@ const App: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // 滚动至当前时间
+  const isUserScrolledRef = useRef<boolean>(false);
+  const isProgrammaticScrollRef = useRef<boolean>(false);
+  const programmaticScrollTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // 滚动至当前时间处理函数
   const scrollToCurrentTime = useCallback((smooth = true) => {
     if (scrollContainerRef.current) {
+      isUserScrolledRef.current = false; // 用户按下空格或初始化时重置手动标志，恢复自动跟随
+      isProgrammaticScrollRef.current = true;
+
+      if (programmaticScrollTimerRef.current) {
+        clearTimeout(programmaticScrollTimerRef.current);
+      }
+
       const viewportWidth = window.innerWidth - 220;
       const targetOffset = viewportWidth * 0.4;
       const targetScroll = Math.max(0, currentTimePx - targetOffset);
+
       if (smooth) {
         scrollContainerRef.current.scrollTo({ left: targetScroll, behavior: 'smooth' });
+        programmaticScrollTimerRef.current = setTimeout(() => {
+          isProgrammaticScrollRef.current = false;
+        }, 800);
       } else {
         scrollContainerRef.current.scrollLeft = targetScroll;
+        isProgrammaticScrollRef.current = false;
       }
     }
   }, [currentTimePx]);
@@ -176,9 +192,23 @@ const App: React.FC = () => {
       scrollToCurrentTime(false);
     }, 100);
     return () => clearTimeout(timer);
-  }, []); // 仅在初始挂载时定位一次，取消后续定时自动跳转
+  }, []);
 
-  // 监听空格键按压事件，快捷跳转回当前时间
+  // 当当前时间推进且用户处于自动跟随状态（未手动横向滚动）时，保持页面同步向前推进
+  useEffect(() => {
+    if (!isUserScrolledRef.current) {
+      scrollToCurrentTime(true);
+    }
+  }, [currentTimePx, scrollToCurrentTime]);
+
+  // 监听容器滚动，区分用户手动操作与程序自动滚动
+  const handleScroll = useCallback(() => {
+    if (!isProgrammaticScrollRef.current) {
+      isUserScrolledRef.current = true;
+    }
+  }, []);
+
+  // 监听空格键按压事件，快捷跳转回当前时间并重新开启跟随
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
@@ -212,7 +242,7 @@ const App: React.FC = () => {
 
       <main className="flex-1 relative overflow-hidden flex flex-col">
         {/* Main Scrollable Area */}
-        <div ref={scrollContainerRef} className="flex-1 overflow-x-auto overflow-y-auto relative">
+        <div ref={scrollContainerRef} onScroll={handleScroll} className="flex-1 overflow-x-auto overflow-y-auto relative">
 
           <div className="min-w-max h-full flex flex-col relative">
 
