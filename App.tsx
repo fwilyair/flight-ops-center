@@ -156,22 +156,47 @@ const App: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
-    // 自动滚动让当前时间对齐到屏幕左侧约 2/5 的位置
-    const timer = setTimeout(() => {
-      if (scrollContainerRef.current) {
-        // 获取视口宽度（减去左侧侧边栏宽度 220px）
-        const viewportWidth = window.innerWidth - 220;
-        // 计算目标偏移植：可视宽度的 40%
-        const targetOffset = viewportWidth * 0.4;
-
-        const targetScroll = currentTimePx - targetOffset;
-        console.log('Current time:', currentTime, 'Pixels:', currentTimePx, 'Target scroll:', targetScroll);
-        scrollContainerRef.current.scrollLeft = Math.max(0, targetScroll);
+  // 滚动至当前时间
+  const scrollToCurrentTime = useCallback((smooth = true) => {
+    if (scrollContainerRef.current) {
+      const viewportWidth = window.innerWidth - 220;
+      const targetOffset = viewportWidth * 0.4;
+      const targetScroll = Math.max(0, currentTimePx - targetOffset);
+      if (smooth) {
+        scrollContainerRef.current.scrollTo({ left: targetScroll, behavior: 'smooth' });
+      } else {
+        scrollContainerRef.current.scrollLeft = targetScroll;
       }
+    }
+  }, [currentTimePx]);
+
+  // 页面初始加载时定位到当前时间一次
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      scrollToCurrentTime(false);
     }, 100);
     return () => clearTimeout(timer);
-  }, [currentTimePx]);
+  }, []); // 仅在初始挂载时定位一次，取消后续定时自动跳转
+
+  // 监听空格键按压事件，快捷跳转回当前时间
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      const isInput = target && (
+        target.tagName === 'INPUT' ||
+        target.tagName === 'TEXTAREA' ||
+        target.isContentEditable
+      );
+
+      if ((e.code === 'Space' || e.key === ' ') && !isInput) {
+        e.preventDefault(); // 阻止浏览器页面平移等默认行为
+        scrollToCurrentTime(true);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [scrollToCurrentTime]);
 
   return (
     <div className="atmosphere-bg flex flex-col h-screen overflow-hidden" style={{ background: 'var(--bg-primary)' }}>
