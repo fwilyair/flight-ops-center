@@ -10,6 +10,8 @@ import { START_TIME_HOUR, Flight, TimelineEvent } from './types';
 
 // Time markers generation - dynamically calculated based on flight data
 
+const HOVER_GUIDE_TIMELINE_OFFSET_PX = 269;
+
 const App: React.FC = () => {
   const [currentTime, setCurrentTime] = useState(() => {
     const now = new Date();
@@ -373,7 +375,7 @@ const App: React.FC = () => {
                   <div
                     className="absolute pointer-events-none z-30 animate-in fade-in duration-150"
                     style={{
-                      left: `${260 + hoveredEventInfo.greenDotPx}px`,
+                      left: `${HOVER_GUIDE_TIMELINE_OFFSET_PX + hoveredEventInfo.greenDotPx}px`,
                       top: 0,
                       height: `${hoveredEventInfo.greenDotY}px`,
                       width: '2px',
@@ -387,7 +389,7 @@ const App: React.FC = () => {
                     <div
                       className="absolute pointer-events-none z-30 animate-in fade-in duration-150"
                       style={{
-                        left: `${260 + hoveredEventInfo.purpleDotPx}px`,
+                        left: `${HOVER_GUIDE_TIMELINE_OFFSET_PX + hoveredEventInfo.purpleDotPx}px`,
                         top: 0,
                         height: `${hoveredEventInfo.purpleDotY}px`,
                         width: '2px',
