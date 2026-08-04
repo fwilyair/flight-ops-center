@@ -42,6 +42,7 @@ export const FlightDetailPanel: React.FC<FlightDetailPanelProps> = ({
     const panelRef = React.useRef<HTMLDivElement>(null);
     const drawerTimelineRef = React.useRef<gsap.core.Timeline | null>(null);
     const initializedPanelRef = React.useRef<HTMLDivElement | null>(null);
+    const initializedFlightIdRef = React.useRef<string | null>(null);
 
     // Reset editing state when flight changes or panel closes
     React.useEffect(() => {
@@ -57,6 +58,7 @@ export const FlightDetailPanel: React.FC<FlightDetailPanelProps> = ({
         const panel = panelRef.current;
         if (!flight || !backdrop || !panel) {
             initializedPanelRef.current = null;
+            initializedFlightIdRef.current = null;
             return;
         }
 
@@ -65,10 +67,16 @@ export const FlightDetailPanel: React.FC<FlightDetailPanelProps> = ({
         );
         const reducedMotionMedia = window.matchMedia(REDUCED_MOTION_QUERY);
 
-        if (initializedPanelRef.current !== panel) {
-            initializedPanelRef.current = panel;
+        const isNewPanel = initializedPanelRef.current !== panel;
+        const isNewFlight = initializedFlightIdRef.current !== flight.id;
+        initializedPanelRef.current = panel;
+        initializedFlightIdRef.current = flight.id;
+
+        if (isNewPanel) {
             gsap.set(backdrop, { autoAlpha: 0 });
             gsap.set(panel, { xPercent: 100, autoAlpha: 0 });
+        }
+        if (isNewPanel || isNewFlight) {
             gsap.set(content, { autoAlpha: 0, x: 8 });
         }
 
@@ -120,10 +128,7 @@ export const FlightDetailPanel: React.FC<FlightDetailPanelProps> = ({
                     ease: MOTION_EASE.layout,
                     overwrite: true,
                 }, 0)
-                .fromTo(content, {
-                    autoAlpha: 0,
-                    x: 8,
-                }, {
+                .to(content, {
                     autoAlpha: 1,
                     x: 0,
                     duration: MOTION_DURATION.fast,
