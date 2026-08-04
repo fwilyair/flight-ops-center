@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState, useMemo, useCallback } from 'react';
+import React, { useRef, useEffect, useLayoutEffect, useState, useMemo, useCallback } from 'react';
 import { Header } from './components/Header';
 import { GanttRow, EventHoverInfo } from './components/GanttRow';
 import { FlightDetailPanel } from './components/FlightDetailPanel';
@@ -7,6 +7,9 @@ import { HelpManualModal } from './components/HelpManualModal';
 import { MOCK_FLIGHTS } from './data';
 import { timeToPixels } from './utils';
 import { START_TIME_HOUR, Flight, TimelineEvent } from './types';
+import { Flip } from './motion/gsap';
+import { MOTION_DURATION, MOTION_EASE } from './motion/tokens';
+import { prefersReducedMotion } from './motion/preferences';
 
 // Time markers generation - dynamically calculated based on flight data
 
@@ -148,6 +151,61 @@ const App: React.FC = () => {
 
   const currentTimePx = timeToPixels(currentTime, timeScale);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const timelineLayoutRef = useRef<HTMLDivElement>(null);
+  const pendingFlipStateRef = useRef<ReturnType<typeof Flip.getState> | null>(null);
+  const timelineFlipRef = useRef<ReturnType<typeof Flip.from> | null>(null);
+
+  const handleTimeScaleChange = useCallback((nextScale: 5 | 10 | 30 | 60) => {
+    if (nextScale === timeScale) return;
+
+    timelineFlipRef.current?.kill();
+    timelineFlipRef.current = null;
+
+    const scope = timelineLayoutRef.current;
+    if (scope && !prefersReducedMotion()) {
+      const layoutTargets = scope.querySelectorAll<HTMLElement>('[data-motion-layout]');
+      pendingFlipStateRef.current = layoutTargets.length > 0
+        ? Flip.getState(layoutTargets, { simple: true })
+        : null;
+    } else {
+      pendingFlipStateRef.current = null;
+    }
+
+    setTimeScale(nextScale);
+  }, [timeScale]);
+
+  useLayoutEffect(() => {
+    const previous = pendingFlipStateRef.current;
+    pendingFlipStateRef.current = null;
+    if (!previous) return;
+
+    timelineFlipRef.current?.kill();
+    const animation = Flip.from(previous, {
+      duration: MOTION_DURATION.layout,
+      ease: MOTION_EASE.layout,
+      absolute: false,
+      nested: true,
+      prune: true,
+      simple: true,
+      overwrite: true,
+    });
+    timelineFlipRef.current = animation;
+
+    return () => {
+      animation.kill();
+      if (timelineFlipRef.current === animation) {
+        timelineFlipRef.current = null;
+      }
+    };
+  }, [timeScale]);
+
+  useLayoutEffect(() => {
+    return () => {
+      timelineFlipRef.current?.kill();
+      timelineFlipRef.current = null;
+      pendingFlipStateRef.current = null;
+    };
+  }, []);
 
   useEffect(() => {
     // Update current time every minute
@@ -247,7 +305,7 @@ const App: React.FC = () => {
         selectedDate={selectedDate}
         onDateChange={setSelectedDate}
         timeScale={timeScale}
-        onTimeScaleChange={setTimeScale}
+        onTimeScaleChange={handleTimeScaleChange}
         onOpenHelp={() => setIsHelpModalOpen(true)}
       />
 
@@ -262,7 +320,7 @@ const App: React.FC = () => {
           className="flex-1 overflow-x-auto overflow-y-auto relative"
         >
 
-          <div className="min-w-max h-full flex flex-col relative">
+          <div ref={timelineLayoutRef} className="min-w-max h-full flex flex-col relative">
 
             {/* Sticky Timeline Header */}
             <div className="sticky top-0 z-40 flex h-14 border-b bg-white dark:bg-gray-900" style={{ borderColor: 'var(--border-color)', boxShadow: 'var(--shadow-sm)' }}>

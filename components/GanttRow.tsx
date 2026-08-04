@@ -72,6 +72,7 @@ const FlightTypeBadge = ({ type }: { type: FlightType }) => {
 
 // CalcPointWithTooltip: renders a purple calculated scale point with hover tooltip
 const CalcPointWithTooltip: React.FC<{
+    motionId: string;
     calcRelPx: number;
     calcPointTime: string;
     calcColor: string;
@@ -81,13 +82,15 @@ const CalcPointWithTooltip: React.FC<{
     lineWidth: number;
     absoluteTop?: number;
     onHoverChange?: (isHovered: boolean) => void;
-}> = ({ calcRelPx, calcPointTime, calcColor, absoluteTop, onHoverChange }) => {
+}> = ({ motionId, calcRelPx, calcPointTime, calcColor, absoluteTop, onHoverChange }) => {
     const [isCalcDotHovered, setIsCalcDotHovered] = React.useState(false);
 
     return (
         <>
             {/* Purple dot - fixed position above all tracks */}
             <div
+                data-motion-layout
+                data-flip-id={`calc-${motionId}`}
                 className="absolute flex items-center justify-center pointer-events-auto"
                 style={{
                     left: `${calcRelPx}px`,
@@ -166,6 +169,8 @@ const EventPill: React.FC<{
 
     return (
         <div
+            data-motion-layout
+            data-flip-id={`event-${event.id}`}
             className={`absolute flex items-center z-10 hover:z-20 cursor-pointer select-none group overflow-visible ${isDimmed ? 'opacity-40 grayscale-[80%]' : ''}`}
             style={{ left: `${leftPos}px`, top: `${topPos}px` }}
             onClick={(e) => {
@@ -356,6 +361,8 @@ const ProcessDiamond: React.FC<{
 
     return (
         <div
+            data-motion-layout
+            data-flip-id={`marker-${marker.id}`}
             className={`absolute flex items-center justify-center pointer-events-auto transition-all ${isHovered ? 'z-50' : 'z-20'}`}
             style={{
                 left: `${leftPx}px`,
@@ -789,6 +796,8 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
     return (
         <div
             ref={rowRef}
+            data-motion-flight-row
+            data-flight-id={flight.id}
             className="flex group transition-all duration-200 relative mb-3 rounded-xl shadow-sm hover:shadow-md border border-slate-100"
             style={{
                 height: `${rowHeight}px`,
@@ -1068,6 +1077,7 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
                                 />
                                 {/* Purple dot above its own capsule */}
                                 <CalcPointWithTooltip
+                                    motionId={event.id}
                                     calcRelPx={purpleDotPx}
                                     calcPointTime={calcPointTime}
                                     calcColor={calcColor}
