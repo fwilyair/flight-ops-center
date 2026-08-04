@@ -16,6 +16,10 @@ interface MotionModalShellProps {
 const getModalContent = (panel: HTMLDivElement): HTMLElement[] =>
   Array.from(panel.querySelectorAll<HTMLElement>('[data-motion-modal-content]'));
 
+const restoreFocus = (target: HTMLElement | null) => {
+  if (target?.isConnected) target.focus({ preventScroll: true });
+};
+
 export const MotionModalShell: React.FC<MotionModalShellProps> = ({
   isOpen,
   onClose,
@@ -25,7 +29,7 @@ export const MotionModalShell: React.FC<MotionModalShellProps> = ({
   panelClassName,
   children,
 }) => {
-  const [mounted, setMounted] = React.useState(isOpen);
+  const [mounted, setMounted] = React.useState(false);
   const rootRef = React.useRef<HTMLDivElement>(null);
   const backdropRef = React.useRef<HTMLDivElement>(null);
   const panelRef = React.useRef<HTMLDivElement>(null);
@@ -36,11 +40,19 @@ export const MotionModalShell: React.FC<MotionModalShellProps> = ({
   const generationRef = React.useRef(0);
   const sessionActiveRef = React.useRef(false);
   const focusRestoredRef = React.useRef(false);
+  const closeRequestedRef = React.useRef(false);
   const reducedMotionRef = React.useRef(false);
   const componentMountedRef = React.useRef(true);
   const isOpenRef = React.useRef(isOpen);
 
   isOpenRef.current = isOpen;
+
+  const requestClose = React.useCallback(() => {
+    if (!isOpenRef.current || closeRequestedRef.current) return;
+
+    closeRequestedRef.current = true;
+    onClose();
+  }, [onClose]);
 
   React.useLayoutEffect(() => {
     componentMountedRef.current = true;
@@ -61,13 +73,14 @@ export const MotionModalShell: React.FC<MotionModalShellProps> = ({
       }
 
       focusRestoredRef.current = false;
+      closeRequestedRef.current = false;
       if (!mounted) setMounted(true);
       return;
     }
 
     if (mounted && sessionActiveRef.current && !focusRestoredRef.current) {
       focusRestoredRef.current = true;
-      previousFocusRef.current?.focus({ preventScroll: true });
+      restoreFocus(previousFocusRef.current);
     }
   }, [isOpen, mounted]);
 
@@ -75,12 +88,12 @@ export const MotionModalShell: React.FC<MotionModalShellProps> = ({
     if (!mounted) return;
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose();
+      if (event.key === 'Escape') requestClose();
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [mounted, onClose]);
+  }, [mounted, requestClose]);
 
   React.useLayoutEffect(() => {
     const root = rootRef.current;
@@ -124,7 +137,7 @@ export const MotionModalShell: React.FC<MotionModalShellProps> = ({
       });
       if (sessionActiveRef.current && !focusRestoredRef.current) {
         focusRestoredRef.current = true;
-        previousFocusRef.current?.focus({ preventScroll: true });
+        restoreFocus(previousFocusRef.current);
       }
       sessionActiveRef.current = false;
       if (!disposed && componentMountedRef.current) setMounted(false);
@@ -252,15 +265,16 @@ export const MotionModalShell: React.FC<MotionModalShellProps> = ({
       ref={rootRef}
       className={`fixed inset-0 z-[100] flex items-center justify-center ${containerClassName}`}
       role="dialog"
-      aria-modal="true"
+      aria-modal={isOpen ? true : undefined}
+      aria-hidden={isOpen ? undefined : true}
       aria-label={ariaLabel}
     >
       <div
         ref={backdropRef}
         className={`absolute inset-0 ${backdropClassName}`}
-        onClick={onClose}
+        onClick={requestClose}
       />
-      <div ref={panelRef} tabIndex={-1} className={panelClassName}>
+      <div ref={panelRef} tabIndex={-1} className={`relative z-[1] ${panelClassName}`}>
         {children}
       </div>
     </div>
