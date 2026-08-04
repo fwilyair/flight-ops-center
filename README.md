@@ -44,7 +44,10 @@ Flight Operations Center 是一个面向航班运行场景的交互式可视化�
 - TypeScript
 - Vite 6
 - Tailwind CSS 浏览器运行时
+- GSAP Core 与 Flip：用于时间轴布局过渡、列表编排和浮层进入退出
 - React Hooks、CSS 动画与基于时间的像素布局
+
+页面保留浏览器原生滚动；GSAP 不接管时间轴滚轮、拖拽或当前时间定位。系统遵循 `prefers-reduced-motion`，在减少动态效果模式下直接呈现最终状态。
 
 ## 本地运行
 
