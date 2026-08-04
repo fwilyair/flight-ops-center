@@ -73,6 +73,7 @@ const FlightTypeBadge = ({ type }: { type: FlightType }) => {
 // CalcPointWithTooltip: renders a purple calculated scale point with hover tooltip
 const CalcPointWithTooltip: React.FC<{
     motionId: string;
+    flightId: string;
     calcRelPx: number;
     calcPointTime: string;
     calcColor: string;
@@ -82,7 +83,7 @@ const CalcPointWithTooltip: React.FC<{
     lineWidth: number;
     absoluteTop?: number;
     onHoverChange?: (isHovered: boolean) => void;
-}> = ({ motionId, calcRelPx, calcPointTime, calcColor, absoluteTop, onHoverChange }) => {
+}> = ({ motionId, flightId, calcRelPx, calcPointTime, calcColor, absoluteTop, onHoverChange }) => {
     const [isCalcDotHovered, setIsCalcDotHovered] = React.useState(false);
 
     return (
@@ -90,7 +91,7 @@ const CalcPointWithTooltip: React.FC<{
             {/* Purple dot - fixed position above all tracks */}
             <div
                 data-motion-layout
-                data-flip-id={`calc-${motionId}`}
+                data-flip-id={`calc-${flightId}-${motionId}`}
                 className="absolute flex items-center justify-center pointer-events-auto"
                 style={{
                     left: `${calcRelPx}px`,
@@ -135,6 +136,7 @@ const CalcPointWithTooltip: React.FC<{
 
 const EventPill: React.FC<{
     event: TimelineEvent;
+    flightId: string;
     track: number;
     timeScale: number;
     currentTime?: string;
@@ -143,7 +145,7 @@ const EventPill: React.FC<{
     isDimmed?: boolean;
     trackSpacing?: number;
     onHoverChange?: (isHovered: boolean) => void;
-}> = ({ event, track, timeScale, currentTime, onEventClick, onContextMenu, isDimmed, trackSpacing = 30, onHoverChange }) => {
+}> = ({ event, flightId, track, timeScale, currentTime, onEventClick, onContextMenu, isDimmed, trackSpacing = 30, onHoverChange }) => {
     const leftPos = timeToPixels(event.timeScheduled || event.timeActual || '', timeScale);
     const colors = getColorForEventType(event.type, event.status);
     const isDelayed = event.status === 'delayed';
@@ -170,7 +172,7 @@ const EventPill: React.FC<{
     return (
         <div
             data-motion-layout
-            data-flip-id={`event-${event.id}`}
+            data-flip-id={`event-${flightId}-${event.id}`}
             className={`absolute flex items-center z-10 hover:z-20 cursor-pointer select-none group overflow-visible ${isDimmed ? 'opacity-40 grayscale-[80%]' : ''}`}
             style={{ left: `${leftPos}px`, top: `${topPos}px` }}
             onClick={(e) => {
@@ -336,10 +338,11 @@ const calculateEventTracks = (events: TimelineEvent[], timeScale: number): Map<s
 
 const ProcessDiamond: React.FC<{
     marker: ProcessMarker;
+    flightId: string;
     timeScale: number;
     stagger: number; // -1, 0, or 1
     isOverlappingLabel: boolean;
-}> = ({ marker, timeScale, stagger, isOverlappingLabel }) => {
+}> = ({ marker, flightId, timeScale, stagger, isOverlappingLabel }) => {
     const [isHovered, setIsHovered] = React.useState(false);
     const leftPx = timeToPixels(marker.time, timeScale);
 
@@ -362,8 +365,8 @@ const ProcessDiamond: React.FC<{
     return (
         <div
             data-motion-layout
-            data-flip-id={`marker-${marker.id}`}
-            className={`absolute flex items-center justify-center pointer-events-auto transition-all ${isHovered ? 'z-50' : 'z-20'}`}
+            data-flip-id={`marker-${flightId}-${marker.id}`}
+            className={`absolute flex items-center justify-center pointer-events-auto ${isHovered ? 'z-50' : 'z-20'}`}
             style={{
                 left: `${leftPx}px`,
                 top: 0,
@@ -404,7 +407,7 @@ const ProcessDiamond: React.FC<{
 };
 
 
-const AnnotationLine: React.FC<{ annotation: Annotation; index: number; timeScale: number }> = ({ annotation, index, timeScale }) => {
+const AnnotationLine: React.FC<{ annotation: Annotation; flightId: string; index: number; timeScale: number }> = ({ annotation, flightId, index, timeScale }) => {
     if (!annotation.startTime || !annotation.endTime) return null;
 
     const startPx = timeToPixels(annotation.startTime, timeScale);
@@ -586,6 +589,7 @@ const AnnotationLine: React.FC<{ annotation: Annotation; index: number; timeScal
                     <ProcessDiamond
                         key={m.id}
                         marker={m}
+                        flightId={flightId}
                         timeScale={timeScale}
                         stagger={stagger}
                         isOverlappingLabel={m.isOverlappingLabel}
@@ -989,12 +993,13 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
             {/* Right Content: Timeline */}
             <div className="flex-1 relative gantt-grid-bg" style={{ overflow: 'visible' }}>
                 {flight.annotations?.map((anno, idx) => (
-                    <AnnotationLine key={`anno-${idx}`} annotation={anno} index={idx} timeScale={timeScale} />
+                    <AnnotationLine key={`anno-${idx}`} annotation={anno} flightId={flight.id} index={idx} timeScale={timeScale} />
                 ))}
                 {flight.events.map((event) => (
                     <EventPill
                         key={event.id}
                         event={event}
+                        flightId={flight.id}
                         track={eventTracks.get(event.id) || 0}
                         timeScale={timeScale}
                         currentTime={currentTime}
@@ -1078,6 +1083,7 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
                                 {/* Purple dot above its own capsule */}
                                 <CalcPointWithTooltip
                                     motionId={event.id}
+                                    flightId={flight.id}
                                     calcRelPx={purpleDotPx}
                                     calcPointTime={calcPointTime}
                                     calcColor={calcColor}

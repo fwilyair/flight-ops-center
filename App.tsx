@@ -155,11 +155,18 @@ const App: React.FC = () => {
   const pendingFlipStateRef = useRef<ReturnType<typeof Flip.getState> | null>(null);
   const timelineFlipRef = useRef<ReturnType<typeof Flip.from> | null>(null);
 
+  const revertTimelineFlip = useCallback(() => {
+    const animation = timelineFlipRef.current;
+    if (!animation) return;
+
+    timelineFlipRef.current = null;
+    animation.revert();
+  }, []);
+
   const handleTimeScaleChange = useCallback((nextScale: 5 | 10 | 30 | 60) => {
     if (nextScale === timeScale) return;
 
-    timelineFlipRef.current?.kill();
-    timelineFlipRef.current = null;
+    revertTimelineFlip();
 
     const scope = timelineLayoutRef.current;
     if (scope && !prefersReducedMotion()) {
@@ -172,14 +179,14 @@ const App: React.FC = () => {
     }
 
     setTimeScale(nextScale);
-  }, [timeScale]);
+  }, [revertTimelineFlip, timeScale]);
 
   useLayoutEffect(() => {
     const previous = pendingFlipStateRef.current;
     pendingFlipStateRef.current = null;
     if (!previous) return;
 
-    timelineFlipRef.current?.kill();
+    revertTimelineFlip();
     const animation = Flip.from(previous, {
       duration: MOTION_DURATION.layout,
       ease: MOTION_EASE.layout,
@@ -192,20 +199,19 @@ const App: React.FC = () => {
     timelineFlipRef.current = animation;
 
     return () => {
-      animation.kill();
       if (timelineFlipRef.current === animation) {
         timelineFlipRef.current = null;
+        animation.revert();
       }
     };
-  }, [timeScale]);
+  }, [revertTimelineFlip, timeScale]);
 
   useLayoutEffect(() => {
     return () => {
-      timelineFlipRef.current?.kill();
-      timelineFlipRef.current = null;
+      revertTimelineFlip();
       pendingFlipStateRef.current = null;
     };
-  }, []);
+  }, [revertTimelineFlip]);
 
   useEffect(() => {
     // Update current time every minute
