@@ -1,5 +1,8 @@
 import React from 'react';
 import { Flight } from '../types';
+import { gsap } from '../motion/gsap';
+import { MOTION_DURATION, MOTION_EASE, MOTION_STAGGER } from '../motion/tokens';
+import { prefersReducedMotion, REDUCED_MOTION_QUERY } from '../motion/preferences';
 
 interface FlightDetailPanelProps {
     flight: Flight | null;
@@ -35,11 +38,132 @@ export const FlightDetailPanel: React.FC<FlightDetailPanelProps> = ({
 }) => {
     const [isEditingRemarks, setIsEditingRemarks] = React.useState(false);
     const [tempRemarks, setTempRemarks] = React.useState('');
+    const backdropRef = React.useRef<HTMLDivElement>(null);
+    const panelRef = React.useRef<HTMLDivElement>(null);
+    const drawerTimelineRef = React.useRef<gsap.core.Timeline | null>(null);
+    const initializedPanelRef = React.useRef<HTMLDivElement | null>(null);
 
     // Reset editing state when flight changes or panel closes
     React.useEffect(() => {
         setIsEditingRemarks(false);
         setTempRemarks('');
+    }, [flight?.id, isOpen]);
+
+    React.useLayoutEffect(() => {
+        drawerTimelineRef.current?.kill();
+        drawerTimelineRef.current = null;
+
+        const backdrop = backdropRef.current;
+        const panel = panelRef.current;
+        if (!flight || !backdrop || !panel) {
+            initializedPanelRef.current = null;
+            return;
+        }
+
+        const content = Array.from(
+            panel.querySelectorAll<HTMLElement>('[data-motion-drawer-content]')
+        );
+        const reducedMotionMedia = window.matchMedia(REDUCED_MOTION_QUERY);
+
+        if (initializedPanelRef.current !== panel) {
+            initializedPanelRef.current = panel;
+            gsap.set(backdrop, { autoAlpha: 0 });
+            gsap.set(panel, { xPercent: 100, autoAlpha: 0 });
+            gsap.set(content, { autoAlpha: 0, x: 8 });
+        }
+
+        const setFinalState = (reduceMotion: boolean) => {
+            drawerTimelineRef.current?.kill();
+            drawerTimelineRef.current = null;
+            gsap.killTweensOf([backdrop, panel, ...content]);
+
+            gsap.set(backdrop, { autoAlpha: isOpen ? 1 : 0 });
+            gsap.set(panel, {
+                xPercent: isOpen ? 0 : 100,
+                autoAlpha: isOpen ? 1 : 0,
+            });
+            gsap.set(content, {
+                autoAlpha: isOpen ? 1 : 0,
+                x: isOpen || reduceMotion ? 0 : 8,
+            });
+        };
+
+        const handleReducedMotionChange = (event: MediaQueryListEvent) => {
+            setFinalState(event.matches);
+        };
+
+        reducedMotionMedia.addEventListener('change', handleReducedMotionChange);
+
+        if (prefersReducedMotion()) {
+            setFinalState(true);
+            return () => {
+                reducedMotionMedia.removeEventListener('change', handleReducedMotionChange);
+                drawerTimelineRef.current?.kill();
+                drawerTimelineRef.current = null;
+            };
+        }
+
+        const timeline = gsap.timeline();
+
+        if (isOpen) {
+            timeline
+                .to(backdrop, {
+                    autoAlpha: 1,
+                    duration: MOTION_DURATION.fast,
+                    ease: MOTION_EASE.standard,
+                    overwrite: true,
+                }, 0)
+                .to(panel, {
+                    xPercent: 0,
+                    autoAlpha: 1,
+                    duration: MOTION_DURATION.drawerIn,
+                    ease: MOTION_EASE.layout,
+                    overwrite: true,
+                }, 0)
+                .fromTo(content, {
+                    autoAlpha: 0,
+                    x: 8,
+                }, {
+                    autoAlpha: 1,
+                    x: 0,
+                    duration: MOTION_DURATION.fast,
+                    ease: MOTION_EASE.standard,
+                    stagger: MOTION_STAGGER.layer,
+                    overwrite: true,
+                }, 0.08);
+        } else {
+            timeline
+                .to(panel, {
+                    xPercent: 100,
+                    autoAlpha: 0,
+                    duration: MOTION_DURATION.drawerOut,
+                    ease: MOTION_EASE.exit,
+                    overwrite: true,
+                }, 0)
+                .to(content, {
+                    autoAlpha: 0,
+                    x: 8,
+                    duration: MOTION_DURATION.fast,
+                    ease: MOTION_EASE.exit,
+                    overwrite: true,
+                }, 0)
+                .to(backdrop, {
+                    autoAlpha: 0,
+                    duration: MOTION_DURATION.fast,
+                    ease: MOTION_EASE.exit,
+                    overwrite: true,
+                }, 0.04);
+        }
+
+        drawerTimelineRef.current = timeline;
+
+        return () => {
+            reducedMotionMedia.removeEventListener('change', handleReducedMotionChange);
+            timeline.kill();
+            if (drawerTimelineRef.current === timeline) {
+                drawerTimelineRef.current = null;
+            }
+        };
     }, [flight?.id, isOpen]);
 
     if (!flight) return null;
@@ -48,15 +172,15 @@ export const FlightDetailPanel: React.FC<FlightDetailPanelProps> = ({
         <>
             {/* Backdrop - z-index lower than flight cards (z-40) so cards remain clickable */}
             <div
-                className={`fixed inset-0 bg-black/20 dark:bg-black/40 z-[35] transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-                    }`}
+                ref={backdropRef}
+                className={`fixed inset-0 bg-black/20 dark:bg-black/40 z-[35] ${isOpen ? '' : 'pointer-events-none'}`}
                 onClick={onClose}
             />
 
             {/* Panel - offset from top to not cover timeline */}
             <div
-                className={`fixed right-0 w-[400px] shadow-2xl z-[70] transform transition-transform duration-300 ease-out rounded-l-2xl overflow-hidden ${isOpen ? 'translate-x-0' : 'translate-x-full'
-                    }`}
+                ref={panelRef}
+                className={`fixed right-0 w-[400px] shadow-2xl z-[70] rounded-l-2xl overflow-hidden ${isOpen ? '' : 'pointer-events-none'}`}
                 style={{
                     top: '95px',
                     height: 'calc(100vh - 95px)',
@@ -161,7 +285,7 @@ export const FlightDetailPanel: React.FC<FlightDetailPanelProps> = ({
                     <div className="relative z-10 px-4 pb-4 space-y-5">
 
                         {/* Flight Numbers */}
-                        <div>
+                        <div data-motion-drawer-content>
                             <div className="flex items-center justify-center gap-3 mt-[12px] mb-[11px]">
                                 <span className="text-3xl font-black text-emerald-600 font-mono tracking-tight tabular-nums" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
                                     {flight.flightNo.split(' / ')[0]}
@@ -223,7 +347,7 @@ export const FlightDetailPanel: React.FC<FlightDetailPanelProps> = ({
                         </div>
 
                         {/* Remarks Section */}
-                        <div className="bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-slate-100 shadow-sm transition-all duration-300">
+                        <div data-motion-drawer-content className="bg-white/60 backdrop-blur-sm rounded-xl p-3 border border-slate-100 shadow-sm">
                             <div className="flex items-center justify-between mb-3 border-b border-slate-100/50 pb-2">
                                 <span className="text-sm font-extrabold text-slate-800 uppercase tracking-wide">
                                     航班备注
@@ -402,7 +526,7 @@ export const FlightDetailPanel: React.FC<FlightDetailPanelProps> = ({
 
                         {/* Event Tasks Section */}
                         {flight.events && flight.events.length > 0 && (
-                            <div className="space-y-3">
+                            <div data-motion-drawer-content className="space-y-3">
                                 {flight.events.map((event) => {
                                     // Calculate time difference
                                     const calcDiff = () => {
