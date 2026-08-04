@@ -802,7 +802,7 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
             ref={rowRef}
             data-motion-flight-row
             data-flight-id={flight.id}
-            className="flex group transition-all duration-200 relative mb-3 rounded-xl shadow-sm hover:shadow-md border border-slate-100"
+            className="flex group transition-shadow duration-200 relative mb-3 rounded-xl shadow-sm hover:shadow-md border border-slate-100"
             style={{
                 height: `${rowHeight}px`,
                 background: '#ffffff' // Pure white card background

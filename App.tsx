@@ -348,6 +348,24 @@ const App: React.FC = () => {
     animation.revert();
   }, []);
 
+  useEffect(() => {
+    const reducedMotionMedia = window.matchMedia(REDUCED_MOTION_QUERY);
+    const restoreTimelineLayout = () => {
+      pendingFlipStateRef.current = null;
+      revertTimelineFlip();
+    };
+    const handleReducedMotionChange = (event: MediaQueryListEvent) => {
+      if (event.matches) restoreTimelineLayout();
+    };
+
+    reducedMotionMedia.addEventListener('change', handleReducedMotionChange);
+    if (reducedMotionMedia.matches) restoreTimelineLayout();
+
+    return () => {
+      reducedMotionMedia.removeEventListener('change', handleReducedMotionChange);
+    };
+  }, [revertTimelineFlip]);
+
   const handleTimeScaleChange = useCallback((nextScale: 5 | 10 | 30 | 60) => {
     if (nextScale === timeScale) return;
 
