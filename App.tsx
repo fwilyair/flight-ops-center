@@ -39,10 +39,115 @@ const App: React.FC = () => {
 
   // 悬浮在事件胶囊上时的虚线与时间标签信息
   const [hoveredEventInfo, setHoveredEventInfo] = useState<EventHoverInfo | null>(null);
+  const [renderedHoverInfo, setRenderedHoverInfo] = useState<EventHoverInfo | null>(null);
+  const hoverMotionScopeRef = useRef<HTMLDivElement>(null);
+  const hoverMotionGenerationRef = useRef(0);
 
   const handleEventHover = useCallback((info: EventHoverInfo | null) => {
+    if (info) setRenderedHoverInfo(info);
     setHoveredEventInfo(info);
   }, []);
+
+  useLayoutEffect(() => {
+    const scope = hoverMotionScopeRef.current;
+    if (!scope || !renderedHoverInfo) return;
+
+    const badges = Array.from(
+      scope.querySelectorAll<HTMLElement>('[data-motion-hover-badge]')
+    );
+    const guides = Array.from(
+      scope.querySelectorAll<HTMLElement>('[data-motion-hover-guide]')
+    );
+    const targets = [...guides, ...badges];
+    if (targets.length === 0) return;
+
+    const generation = ++hoverMotionGenerationRef.current;
+    const reducedMotionMedia = window.matchMedia(REDUCED_MOTION_QUERY);
+    let contextReverted = false;
+    const context = gsap.context(() => {
+      gsap.killTweensOf(targets);
+
+      if (reducedMotionMedia.matches) {
+        if (!hoveredEventInfo) setRenderedHoverInfo(null);
+        return;
+      }
+
+      const timeline = gsap.timeline({
+        onComplete: () => {
+          if (
+            !hoveredEventInfo &&
+            hoverMotionGenerationRef.current === generation
+          ) {
+            setRenderedHoverInfo(null);
+          }
+        },
+      });
+
+      if (hoveredEventInfo) {
+        if (guides.length > 0) {
+          timeline.fromTo(
+            guides,
+            { autoAlpha: 0 },
+            {
+              autoAlpha: 1,
+              duration: MOTION_DURATION.fast,
+              overwrite: true,
+            },
+            0
+          );
+        }
+
+        if (badges.length > 0) {
+          timeline.fromTo(
+            badges,
+            { autoAlpha: 0, y: 4, scale: 0.96 },
+            {
+              autoAlpha: 1,
+              y: 0,
+              scale: 1,
+              duration: MOTION_DURATION.fast,
+              ease: MOTION_EASE.standard,
+              overwrite: true,
+            },
+            0
+          );
+        }
+      } else {
+        timeline.to(targets, {
+          autoAlpha: 0,
+          duration: 0.1,
+          ease: MOTION_EASE.exit,
+          overwrite: true,
+        });
+      }
+    }, scope);
+
+    const revertContext = () => {
+      if (contextReverted) return;
+      contextReverted = true;
+      context.revert();
+    };
+    const handleReducedMotionChange = (event: MediaQueryListEvent) => {
+      if (!event.matches) return;
+
+      if (hoverMotionGenerationRef.current === generation) {
+        hoverMotionGenerationRef.current += 1;
+      }
+      revertContext();
+      gsap.killTweensOf(targets);
+      if (!hoveredEventInfo) setRenderedHoverInfo(null);
+    };
+
+    reducedMotionMedia.addEventListener('change', handleReducedMotionChange);
+
+    return () => {
+      reducedMotionMedia.removeEventListener('change', handleReducedMotionChange);
+      if (hoverMotionGenerationRef.current === generation) {
+        hoverMotionGenerationRef.current += 1;
+      }
+      revertContext();
+    };
+  }, [hoveredEventInfo, renderedHoverInfo]);
 
   // 航班详情面板状态
   const [selectedFlight, setSelectedFlight] = useState<Flight | null>(null);
@@ -386,7 +491,7 @@ const App: React.FC = () => {
   }, [scrollToCurrentTime]);
 
   return (
-    <div className="atmosphere-bg flex flex-col h-screen overflow-hidden" style={{ background: 'var(--bg-primary)' }}>
+    <div ref={hoverMotionScopeRef} className="atmosphere-bg flex flex-col h-screen overflow-hidden" style={{ background: 'var(--bg-primary)' }}>
       <Header
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
@@ -436,34 +541,36 @@ const App: React.FC = () => {
                 </div>
 
                 {/* Hover Time Indicator Badges in Timeline Header */}
-                {hoveredEventInfo && (
+                {renderedHoverInfo && (
                   <>
                     {/* Green Dot Scheduled Time Badge */}
                     <div
-                      className="absolute z-50 flex flex-col items-center pointer-events-none animate-in fade-in zoom-in-95 duration-150"
+                      data-motion-hover-badge
+                      className="absolute z-50 flex flex-col items-center pointer-events-none"
                       style={{
-                        left: `${hoveredEventInfo.greenDotPx}px`,
+                        left: `${renderedHoverInfo.greenDotPx}px`,
                         top: '50%',
                         transform: 'translate(-50%, -50%)'
                       }}
                     >
                       <div className="bg-emerald-600 text-white text-sm font-bold px-1.5 h-[22px] flex items-center justify-center rounded shadow-sm tabular-nums font-mono border border-emerald-500 whitespace-nowrap leading-none pb-[1px]">
-                        {hoveredEventInfo.timeScheduled}
+                        {renderedHoverInfo.timeScheduled}
                       </div>
                     </div>
 
                     {/* Purple Dot Calc Point Time Badge */}
-                    {hoveredEventInfo.calcPointTime && hoveredEventInfo.purpleDotPx !== undefined && (
+                    {renderedHoverInfo.calcPointTime && renderedHoverInfo.purpleDotPx !== undefined && (
                       <div
-                        className="absolute z-50 flex flex-col items-center pointer-events-none animate-in fade-in zoom-in-95 duration-150"
+                        data-motion-hover-badge
+                        className="absolute z-50 flex flex-col items-center pointer-events-none"
                         style={{
-                          left: `${hoveredEventInfo.purpleDotPx}px`,
+                          left: `${renderedHoverInfo.purpleDotPx}px`,
                           top: '50%',
                           transform: 'translate(-50%, -50%)'
                         }}
                       >
                         <div className="bg-purple-600 text-white text-sm font-bold px-1.5 h-[22px] flex items-center justify-center rounded shadow-sm tabular-nums font-mono border border-purple-500 whitespace-nowrap leading-none pb-[1px]">
-                          {hoveredEventInfo.calcPointTime}
+                          {renderedHoverInfo.calcPointTime}
                         </div>
                       </div>
                     )}
@@ -515,15 +622,16 @@ const App: React.FC = () => {
               ></div>
 
               {/* Hover Guide Lines (Green & Purple dashed vertical lines extending to timeline header) */}
-              {hoveredEventInfo && (
+              {renderedHoverInfo && (
                 <>
                   {/* Green Dot Vertical Line */}
                   <div
-                    className="absolute pointer-events-none z-30 animate-in fade-in duration-150"
+                    data-motion-hover-guide
+                    className="absolute pointer-events-none z-30"
                     style={{
-                      left: `${HOVER_GUIDE_TIMELINE_OFFSET_PX + hoveredEventInfo.greenDotPx}px`,
+                      left: `${HOVER_GUIDE_TIMELINE_OFFSET_PX + renderedHoverInfo.greenDotPx}px`,
                       top: 0,
-                      height: `${hoveredEventInfo.greenDotY}px`,
+                      height: `${renderedHoverInfo.greenDotY}px`,
                       width: '2px',
                       borderLeft: '2px dashed #10B981',
                       transform: 'translateX(-50%)',
@@ -531,13 +639,14 @@ const App: React.FC = () => {
                   />
 
                   {/* Purple Dot Vertical Line */}
-                  {hoveredEventInfo.purpleDotPx !== undefined && hoveredEventInfo.purpleDotY !== undefined && (
+                  {renderedHoverInfo.purpleDotPx !== undefined && renderedHoverInfo.purpleDotY !== undefined && (
                     <div
-                      className="absolute pointer-events-none z-30 animate-in fade-in duration-150"
+                      data-motion-hover-guide
+                      className="absolute pointer-events-none z-30"
                       style={{
-                        left: `${HOVER_GUIDE_TIMELINE_OFFSET_PX + hoveredEventInfo.purpleDotPx}px`,
+                        left: `${HOVER_GUIDE_TIMELINE_OFFSET_PX + renderedHoverInfo.purpleDotPx}px`,
                         top: 0,
-                        height: `${hoveredEventInfo.purpleDotY}px`,
+                        height: `${renderedHoverInfo.purpleDotY}px`,
                         width: '2px',
                         borderLeft: '2px dashed #8B5CF6',
                         transform: 'translateX(-50%)',
