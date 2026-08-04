@@ -7,8 +7,8 @@ import { HelpManualModal } from './components/HelpManualModal';
 import { MOCK_FLIGHTS } from './data';
 import { timeToPixels } from './utils';
 import { START_TIME_HOUR, Flight, TimelineEvent } from './types';
-import { Flip } from './motion/gsap';
-import { MOTION_DURATION, MOTION_EASE } from './motion/tokens';
+import { Flip, gsap } from './motion/gsap';
+import { MOTION_DURATION, MOTION_EASE, MOTION_STAGGER } from './motion/tokens';
 import { prefersReducedMotion } from './motion/preferences';
 
 // Time markers generation - dynamically calculated based on flight data
@@ -111,6 +111,11 @@ const App: React.FC = () => {
     });
   }, [flights, deferredSearchQuery, selectedDate]);
 
+  const filteredFlightKey = useMemo(
+    () => `${deferredSearchQuery}|${selectedDate}|${filteredFlights.map(flight => flight.id).join(',')}`,
+    [deferredSearchQuery, selectedDate, filteredFlights]
+  );
+
   // 计算所有航班事件的最大时间，确保时间轴足够长
   const calculateMaxTime = () => {
     let maxMinutes = 0;
@@ -154,6 +159,46 @@ const App: React.FC = () => {
   const timelineLayoutRef = useRef<HTMLDivElement>(null);
   const pendingFlipStateRef = useRef<ReturnType<typeof Flip.getState> | null>(null);
   const timelineFlipRef = useRef<ReturnType<typeof Flip.from> | null>(null);
+
+  useLayoutEffect(() => {
+    const scope = timelineLayoutRef.current;
+    if (!scope || prefersReducedMotion()) return;
+
+    const rows = Array.from(
+      scope.querySelectorAll<HTMLElement>('[data-motion-flight-row]')
+    );
+    if (rows.length === 0) return;
+
+    const context = gsap.context(() => {
+      gsap.killTweensOf(rows);
+      gsap.fromTo(
+        rows,
+        { autoAlpha: 0, y: 10 },
+        {
+          autoAlpha: 1,
+          y: 0,
+          duration: MOTION_DURATION.fast,
+          ease: MOTION_EASE.standard,
+          stagger: {
+            each: MOTION_STAGGER.list,
+            amount: Math.min(0.24, MOTION_STAGGER.list * Math.max(0, rows.length - 1)),
+          },
+          overwrite: true,
+          clearProps: 'opacity,visibility,transform',
+        }
+      );
+
+      if (deferredSearchQuery && rows[0]) {
+        gsap.fromTo(
+          rows[0],
+          { scale: 1.012 },
+          { scale: 1, duration: 0.5, ease: MOTION_EASE.standard, clearProps: 'transform' }
+        );
+      }
+    }, scope);
+
+    return () => context.revert();
+  }, [filteredFlightKey, deferredSearchQuery]);
 
   const revertTimelineFlip = useCallback(() => {
     const animation = timelineFlipRef.current;
