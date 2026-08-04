@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { MotionModalShell } from './MotionModalShell';
 
 interface HelpManualModalProps {
   isOpen: boolean;
@@ -10,21 +11,17 @@ type TabType = 'overview' | 'events' | 'interactions';
 export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClose }) => {
   const [activeTab, setActiveTab] = useState<TabType>('overview');
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 overflow-hidden">
-      {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity animate-in fade-in duration-200"
-        onClick={onClose}
-      />
-
-      {/* Main Modal Container - Fixed uniform height for all tabs to eliminate any height jumping when switching tabs */}
-      <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-4xl h-[570px] max-h-[85vh] flex flex-col overflow-hidden border border-gray-100 dark:border-gray-800 animate-in zoom-in-95 duration-200">
+    <MotionModalShell
+      isOpen={isOpen}
+      onClose={onClose}
+      ariaLabel="穿透管控使用手册"
+      containerClassName="p-4 sm:p-6 overflow-hidden"
+      panelClassName="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-4xl h-[570px] max-h-[85vh] flex flex-col overflow-hidden border border-gray-100 dark:border-gray-800"
+    >
         
         {/* Modal Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-slate-50/80 dark:bg-gray-800/80 backdrop-blur-md shrink-0">
+        <div data-motion-modal-content className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-slate-50/80 dark:bg-gray-800/80 backdrop-blur-md shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-blue-600/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400 flex items-center justify-center font-bold">
               <span className="material-symbols-outlined text-2xl">help</span>
@@ -42,7 +39,7 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
         </div>
 
         {/* Tab Navigation - Equal 3-Column Split */}
-        <div className="grid grid-cols-3 px-6 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shrink-0">
+        <div data-motion-modal-content className="grid grid-cols-3 px-6 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shrink-0">
           <button
             onClick={() => setActiveTab('overview')}
             className={`w-full py-3 text-sm font-bold border-b-2 transition-colors flex items-center justify-center gap-2 ${
@@ -79,7 +76,7 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
         </div>
 
         {/* Modal Body / Tab Content */}
-        <div className="flex-1 overflow-y-auto no-scrollbar p-6 text-gray-700 dark:text-gray-300">
+        <div data-motion-modal-content className="flex-1 overflow-y-auto no-scrollbar p-6 text-gray-700 dark:text-gray-300">
 
           {/* TAB 1: OVERVIEW */}
           {activeTab === 'overview' && (
@@ -293,7 +290,6 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
           )}
 
         </div>
-      </div>
-    </div>
+    </MotionModalShell>
   );
 };

@@ -4,6 +4,7 @@ import { GanttRow, EventHoverInfo } from './components/GanttRow';
 import { FlightDetailPanel } from './components/FlightDetailPanel';
 import { CapsuleDetailModal } from './components/CapsuleDetailModal';
 import { HelpManualModal } from './components/HelpManualModal';
+import { MotionModalShell } from './components/MotionModalShell';
 import { MOCK_FLIGHTS } from './data';
 import { timeToPixels } from './utils';
 import { START_TIME_HOUR, Flight, TimelineEvent } from './types';
@@ -715,18 +716,14 @@ const App: React.FC = () => {
       />
 
       {/* Video Monitor Modal - Under Construction */}
-      {isVideoModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center">
-          {/* Backdrop */}
-          <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity animate-in fade-in duration-200"
-            onClick={handleVideoModalClose}
-          ></div>
-
-          {/* Modal Content */}
-          <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-[400px] overflow-hidden animate-in zoom-in-95 duration-200 scale-100 opacity-100">
+      <MotionModalShell
+        isOpen={isVideoModalOpen}
+        onClose={handleVideoModalClose}
+        ariaLabel="监控视频"
+        panelClassName="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-[400px] overflow-hidden"
+      >
             {/* Header */}
-            <div className="relative px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-center bg-white dark:bg-gray-800">
+            <div data-motion-modal-content className="relative px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-center bg-white dark:bg-gray-800">
               <span className="text-xl font-bold tracking-wide text-gray-900 dark:text-white">监控视频</span>
               <button
                 onClick={handleVideoModalClose}
@@ -737,7 +734,7 @@ const App: React.FC = () => {
             </div>
 
             {/* Body */}
-            <div className="p-10 flex flex-col items-center justify-center text-center space-y-5">
+            <div data-motion-modal-content className="p-10 flex flex-col items-center justify-center text-center space-y-5">
               <div className="w-20 h-20 bg-orange-50 rounded-full flex items-center justify-center mb-2">
                 <span className="material-symbols-outlined text-5xl text-orange-500">engineering</span>
               </div>
@@ -753,9 +750,7 @@ const App: React.FC = () => {
                 我知道了
               </button>
             </div>
-          </div>
-        </div>
-      )}
+      </MotionModalShell>
       {/* Help Manual Modal */}
       <HelpManualModal
         isOpen={isHelpModalOpen}

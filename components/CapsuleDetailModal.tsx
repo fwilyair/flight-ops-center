@@ -1,5 +1,6 @@
 import React from 'react';
 import { TimelineEvent, TaskStatus, TaskLifecycleEvent } from '../types';
+import { MotionModalShell } from './MotionModalShell';
 
 interface CapsuleDetailModalProps {
     isOpen: boolean;
@@ -158,25 +159,19 @@ export const CapsuleDetailModal: React.FC<CapsuleDetailModalProps> = ({
         }, 600);
     };
 
-    if (!isOpen || !event) return null;
+    if (!event) return null;
 
     const timeDiff = calculateTimeDiff(event.timeActual, event.timeScheduled);
     const timeDiffColor = timeDiff === null ? 'text-gray-500' : timeDiff > 0 ? 'text-red-600' : 'text-emerald-600';
 
     return (
-        <>
-            {/* Backdrop */}
-            <div
-                className="fixed inset-0 bg-black/40 z-[80] transition-opacity"
-                onClick={onClose}
-            />
-
-            {/* Main Capsule Detail Modal */}
-            <div
-                className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] max-h-[90vh] z-[90] rounded-2xl overflow-hidden shadow-2xl flex flex-col"
-                style={{ boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' }}
-            >
-                <div className="relative px-5 py-6 bg-white z-20 border-b border-gray-100 shadow-sm flex-none">
+        <MotionModalShell
+            isOpen={isOpen}
+            onClose={onClose}
+            ariaLabel={`${flightNo} ${event.label}任务详情`}
+            panelClassName="relative w-[700px] h-[700px] max-h-[90vh] z-[90] rounded-2xl overflow-hidden shadow-2xl flex flex-col"
+        >
+                <div data-motion-modal-content className="relative px-5 py-6 bg-white z-20 border-b border-gray-100 shadow-sm flex-none">
                     {/* Title content - Centered */}
                     <div className="flex items-center justify-center relative">
                         <div className="flex flex-col items-center gap-1">
@@ -212,7 +207,7 @@ export const CapsuleDetailModal: React.FC<CapsuleDetailModalProps> = ({
 
                 {/* Content area with liquid flow background */}
                 {/* Content area with liquid flow background */}
-                <div className="flex-1 overflow-y-auto relative bg-white flex flex-col-reverse p-6">
+                <div data-motion-modal-content className="flex-1 overflow-y-auto relative bg-white flex flex-col-reverse p-6">
                     {/* Subtle gradient overlay */}
                     <div className="absolute inset-0 bg-gradient-to-br from-sky-50/50 via-white to-blue-50/30 pointer-events-none sticky top-0"></div>
 
@@ -369,7 +364,6 @@ export const CapsuleDetailModal: React.FC<CapsuleDetailModalProps> = ({
                         </div>
                     </div>
                 </div>
-            </div>
-        </>
+        </MotionModalShell>
     );
 };
