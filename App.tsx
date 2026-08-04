@@ -153,16 +153,13 @@ const App: React.FC = () => {
   // 航班详情面板状态
   const [selectedFlight, setSelectedFlight] = useState<Flight | null>(null);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const selectedFlightIdRef = useRef<string | null>(null);
 
   const handleFlightClick = useCallback((flight: Flight) => {
-    setSelectedFlight(prev => {
-      if (prev?.id === flight.id) {
-        setIsPanelOpen(p => !p);
-        return prev;
-      }
-      setIsPanelOpen(true);
-      return flight;
-    });
+    const isSameFlight = selectedFlightIdRef.current === flight.id;
+    selectedFlightIdRef.current = flight.id;
+    setSelectedFlight(flight);
+    setIsPanelOpen(prev => isSameFlight ? !prev : true);
   }, []);
 
   const handlePanelClose = useCallback(() => {
