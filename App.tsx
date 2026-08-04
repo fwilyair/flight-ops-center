@@ -9,7 +9,7 @@ import { timeToPixels } from './utils';
 import { START_TIME_HOUR, Flight, TimelineEvent } from './types';
 import { Flip, gsap } from './motion/gsap';
 import { MOTION_DURATION, MOTION_EASE, MOTION_STAGGER } from './motion/tokens';
-import { prefersReducedMotion } from './motion/preferences';
+import { prefersReducedMotion, REDUCED_MOTION_QUERY } from './motion/preferences';
 
 // Time markers generation - dynamically calculated based on flight data
 
@@ -159,19 +159,35 @@ const App: React.FC = () => {
   const timelineLayoutRef = useRef<HTMLDivElement>(null);
   const pendingFlipStateRef = useRef<ReturnType<typeof Flip.getState> | null>(null);
   const timelineFlipRef = useRef<ReturnType<typeof Flip.from> | null>(null);
+  const previousFilteredFlightKeyRef = useRef(filteredFlightKey);
 
   useLayoutEffect(() => {
-    const scope = timelineLayoutRef.current;
-    if (!scope || prefersReducedMotion()) return;
+    const previousFilteredFlightKey = previousFilteredFlightKeyRef.current;
+    previousFilteredFlightKeyRef.current = filteredFlightKey;
+    if (previousFilteredFlightKey === filteredFlightKey) return;
 
-    const rows = Array.from(
+    const scope = timelineLayoutRef.current;
+    if (!scope) return;
+
+    const reducedMotionMedia = window.matchMedia(REDUCED_MOTION_QUERY);
+    if (reducedMotionMedia.matches) return;
+
+    const rows: HTMLElement[] = Array.from(
       scope.querySelectorAll<HTMLElement>('[data-motion-flight-row]')
     );
     if (rows.length === 0) return;
 
+    // `amount` caps the first-to-last row start-time spread.
+    const staggerSpread = Math.min(
+      0.24,
+      MOTION_STAGGER.list * Math.max(0, rows.length - 1)
+    );
+
     const context = gsap.context(() => {
       gsap.killTweensOf(rows);
-      gsap.fromTo(
+      const timeline = gsap.timeline();
+
+      timeline.fromTo(
         rows,
         { autoAlpha: 0, y: 10 },
         {
@@ -179,25 +195,46 @@ const App: React.FC = () => {
           y: 0,
           duration: MOTION_DURATION.fast,
           ease: MOTION_EASE.standard,
-          stagger: {
-            each: MOTION_STAGGER.list,
-            amount: Math.min(0.24, MOTION_STAGGER.list * Math.max(0, rows.length - 1)),
-          },
+          stagger: { amount: staggerSpread },
           overwrite: true,
-          clearProps: 'opacity,visibility,transform',
-        }
+        },
+        0
       );
 
       if (deferredSearchQuery && rows[0]) {
-        gsap.fromTo(
+        timeline.fromTo(
           rows[0],
           { scale: 1.012 },
-          { scale: 1, duration: 0.5, ease: MOTION_EASE.standard, clearProps: 'transform' }
+          { scale: 1, duration: 0.5, ease: MOTION_EASE.standard },
+          0
         );
       }
+
+      timeline.set(rows, { clearProps: 'opacity,visibility,transform' });
     }, scope);
 
-    return () => context.revert();
+    let contextReverted = false;
+    const revertContext = () => {
+      if (contextReverted) return;
+      contextReverted = true;
+      context.revert();
+    };
+    const restoreRows = () => {
+      revertContext();
+      gsap.killTweensOf(rows);
+      gsap.set(rows, { clearProps: 'opacity,visibility,transform' });
+    };
+    const handleReducedMotionChange = (event: MediaQueryListEvent) => {
+      if (event.matches) restoreRows();
+    };
+
+    reducedMotionMedia.addEventListener('change', handleReducedMotionChange);
+    if (reducedMotionMedia.matches) restoreRows();
+
+    return () => {
+      reducedMotionMedia.removeEventListener('change', handleReducedMotionChange);
+      revertContext();
+    };
   }, [filteredFlightKey, deferredSearchQuery]);
 
   const revertTimelineFlip = useCallback(() => {
