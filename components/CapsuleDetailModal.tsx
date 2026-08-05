@@ -8,6 +8,7 @@ interface CapsuleDetailModalProps {
     event: TimelineEvent | null;
     flightNo: string;
     codeshare?: string;
+    currentTime?: string;
     onControl?: () => void;
 }
 
@@ -53,23 +54,30 @@ const getLifecycleTypeStyle = (type: TaskLifecycleEvent['type']) => {
 };
 
 // Calculate time difference in minutes
-const calculateTimeDiff = (actual?: string, scheduled?: string): number | null => {
-    if (!actual || !scheduled || actual === '--:--' || scheduled === '--:--') return null;
-
-    const [aH, aM] = actual.split(':').map(Number);
-    const [sH, sM] = scheduled.split(':').map(Number);
-
-    const actualMins = aH * 60 + aM;
-    const scheduledMins = sH * 60 + sM;
-
-    return actualMins - scheduledMins;
+const calculateTimeDiff = (actual?: string, scheduled?: string, currentTime?: string): number | null => {
+    if (actual && actual !== '--:--' && scheduled && scheduled !== '--:--') {
+        const [aH, aM] = actual.split(':').map(Number);
+        const [sH, sM] = scheduled.split(':').map(Number);
+        return (aH * 60 + aM) - (sH * 60 + sM);
+    }
+    if ((!actual || actual === '--:--') && scheduled && scheduled !== '--:--') {
+        const now = new Date();
+        const curStr = currentTime || `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+        const [cH, cM] = curStr.split(':').map(Number);
+        const [sH, sM] = scheduled.split(':').map(Number);
+        let diffMins = (cH * 60 + cM) - (sH * 60 + sM);
+        if (diffMins > 720) diffMins -= 1440;
+        if (diffMins < -720) diffMins += 1440;
+        return diffMins;
+    }
+    return null;
 };
 
 // Status translation map
 const STATUS_MAP_CN: Record<string, string> = {
     'completed': '正常完成',
     'overtime-completed': '超时完成',
-    'overtime-incomplete': '超时未完',
+    'overtime-incomplete': '超时未完成',
     'delayed': '延误',
     'active': '保障中',
     'pending': '未开始',
@@ -84,6 +92,7 @@ export const CapsuleDetailModal: React.FC<CapsuleDetailModalProps> = ({
     event,
     flightNo,
     codeshare,
+    currentTime,
     onControl
 }) => {
     // ... hooks
@@ -161,7 +170,7 @@ export const CapsuleDetailModal: React.FC<CapsuleDetailModalProps> = ({
 
     if (!event) return null;
 
-    const timeDiff = calculateTimeDiff(event.timeActual, event.timeScheduled);
+    const timeDiff = calculateTimeDiff(event.timeActual, event.timeScheduled, currentTime);
     const timeDiffColor = timeDiff === null ? 'text-gray-500' : timeDiff > 0 ? 'text-red-600' : 'text-emerald-600';
 
     return (

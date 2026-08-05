@@ -727,6 +727,7 @@ const App: React.FC = () => {
         event={selectedEvent}
         flightNo={capsuleFlightNo}
         codeshare={capsuleCodeshare}
+        currentTime={currentTime}
         onControl={() => console.log('Control clicked for event:', selectedEvent?.label)}
       />
 
