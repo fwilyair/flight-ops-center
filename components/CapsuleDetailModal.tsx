@@ -224,20 +224,28 @@ export const CapsuleDetailModal: React.FC<CapsuleDetailModalProps> = ({
                                 let alignment = 'self-start'; // Default Left (Field)
                                 let bubbleStyle = 'bg-gray-100 text-gray-700';
 
-                                // Colors for bubbles (content)
+                                // Colors for bubbles (content) matching System Color Legends & Control Buttons
                                 if (['预警', '催办'].includes(lc.type)) {
                                     alignment = 'self-center';
-                                    if (lc.type === '预警') {
-                                        bubbleStyle = 'bg-orange-50 text-orange-600 border border-orange-100';
-                                    } else { // 催办
-                                        bubbleStyle = 'bg-rose-50 text-rose-600 border border-rose-100';
+                                    if (lc.type === '催办') {
+                                        // 穿透管控 (催办): 匹配底部橙色「穿透管控」按钮
+                                        bubbleStyle = 'bg-orange-50 text-orange-700 border border-orange-200 shadow-sm';
+                                    } else if (lc.description.includes('超时')) {
+                                        // 超时告警/超时未完成: 匹配系统图例红色「超时未完成」
+                                        bubbleStyle = 'bg-red-50 text-red-700 border border-red-200 shadow-sm';
+                                    } else if (lc.description.includes('关联') || lc.description.includes('连带')) {
+                                        // 关联告警: 匹配系统图例紫色「关联告警」
+                                        bubbleStyle = 'bg-purple-50 text-purple-700 border border-purple-200 shadow-sm';
+                                    } else {
+                                        // 临期预警: 匹配系统图例青色「临期预警」
+                                        bubbleStyle = 'bg-cyan-50 text-cyan-700 border border-cyan-200 shadow-sm';
                                     }
                                 } else if (lc.type === '管控') {
                                     alignment = 'self-end';
-                                    // Light Green as requested (matching avatar)
-                                    bubbleStyle = 'bg-emerald-100 text-emerald-700 border border-emerald-200 shadow-sm';
+                                    // 多级管控: 匹配底部蓝色「多级管控」按钮
+                                    bubbleStyle = 'bg-blue-50 text-blue-700 border border-blue-200 shadow-sm';
                                 } else {
-                                    // Default Task Blue
+                                    // 常规节点 (创建/发布/领受/到位/开始/结束)
                                     bubbleStyle = 'bg-blue-50 text-blue-700 border border-blue-100 shadow-sm';
                                 }
 
