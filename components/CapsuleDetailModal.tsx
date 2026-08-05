@@ -82,8 +82,24 @@ const STATUS_MAP_CN: Record<string, string> = {
     'active': '保障中',
     'pending': '未开始',
     'normal': '正常',
-    'warning': '异常',
-    'alert': '告警'
+    'warning': '临期预警',
+    'alert': '关联告警'
+};
+
+// Unified StatusBadge style for legend statuses
+const getStatusBadgeStyle = (status: string) => {
+    switch (status) {
+        case 'overtime-completed':
+            return { bg: 'bg-yellow-50', border: 'border-yellow-100', text: 'text-yellow-900', label: '超时完成' };
+        case 'overtime-incomplete':
+            return { bg: 'bg-red-50', border: 'border-red-100', text: 'text-red-900', label: '超时未完成' };
+        case 'alert':
+            return { bg: 'bg-purple-50', border: 'border-purple-100', text: 'text-purple-900', label: '关联告警' };
+        case 'warning':
+            return { bg: 'bg-cyan-50', border: 'border-cyan-100', text: 'text-cyan-900', label: '临期预警' };
+        default:
+            return null;
+    }
 };
 
 export const CapsuleDetailModal: React.FC<CapsuleDetailModalProps> = ({
@@ -95,14 +111,9 @@ export const CapsuleDetailModal: React.FC<CapsuleDetailModalProps> = ({
     currentTime,
     onControl
 }) => {
-    // ... hooks
-
     // Helper to get status text
     const getStatusText = (status: string) => STATUS_MAP_CN[status] || status;
 
-    // ... rest of component
-
-    // In Render:
     // ... hooks
     const [isControlModalOpen, setIsControlModalOpen] = React.useState(false);
     const [controlText, setControlText] = React.useState('');
@@ -195,7 +206,7 @@ export const CapsuleDetailModal: React.FC<CapsuleDetailModalProps> = ({
                             </div>
 
                             {/* Restored Task Details - Text Based - Consistent Font Size - Increased Gap */}
-                            <div className="flex items-center gap-12 mt-2 text-lg font-bold text-gray-800">
+                            <div className="flex items-center gap-6 mt-2 text-lg font-bold text-gray-800">
                                 <span>{event.label}</span>
                                 {timeDiff !== null && (
                                     <>
@@ -206,7 +217,17 @@ export const CapsuleDetailModal: React.FC<CapsuleDetailModalProps> = ({
                                     </>
                                 )}
                                 <span className="w-px h-5 bg-gray-300"></span>
-                                <span className="text-gray-500">{getStatusText(event.status)}</span>
+                                {(() => {
+                                    const badge = getStatusBadgeStyle(event.status);
+                                    if (badge) {
+                                        return (
+                                            <div className={`flex h-8 w-[100px] shrink-0 items-center justify-center gap-x-2 rounded-full border ${badge.bg} ${badge.border} transition-all duration-200 hover:shadow-sm`}>
+                                                <span className={`text-xs font-bold uppercase tracking-wide ${badge.text}`}>{badge.label}</span>
+                                            </div>
+                                        );
+                                    }
+                                    return <span className="text-gray-500">{getStatusText(event.status)}</span>;
+                                })()}
                             </div>
                         </div>
 
