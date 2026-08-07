@@ -5,7 +5,7 @@ export const MOCK_FLIGHTS: Flight[] = [
   // 1. 进港已完成 - 2个事件
   {
     id: '1',
-    flightNo: 'CA1538 / CA1539',
+    flightNo: 'CA1538',
     codeshare: 'CA1539',
     remarks: '',
     stand: '203',

@@ -61,6 +61,15 @@ test('provides STA and STD for every mock flight card', () => {
     });
 });
 
+test('uses a single normalized flight number for every turnaround flight', () => {
+    MOCK_FLIGHTS.forEach((flight) => {
+        assert.ok(
+            !flight.flightNo.includes('/'),
+            `${flight.flightNo} should not combine multiple flight numbers`,
+        );
+    });
+});
+
 test('provides independent card metadata for every turnaround flight', () => {
     MOCK_FLIGHTS.forEach((flight) => {
         const expected = EXPECTED_METADATA_BY_FLIGHT_ID[flight.id as keyof typeof EXPECTED_METADATA_BY_FLIGHT_ID];
