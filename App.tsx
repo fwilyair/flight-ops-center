@@ -646,7 +646,7 @@ const App: React.FC = () => {
             </div>
 
             {/* Flight Rows Area */}
-            <div className="flex-1 flex relative">
+            <div className="flight-rows-area relative flex flex-1">
 
               {/* Past Time Shade (Left of Current Time) - Tech Dot Pattern */}
               <div
