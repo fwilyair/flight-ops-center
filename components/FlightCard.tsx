@@ -18,6 +18,7 @@ import type { FlightTag } from './flightTags';
 
 export interface FlightCardProps {
     flight: Flight;
+    height?: number;
     onClick?: () => void;
     onVideoClick?: () => void;
     onFlightUpdate?: (flight: Flight) => void;
@@ -79,8 +80,8 @@ const LegTagRow: React.FC<{
     const isDeparture = leg === 'departure';
 
     return (
-        <div className="relative flex h-[22px] min-w-0 items-center">
-            <div className="mx-auto flex min-w-0 items-center justify-center gap-1">
+        <div className="flex h-[22px] min-w-0 items-center justify-between">
+            <div className="flex min-w-0 items-center gap-1">
                 {visibleTags.map((tag, index) => (
                     <TagDot key={`${leg}-${tag}-${index}`} tag={tag} />
                 ))}
@@ -103,7 +104,7 @@ const LegTagRow: React.FC<{
                     type="button"
                     title="播放监控视频"
                     aria-label="播放监控视频"
-                    className="absolute right-0 flex size-[20px] shrink-0 items-center justify-center rounded-full text-blue-600 hover:bg-blue-50"
+                    className="ml-1 flex size-[20px] shrink-0 items-center justify-center rounded-full text-blue-600 hover:bg-blue-50"
                     onClick={(event) => {
                         event.stopPropagation();
                         onVideoClick?.();
@@ -130,6 +131,7 @@ const LegTagRow: React.FC<{
 
 export const FlightCard: React.FC<FlightCardProps> = ({
     flight,
+    height = 140,
     onClick,
     onVideoClick,
     onFlightUpdate,
@@ -207,7 +209,7 @@ export const FlightCard: React.FC<FlightCardProps> = ({
             window.removeEventListener('resize', update);
             window.removeEventListener('scroll', update, true);
         };
-    }, [selectedLeg, updatePickerPosition]);
+    }, [height, selectedLeg, updatePickerPosition]);
 
     const handleTagSelection = React.useCallback((tag: FlightTag) => {
         if (!selectedLeg) return;
@@ -219,77 +221,78 @@ export const FlightCard: React.FC<FlightCardProps> = ({
 
     return (
         <div
-            className={`sticky left-0 z-40 mr-2 box-border h-[140px] w-[260px] min-w-[260px] flex-none shrink-0 self-start rounded-l-xl rounded-r-2xl border-y border-r border-slate-200 px-2.5 py-2 shadow-[4px_0_12px_-2px_rgba(0,0,0,0.08)] ${isDelayed ? 'bg-rose-50' : 'bg-slate-100'} ${onClick ? 'cursor-pointer' : ''}`}
+            className={`sticky left-0 z-40 mr-2 box-border min-h-[140px] w-[260px] min-w-[260px] flex-none shrink-0 self-start rounded-l-xl rounded-r-2xl border-y border-r border-slate-200 px-2.5 py-2 shadow-[4px_0_12px_-2px_rgba(0,0,0,0.08)] ${isDelayed ? 'bg-rose-50' : 'bg-slate-100'} ${onClick ? 'cursor-pointer' : ''}`}
+            style={{ height: `${height}px` }}
             onClick={(event) => {
                 event.stopPropagation();
                 onClick?.();
             }}
         >
-            <div className="grid h-[122px] grid-rows-[28px_22px_1px_28px_22px] gap-y-1">
+            <div className="flex h-full min-h-0 flex-col">
                 {legPresence.arrival ? (
-                    <div className="grid min-w-0 grid-cols-[72px_65px_31px_31px_minmax(27px,1fr)] items-center gap-x-[3px] text-emerald-700">
-                        <span className={`min-w-0 overflow-hidden whitespace-nowrap font-mono font-extrabold leading-none tabular-nums ${getFlightNumberSizeClass(arrivalFlightNo)}`} title={arrivalFlightNo}>
-                            {arrivalFlightNo}
-                        </span>
-                        <span className="min-w-0 whitespace-nowrap text-center font-mono text-[12px] font-extrabold leading-none text-emerald-900 tabular-nums">
-                            {formatCardTime(flight.times?.sta)}
-                        </span>
-                        <span className={`flex h-5 min-w-0 items-center justify-center whitespace-nowrap rounded-[4px] px-[3px] text-center text-[11px] font-bold leading-none ${flight.arrInfo?.status === '延误' ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-800'}`}>
-                            {flight.arrInfo?.status || '-'}
-                        </span>
-                        <span className="flex h-5 min-w-0 items-center justify-center whitespace-nowrap rounded-[4px] bg-emerald-100/75 px-0.5 text-center font-mono text-[11px] font-bold leading-none text-emerald-900">
-                            {flight.arrInfo?.stand || '-'}
-                        </span>
-                        <span className="min-w-0 text-right leading-none">
-                            <FlightTypeLabel type={arrivalType} visible={typeVisibility.arrival} />
-                        </span>
-                    </div>
-                ) : <div aria-hidden="true" />}
+                    <section aria-label="进港航班" className="flex min-h-0 flex-1 flex-col justify-center gap-1">
+                        <div className="grid min-w-0 grid-cols-[72px_65px_31px_31px_minmax(27px,1fr)] items-center gap-x-[3px] text-emerald-700">
+                            <span className={`min-w-0 overflow-hidden whitespace-nowrap font-mono font-extrabold leading-none tabular-nums ${getFlightNumberSizeClass(arrivalFlightNo)}`} title={arrivalFlightNo}>
+                                {arrivalFlightNo}
+                            </span>
+                            <span className="min-w-0 whitespace-nowrap text-center font-mono text-[12px] font-extrabold leading-none text-emerald-900 tabular-nums">
+                                {formatCardTime(flight.times?.sta)}
+                            </span>
+                            <span className={`flex h-5 min-w-0 items-center justify-center whitespace-nowrap rounded-[4px] px-[3px] text-center text-[11px] font-bold leading-none ${flight.arrInfo?.status === '延误' ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-800'}`}>
+                                {flight.arrInfo?.status || '-'}
+                            </span>
+                            <span className="flex h-5 min-w-0 items-center justify-center whitespace-nowrap rounded-[4px] bg-emerald-100/75 px-0.5 text-center font-mono text-[11px] font-bold leading-none text-emerald-900">
+                                {flight.arrInfo?.stand || '-'}
+                            </span>
+                            <span className="min-w-0 text-right leading-none">
+                                <FlightTypeLabel type={arrivalType} visible={typeVisibility.arrival} />
+                            </span>
+                        </div>
+                        <LegTagRow
+                            leg="arrival"
+                            tags={arrivalTags}
+                            capacity={9}
+                            triggerRef={arrivalTriggerRef}
+                            isPickerOpen={selectedLeg === 'arrival'}
+                            onAddClick={handleAddClick}
+                        />
+                    </section>
+                ) : null}
 
-                {legPresence.arrival ? (
-                    <LegTagRow
-                        leg="arrival"
-                        tags={arrivalTags}
-                        capacity={9}
-                        triggerRef={arrivalTriggerRef}
-                        isPickerOpen={selectedLeg === 'arrival'}
-                        onAddClick={handleAddClick}
-                    />
-                ) : <div aria-hidden="true" />}
-
-                <div className="h-px bg-slate-300" aria-hidden="true" />
+                {legPresence.arrival && legPresence.departure && (
+                    <div className="h-px shrink-0 bg-slate-300" aria-hidden="true" />
+                )}
 
                 {legPresence.departure ? (
-                    <div className="grid min-w-0 grid-cols-[72px_65px_31px_31px_minmax(27px,1fr)] items-center gap-x-[3px] text-blue-700">
-                        <span className={`min-w-0 overflow-hidden whitespace-nowrap font-mono font-extrabold leading-none tabular-nums ${getFlightNumberSizeClass(departureFlightNo)}`} title={departureFlightNo}>
-                            {departureFlightNo}
-                        </span>
-                        <span className="min-w-0 whitespace-nowrap text-center font-mono text-[12px] font-extrabold leading-none text-blue-900 tabular-nums">
-                            {formatCardTime(flight.times?.std)}
-                        </span>
-                        <span className={`flex h-5 min-w-0 items-center justify-center whitespace-nowrap rounded-[4px] px-[3px] text-center text-[11px] font-bold leading-none ${flight.depInfo?.status === '延误' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-800'}`}>
-                            {flight.depInfo?.status || '-'}
-                        </span>
-                        <span className="flex h-5 min-w-0 items-center justify-center whitespace-nowrap rounded-[4px] bg-blue-100/75 px-0.5 text-center font-mono text-[11px] font-bold leading-none text-blue-900">
-                            {flight.depInfo?.gate || '-'}
-                        </span>
-                        <span className="min-w-0 text-right leading-none">
-                            <FlightTypeLabel type={departureType} visible={typeVisibility.departure} />
-                        </span>
-                    </div>
-                ) : <div aria-hidden="true" />}
-
-                {legPresence.departure ? (
-                    <LegTagRow
-                        leg="departure"
-                        tags={departureTags}
-                        capacity={7}
-                        triggerRef={departureTriggerRef}
-                        isPickerOpen={selectedLeg === 'departure'}
-                        onAddClick={handleAddClick}
-                        onVideoClick={onVideoClick}
-                    />
-                ) : <div aria-hidden="true" />}
+                    <section aria-label="出港航班" className="flex min-h-0 flex-1 flex-col justify-center gap-1">
+                        <div className="grid min-w-0 grid-cols-[72px_65px_31px_31px_minmax(27px,1fr)] items-center gap-x-[3px] text-blue-700">
+                            <span className={`min-w-0 overflow-hidden whitespace-nowrap font-mono font-extrabold leading-none tabular-nums ${getFlightNumberSizeClass(departureFlightNo)}`} title={departureFlightNo}>
+                                {departureFlightNo}
+                            </span>
+                            <span className="min-w-0 whitespace-nowrap text-center font-mono text-[12px] font-extrabold leading-none text-blue-900 tabular-nums">
+                                {formatCardTime(flight.times?.std)}
+                            </span>
+                            <span className={`flex h-5 min-w-0 items-center justify-center whitespace-nowrap rounded-[4px] px-[3px] text-center text-[11px] font-bold leading-none ${flight.depInfo?.status === '延误' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-800'}`}>
+                                {flight.depInfo?.status || '-'}
+                            </span>
+                            <span className="flex h-5 min-w-0 items-center justify-center whitespace-nowrap rounded-[4px] bg-blue-100/75 px-0.5 text-center font-mono text-[11px] font-bold leading-none text-blue-900">
+                                {flight.depInfo?.gate || '-'}
+                            </span>
+                            <span className="min-w-0 text-right leading-none">
+                                <FlightTypeLabel type={departureType} visible={typeVisibility.departure} />
+                            </span>
+                        </div>
+                        <LegTagRow
+                            leg="departure"
+                            tags={departureTags}
+                            capacity={7}
+                            triggerRef={departureTriggerRef}
+                            isPickerOpen={selectedLeg === 'departure'}
+                            onAddClick={handleAddClick}
+                            onVideoClick={onVideoClick}
+                        />
+                    </section>
+                ) : null}
             </div>
 
             {selectedLeg && pickerPosition && createPortal(

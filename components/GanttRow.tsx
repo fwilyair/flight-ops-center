@@ -904,6 +904,7 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
 
             <FlightCard
                 flight={flight}
+                height={rowHeight}
                 onClick={onClick}
                 onVideoClick={onVideoClick}
                 onFlightUpdate={onFlightUpdate}
