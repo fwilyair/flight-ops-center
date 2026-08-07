@@ -70,6 +70,10 @@ export interface Flight {
   // Route
   route?: string; // 航线 e.g. CTU-PEK
   flightType?: FlightType;
+  arrTags?: string[];
+  depTags?: string[];
+  arrFlightType?: FlightType;
+  depFlightType?: FlightType;
   // Dual status support
   arrInfo?: {
     status: '前起' | '到达' | '入位' | '备降' | '延误';

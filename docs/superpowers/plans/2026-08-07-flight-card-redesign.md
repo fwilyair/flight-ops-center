@@ -37,6 +37,14 @@ Create `components/flightCardLayout.test.ts` with:
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import type { Flight } from '../types.ts';
+import {
+    addFlightTagToLeg,
+    getFlightNumberSizeClass,
+    getLegFlightType,
+    getLegTags,
+    getTagDisplay,
+    getTypeVisibility,
+} from './flightCardLayout.ts';
 
 const flight = {
     id: 'edge',
@@ -53,59 +61,55 @@ const flight = {
     annotations: [],
 } satisfies Flight;
 
-const loadLayout = async () => {
-    const layout = await import('./flightCardLayout.ts').catch(() => null);
-    assert.ok(layout, 'flight card layout utilities should exist');
-    return layout;
-};
-
-test('reads independent arrival and departure card data', async () => {
-    const layout = await loadLayout();
-    if (!layout) return;
-    assert.deepEqual(layout.getLegTags(flight, 'arrival'), ['冰', 'Q']);
-    assert.deepEqual(layout.getLegTags(flight, 'departure'), ['D']);
-    assert.equal(layout.getLegFlightType(flight, 'arrival'), 'REG');
-    assert.equal(layout.getLegFlightType(flight, 'departure'), 'FERRY');
+test('reads independent arrival and departure card data', () => {
+    assert.deepEqual(getLegTags(flight, 'arrival'), ['冰', 'Q']);
+    assert.deepEqual(getLegTags(flight, 'departure'), ['D']);
+    assert.equal(getLegFlightType(flight, 'arrival'), 'REG');
+    assert.equal(getLegFlightType(flight, 'departure'), 'FERRY');
 });
 
-test('falls back to legacy shared fields during migration', async () => {
-    const layout = await loadLayout();
-    if (!layout) return;
+test('falls back to legacy shared fields during migration', () => {
     const legacy = { ...flight, arrTags: undefined, depTags: undefined, arrFlightType: undefined, depFlightType: undefined };
-    assert.deepEqual(layout.getLegTags(legacy, 'arrival'), ['冰']);
-    assert.deepEqual(layout.getLegTags(legacy, 'departure'), ['冰']);
-    assert.equal(layout.getLegFlightType(legacy, 'arrival'), 'REG');
-    assert.equal(layout.getLegFlightType(legacy, 'departure'), 'REG');
+    assert.deepEqual(getLegTags(legacy, 'arrival'), ['冰']);
+    assert.deepEqual(getLegTags(legacy, 'departure'), ['冰']);
+    assert.equal(getLegFlightType(legacy, 'arrival'), 'REG');
+    assert.equal(getLegFlightType(legacy, 'departure'), 'REG');
 });
 
-test('shows one type when both legs match and two when they differ', async () => {
-    const layout = await loadLayout();
-    if (!layout) return;
-    assert.deepEqual(layout.getTypeVisibility('REG', 'REG'), { arrival: true, departure: false });
-    assert.deepEqual(layout.getTypeVisibility('REG', 'FERRY'), { arrival: true, departure: true });
+test('shows one type when both legs match and two when they differ', () => {
+    assert.deepEqual(getTypeVisibility('REG', 'REG'), { arrival: true, departure: false });
+    assert.deepEqual(getTypeVisibility('REG', 'FERRY'), { arrival: true, departure: true });
 });
 
-test('keeps the add control outside tag overflow capacity', async () => {
-    const layout = await loadLayout();
-    if (!layout) return;
-    assert.deepEqual(layout.getTagDisplay(['冰', 'Q', '控'], 4), { visibleTags: ['冰', 'Q', '控'], hiddenCount: 0 });
-    assert.deepEqual(layout.getTagDisplay(['冰', 'Q', '控', 'C', 'I'], 4), { visibleTags: ['冰', 'Q', '控'], hiddenCount: 2 });
+test('shows only the existing type when one leg type is missing', () => {
+    assert.deepEqual(getTypeVisibility('REG', undefined), { arrival: true, departure: false });
+    assert.deepEqual(getTypeVisibility(undefined, 'FERRY'), { arrival: false, departure: true });
 });
 
-test('uses compact typography for eight-to-ten-character flight numbers', async () => {
-    const layout = await loadLayout();
-    if (!layout) return;
-    assert.equal(layout.getFlightNumberSizeClass('HU7856'), 'text-[17px]');
-    assert.equal(layout.getFlightNumberSizeClass('ZZMZT6343'), 'text-[12px] tracking-[-0.65px]');
+test('hides types when neither leg type exists', () => {
+    assert.equal(getLegFlightType({ ...flight, flightType: undefined, arrFlightType: undefined }, 'arrival'), undefined);
+    assert.deepEqual(getTypeVisibility(undefined, undefined), { arrival: false, departure: false });
 });
 
-test('adds a tag only to the selected leg and synchronizes legacy detail tags', async () => {
-    const layout = await loadLayout();
-    if (!layout) return;
-    const updated = layout.addFlightTagToLeg(flight, 'departure', '控');
+test('keeps the add control outside tag overflow capacity', () => {
+    assert.deepEqual(getTagDisplay(['冰', 'Q', '控'], 4), { visibleTags: ['冰', 'Q', '控'], hiddenCount: 0 });
+    assert.deepEqual(getTagDisplay(['冰', 'Q', '控', 'C', 'I'], 4), { visibleTags: ['冰', 'Q', '控'], hiddenCount: 2 });
+});
+
+test('uses compact typography at the eight-character boundary', () => {
+    assert.equal(getFlightNumberSizeClass('ABC1234'), 'text-[17px]');
+    assert.equal(getFlightNumberSizeClass('ABCD1234'), 'text-[12px] tracking-[-0.65px]');
+    assert.equal(getFlightNumberSizeClass('ABCDEF1234'), 'text-[12px] tracking-[-0.65px]');
+});
+
+test('adds a tag only to the selected leg and synchronizes legacy detail tags', () => {
+    const original = structuredClone(flight);
+    const updated = addFlightTagToLeg(flight, 'departure', '控');
+    assert.deepEqual(flight, original);
     assert.deepEqual(updated.arrTags, ['冰', 'Q']);
     assert.deepEqual(updated.depTags, ['D', '控']);
     assert.deepEqual(updated.tags, ['冰', 'Q', 'D', '控']);
+    assert.notStrictEqual(updated.depTags, flight.depTags);
 });
 ```
 
@@ -114,10 +118,10 @@ test('adds a tag only to the selected leg and synchronizes legacy detail tags', 
 Run:
 
 ```bash
-npm test -- --test-name-pattern="independent arrival|legacy shared|one type|tag overflow|compact typography|selected leg"
+node --experimental-strip-types --test --test-name-pattern="independent arrival|legacy shared|one type|one leg type is missing|neither leg type exists|tag overflow|compact typography|selected leg" components/flightCardLayout.test.ts
 ```
 
-Expected: FAIL because `flightCardLayout.ts` and the new `Flight` fields do not exist.
+Expected: FAIL before implementation because static `flightCardLayout.ts` import and new `Flight` fields do not yet exist; missing-type cases specify showing only existing leg, or neither when both are absent.
 
 - [ ] **Step 3: Add the leg-specific fields**
 
@@ -144,13 +148,15 @@ export type FlightLeg = 'arrival' | 'departure';
 export const getLegTags = (flight: Flight, leg: FlightLeg): string[] =>
     (leg === 'arrival' ? flight.arrTags : flight.depTags) ?? flight.tags ?? [];
 
-export const getLegFlightType = (flight: Flight, leg: FlightLeg): FlightType =>
-    (leg === 'arrival' ? flight.arrFlightType : flight.depFlightType) ?? flight.flightType ?? 'REG';
+export const getLegFlightType = (flight: Flight, leg: FlightLeg): FlightType | undefined =>
+    (leg === 'arrival' ? flight.arrFlightType : flight.depFlightType) ?? flight.flightType;
 
-export const getTypeVisibility = (arrivalType: FlightType, departureType: FlightType) => ({
-    arrival: true,
-    departure: arrivalType !== departureType,
-});
+export const getTypeVisibility = (arrivalType: FlightType | undefined, departureType: FlightType | undefined) => {
+    if (!arrivalType && !departureType) return { arrival: false, departure: false };
+    if (!arrivalType) return { arrival: false, departure: true };
+    if (!departureType) return { arrival: true, departure: false };
+    return { arrival: true, departure: arrivalType !== departureType };
+};
 
 export const getFlightNumberSizeClass = (flightNo: string): string =>
     flightNo.length >= 8
@@ -187,7 +193,7 @@ export const addFlightTagToLeg = (flight: Flight, leg: FlightLeg, tag: FlightTag
 Run:
 
 ```bash
-npm test -- --test-name-pattern="independent arrival|legacy shared|one type|tag overflow|compact typography|selected leg"
+node --experimental-strip-types --test --test-name-pattern="independent arrival|legacy shared|one type|one leg type is missing|neither leg type exists|tag overflow|compact typography|selected leg" components/flightCardLayout.test.ts
 npm run typecheck
 ```
 
