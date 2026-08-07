@@ -896,7 +896,7 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
             ref={rowRef}
             data-motion-flight-row
             data-flight-id={flight.id}
-            className="flight-row flex group relative mb-3 rounded-xl shadow-sm hover:shadow-md border border-slate-100"
+            className="flight-row group relative mb-3 flex"
             style={{
                 height: `${rowHeight}px`,
             }}

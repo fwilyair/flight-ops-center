@@ -27,3 +27,13 @@ test('stretches flight card modules with the expanded row height', async () => {
     assert.doesNotMatch(cardSource, /mx-auto flex min-w-0 items-center justify-center/);
     assert.match(rowSource, /<FlightCard[\s\S]*height=\{rowHeight\}/);
 });
+
+test('separates each flight card from the transparent timeline row', async () => {
+    const cardSource = await readFile(new URL('./FlightCard.tsx', import.meta.url), 'utf8');
+    const rowSource = await readFile(new URL('./GanttRow.tsx', import.meta.url), 'utf8');
+    const indexSource = await readFile(new URL('../index.html', import.meta.url), 'utf8');
+
+    assert.match(cardSource, /border-y border-r border-slate-300\/80/);
+    assert.match(indexSource, /\.flight-row \{[\s\S]*?background-color: transparent;/);
+    assert.doesNotMatch(rowSource, /className="flight-row[^"]*(?:shadow|border)/);
+});

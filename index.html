@@ -134,16 +134,12 @@
     /* 航班行分组：利用现有行间距建立边界，不增加行高 */
     .flight-row {
       --flight-row-surface: #ffffff;
-      background-color: var(--flight-row-surface);
-      transition: height 300ms ease, box-shadow 200ms ease, background-color 160ms ease;
+      background-color: transparent;
+      transition: height 300ms ease;
     }
 
     .flight-row:nth-child(even) {
       --flight-row-surface: #f8fafc;
-    }
-
-    .flight-row:hover {
-      --flight-row-surface: #f1f5f9;
     }
 
     .gantt-row-edge {
@@ -162,10 +158,6 @@
 
     .dark .flight-row:nth-child(even) {
       --flight-row-surface: #1e293b;
-    }
-
-    .dark .flight-row:hover {
-      --flight-row-surface: #263449;
     }
 
     .dark .gantt-row-edge {
