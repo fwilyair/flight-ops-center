@@ -78,9 +78,12 @@ const LegTagRow: React.FC<{
 }> = ({ leg, tags, capacity, triggerRef, isPickerOpen, onAddClick, onVideoClick }) => {
     const { visibleTags, hiddenCount } = getTagDisplay(tags, capacity);
     const isDeparture = leg === 'departure';
+    const railColorClass = isDeparture
+        ? 'bg-[rgba(37,99,235,0.05)]'
+        : 'bg-[rgba(16,185,129,0.05)]';
 
     return (
-        <div className="flex h-[22px] min-w-0 items-center justify-between">
+        <div className={`flex h-[22px] min-w-0 items-center justify-between rounded-[4px] px-1 ${railColorClass}`}>
             <div className="flex min-w-0 items-center gap-1">
                 {visibleTags.map((tag, index) => (
                     <TagDot key={`${leg}-${tag}-${index}`} tag={tag} />
