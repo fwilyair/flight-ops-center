@@ -28,6 +28,20 @@ export const flightDetailTagColorMap: Record<string, string> = {
     '重要': 'bg-rose-500',
 };
 
+// 列表卡片需在小尺寸内保持高区分度，与详情面板的业务强调色分开。
+export const flightCardTagColorMap: Record<string, string> = {
+    '冰': 'bg-blue-500',
+    'Q': 'bg-blue-600',
+    '控': 'bg-yellow-400 text-yellow-900',
+    'C': 'bg-red-500',
+    'I': 'bg-purple-500',
+    'D': 'bg-orange-500',
+    'V': 'bg-teal-500',
+    '互天': 'bg-cyan-600',
+    '机': 'bg-indigo-500',
+    '重要': 'bg-rose-600',
+};
+
 export const addFlightTag = (tags: string[] | undefined, tag: FlightTag): string[] => {
     const currentTags = tags ?? [];
     return currentTags.includes(tag) ? currentTags : [...currentTags, tag];

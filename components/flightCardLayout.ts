@@ -4,6 +4,10 @@ import type { FlightTag } from './flightTags.ts';
 
 export type FlightLeg = 'arrival' | 'departure';
 
+type RectSize = { width: number; height: number };
+type ViewportSize = { width: number; height: number };
+type PickerAnchorRect = Pick<DOMRect, 'left' | 'right' | 'top' | 'bottom' | 'width'>;
+
 export const getLegTags = (flight: Flight, leg: FlightLeg): string[] =>
     (leg === 'arrival' ? flight.arrTags : flight.depTags) ?? flight.tags ?? [];
 
@@ -45,5 +49,30 @@ export const addFlightTagToLeg = (flight: Flight, leg: FlightLeg, tag: FlightTag
         arrTags,
         depTags,
         tags: Array.from(new Set([...arrTags, ...depTags])),
+    };
+};
+
+export const getFlightCardTagPickerPosition = (
+    anchorRect: PickerAnchorRect,
+    pickerSize: RectSize,
+    viewportSize: ViewportSize,
+) => {
+    const margin = 8;
+    const centeredLeft = anchorRect.left + anchorRect.width / 2 - pickerSize.width / 2;
+    const belowTop = anchorRect.bottom + margin;
+    const fitsBelow = belowTop + pickerSize.height <= viewportSize.height - margin;
+    const preferredTop = fitsBelow
+        ? belowTop
+        : anchorRect.top - pickerSize.height - margin;
+
+    return {
+        left: Math.min(
+            Math.max(margin, centeredLeft),
+            Math.max(margin, viewportSize.width - pickerSize.width - margin),
+        ),
+        top: Math.min(
+            Math.max(margin, preferredTop),
+            Math.max(margin, viewportSize.height - pickerSize.height - margin),
+        ),
     };
 };

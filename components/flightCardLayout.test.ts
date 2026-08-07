@@ -93,3 +93,31 @@ test('adds a tag only to the selected leg and synchronizes legacy detail tags', 
     assert.deepEqual(updated.tags, ['冰', 'Q', 'D', '控']);
     assert.notStrictEqual(updated.depTags, flight.depTags);
 });
+
+test('centers the card tag picker below its trigger and clamps it inside the viewport', async () => {
+    const layout = await import('./flightCardLayout.ts');
+    assert.equal(typeof layout.getFlightCardTagPickerPosition, 'function');
+    if (typeof layout.getFlightCardTagPickerPosition !== 'function') return;
+
+    assert.deepEqual(
+        layout.getFlightCardTagPickerPosition(
+            { left: 4, right: 24, top: 40, bottom: 60, width: 20 },
+            { width: 280, height: 110 },
+            { width: 320, height: 600 },
+        ),
+        { left: 8, top: 68 },
+    );
+});
+
+test('places the card tag picker above its trigger when it would cross the viewport bottom', async () => {
+    const { getFlightCardTagPickerPosition } = await import('./flightCardLayout.ts');
+
+    assert.deepEqual(
+        getFlightCardTagPickerPosition(
+            { left: 260, right: 280, top: 540, bottom: 560, width: 20 },
+            { width: 280, height: 110 },
+            { width: 320, height: 600 },
+        ),
+        { left: 32, top: 422 },
+    );
+});
