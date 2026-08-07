@@ -678,7 +678,7 @@ const App: React.FC = () => {
                   {/* Green Dot Vertical Line */}
                   <div
                     data-motion-hover-guide
-                    className="absolute pointer-events-none z-30"
+                    className="absolute pointer-events-none z-40"
                     style={{
                       left: `${HOVER_GUIDE_TIMELINE_OFFSET_PX + renderedHoverInfo.greenDotPx}px`,
                       top: 0,
@@ -693,7 +693,7 @@ const App: React.FC = () => {
                   {renderedHoverInfo.purpleDotPx !== undefined && renderedHoverInfo.purpleDotY !== undefined && (
                     <div
                       data-motion-hover-guide
-                      className="absolute pointer-events-none z-30"
+                      className="absolute pointer-events-none z-40"
                       style={{
                         left: `${HOVER_GUIDE_TIMELINE_OFFSET_PX + renderedHoverInfo.purpleDotPx}px`,
                         top: 0,

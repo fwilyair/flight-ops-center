@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { assignPriorityTracks, buildFixedRowOverflow, getExpandedControlTop, getExpansionTargetEventId, getFlightRowHeight } from './flightRowLayout.ts';
+import { assignPriorityTracks, buildFixedRowOverflow, buildOverflowPreviewLayout, getCorrectedTime, getExpandedControlTop, getExpansionTargetEventId, getFlightRowHeight, getTimeDifferenceMinutes } from './flightRowLayout.ts';
 
 type TestEvent = {
     id: string;
@@ -121,4 +121,31 @@ test('maps the shared expand-all button state to the first hidden task', () => {
     assert.equal(getExpansionTargetEventId(true, groups), 'hidden');
     assert.equal(getExpansionTargetEventId(false, groups), null);
     assert.equal(getExpansionTargetEventId(true, []), null);
+});
+
+test('calculates corrected time only when the baseline offset exceeds 15 minutes', () => {
+    assert.equal(getCorrectedTime('10:00', '10:30', '10:00'), '10:30');
+    assert.equal(getCorrectedTime('23:50', '10:30', '10:00'), '00:20');
+    assert.equal(getCorrectedTime('10:00', '10:15', '10:00'), undefined);
+    assert.equal(getCorrectedTime('--:--', '10:30', '10:00'), undefined);
+});
+
+test('aligns overflow preview capsules by their timeline pixel offsets', () => {
+    const events: TestEvent[] = [
+        { id: '10:00', status: 'warning', x: 100 },
+        { id: '10:05', status: 'warning', x: 140 },
+        { id: '10:20', status: 'warning', x: 260 },
+    ];
+
+    const layout = buildOverflowPreviewLayout(events, 100, event => event.x, () => 240);
+
+    assert.deepEqual(layout.items.map(item => item.offsetPx), [0, 40, 160]);
+    assert.equal(layout.widthPx, 432);
+});
+
+test('calculates actual minus scheduled time across midnight', () => {
+    assert.equal(getTimeDifferenceMinutes('10:45', '10:00'), 45);
+    assert.equal(getTimeDifferenceMinutes('00:10', '23:50'), 20);
+    assert.equal(getTimeDifferenceMinutes('09:50', '10:00'), -10);
+    assert.equal(getTimeDifferenceMinutes('--:--', '10:00'), undefined);
 });

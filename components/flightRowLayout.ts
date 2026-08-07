@@ -16,6 +16,16 @@ export interface FixedRowOverflowLayout<T> {
     overflowGroups: OverflowGroup<T>[];
 }
 
+export interface OverflowPreviewLayoutItem<T> {
+    event: T;
+    offsetPx: number;
+}
+
+export interface OverflowPreviewLayout<T> {
+    items: Array<OverflowPreviewLayoutItem<T>>;
+    widthPx: number;
+}
+
 export interface FlightRowHeightOptions {
     isExpanded: boolean;
     hasCalcPoints: boolean;
@@ -149,4 +159,67 @@ export const getExpansionTargetEventId = <T extends FixedRowEvent>(
 ): string | null => {
     if (!shouldExpand) return null;
     return overflowGroups[0]?.events[0]?.id ?? null;
+};
+
+export const getCorrectedTime = (
+    scheduledTime?: string,
+    releaseEndTime?: string,
+    takeoffEndTime?: string,
+): string | undefined => {
+    if (!scheduledTime || scheduledTime === '--:--' || !releaseEndTime || !takeoffEndTime) {
+        return undefined;
+    }
+
+    const toMinutes = (time: string) => {
+        const [hours, minutes] = time.split(':').map(Number);
+        return (hours * 60) + minutes;
+    };
+    const correctionMinutes = toMinutes(releaseEndTime) - toMinutes(takeoffEndTime);
+    if (correctionMinutes <= 15) return undefined;
+
+    const correctedMinutes = (toMinutes(scheduledTime) + correctionMinutes + 1440) % 1440;
+    const hours = Math.floor(correctedMinutes / 60);
+    const minutes = correctedMinutes % 60;
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+};
+
+export const getTimeDifferenceMinutes = (
+    laterTime?: string,
+    earlierTime?: string,
+): number | undefined => {
+    if (!laterTime || laterTime === '--:--' || !earlierTime || earlierTime === '--:--') {
+        return undefined;
+    }
+
+    const toMinutes = (time: string) => {
+        const [hours, minutes] = time.split(':').map(Number);
+        return (hours * 60) + minutes;
+    };
+    let difference = toMinutes(laterTime) - toMinutes(earlierTime);
+    if (difference > 720) difference -= 1440;
+    if (difference < -720) difference += 1440;
+    return difference;
+};
+
+export const buildOverflowPreviewLayout = <T>(
+    events: T[],
+    anchorLeftPx: number,
+    getLeftPx: (event: T) => number,
+    getWidthPx: (event: T) => number,
+    minimumWidthPx = 340,
+    horizontalPaddingPx = 32,
+): OverflowPreviewLayout<T> => {
+    const items = events.map(event => ({
+        event,
+        offsetPx: Math.max(0, getLeftPx(event) - anchorLeftPx),
+    }));
+    const contentRightPx = Math.max(
+        0,
+        ...items.map(({ event, offsetPx }) => offsetPx + getWidthPx(event)),
+    );
+
+    return {
+        items,
+        widthPx: Math.max(minimumWidthPx, contentRightPx + horizontalPaddingPx),
+    };
 };

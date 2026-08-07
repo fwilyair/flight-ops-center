@@ -1,7 +1,7 @@
 import React from 'react';
 import { Flight, TimelineEvent, Annotation, FlightType, ProcessMarker } from '../types';
 import { timeToPixels, getColorForEventType } from '../utils';
-import { assignPriorityTracks, buildFixedRowOverflow, getExpandedControlTop, getExpansionTargetEventId, getFlightRowHeight } from './flightRowLayout';
+import { assignPriorityTracks, buildFixedRowOverflow, buildOverflowPreviewLayout, getCorrectedTime, getExpandedControlTop, getExpansionTargetEventId, getFlightRowHeight, getTimeDifferenceMinutes } from './flightRowLayout';
 import type { OverflowGroup } from './flightRowLayout';
 import { TimeKindBadge } from './TimeKindBadge';
 
@@ -146,18 +146,19 @@ const EventCapsuleVisual: React.FC<{
     const colors = getColorForEventType(event.type, event.status);
     const isDelayed = event.status === 'delayed';
 
-    let timeDiff: number | null = null;
-    let timeDiffColor = '';
     const hasActualTime = event.timeActual && event.timeActual !== '--:--';
-    if (!hasActualTime && event.timeScheduled && event.timeScheduled !== '--:--' && currentTime) {
-        const [cH, cM] = currentTime.split(':').map(Number);
-        const [sH, sM] = event.timeScheduled.split(':').map(Number);
-        let diffMins = (cH * 60 + cM) - (sH * 60 + sM);
-        if (diffMins > 720) diffMins -= 1440;
-        if (diffMins < -720) diffMins += 1440;
-        timeDiff = diffMins;
-        timeDiffColor = diffMins > 0 ? 'text-red-500' : diffMins < 0 ? 'text-emerald-500' : 'text-gray-500';
-    }
+    const pendingTimeDiff = !hasActualTime
+        ? getTimeDifferenceMinutes(currentTime, event.timeScheduled)
+        : undefined;
+    const completedTimeDiff = hasActualTime && event.status === 'overtime-completed'
+        ? getTimeDifferenceMinutes(event.timeActual, event.timeScheduled)
+        : undefined;
+    const getTimeDiffColor = (difference: number) => (
+        difference > 0 ? 'text-red-500' : difference < 0 ? 'text-emerald-500' : 'text-gray-500'
+    );
+    const formatTimeDiff = (difference: number) => (
+        difference > 0 ? `+${difference}` : difference
+    );
 
     return (
         <div className="relative">
@@ -216,13 +217,23 @@ const EventCapsuleVisual: React.FC<{
                                     <TimeKindBadge kind="actual" />
                                     <span className="tabular-nums font-mono font-bold text-gray-900 dark:text-gray-100 text-sm leading-none">{event.timeActual}</span>
                                 </div>
+                                {completedTimeDiff !== undefined && (
+                                    <>
+                                        <div className="w-px h-3 bg-gray-300 dark:bg-gray-600 mx-0.5 opacity-50"></div>
+                                        <div className="flex items-center gap-1 leading-none py-[1px] px-1">
+                                            <span className={`tabular-nums font-mono font-bold text-sm tracking-tight leading-none ${getTimeDiffColor(completedTimeDiff)}`}>
+                                                {formatTimeDiff(completedTimeDiff)}
+                                            </span>
+                                        </div>
+                                    </>
+                                )}
                             </>
-                        ) : timeDiff !== null ? (
+                        ) : pendingTimeDiff !== undefined ? (
                             <>
                                 <div className="w-px h-3 bg-gray-300 dark:bg-gray-600 mx-0.5 opacity-50"></div>
                                 <div className="flex items-center gap-1 leading-none py-[1px] px-1">
-                                    <span className={`tabular-nums font-mono font-bold text-sm tracking-tight leading-none ${timeDiffColor}`}>
-                                        {timeDiff > 0 ? `+${timeDiff}` : timeDiff}
+                                    <span className={`tabular-nums font-mono font-bold text-sm tracking-tight leading-none ${getTimeDiffColor(pendingTimeDiff)}`}>
+                                        {formatTimeDiff(pendingTimeDiff)}
                                     </span>
                                 </div>
                             </>
@@ -639,8 +650,27 @@ const OverflowPill: React.FC<{
     group: OverflowGroup<TimelineEvent>;
     top: number;
     currentTime?: string;
+    timeScale: number;
     onExpand?: () => void;
-}> = ({ group, top, currentTime, onExpand }) => {
+    onEventClick?: (event: TimelineEvent) => void;
+    onEventHoverChange?: (eventId: string, isHovered: boolean, previewRow?: HTMLElement) => void;
+    releaseEndTime?: string;
+    takeoffEndTime?: string;
+}> = ({ group, top, currentTime, timeScale, onExpand, onEventClick, onEventHoverChange, releaseEndTime, takeoffEndTime }) => {
+    const previewLayout = buildOverflowPreviewLayout<TimelineEvent>(
+        group.events,
+        group.leftPx,
+        event => timeToPixels(event.timeScheduled || event.timeActual || '', timeScale),
+        event => {
+            const scheduledLeftPx = timeToPixels(event.timeScheduled || event.timeActual || '', timeScale);
+            const correctedTime = getCorrectedTime(event.timeScheduled, releaseEndTime, takeoffEndTime);
+            const correctedOffsetPx = correctedTime
+                ? timeToPixels(correctedTime, timeScale) - scheduledLeftPx
+                : 0;
+            return Math.max(getEstimatedEventWidth(event), correctedOffsetPx + 24);
+        },
+    );
+
     return (
         // 预览浮层复用真实胶囊视觉，确保折叠前后的状态识别一致。
         <div
@@ -662,14 +692,83 @@ const OverflowPill: React.FC<{
                 <span className="material-symbols-outlined text-[15px] leading-none text-orange-100" aria-hidden="true">expand_more</span>
             </button>
 
-            <div className="absolute left-0 top-full mt-2.5 hidden w-max min-w-[340px] max-w-[560px] rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_14px_36px_rgba(15,23,42,0.2)] group-hover/overflow:block group-focus-within/overflow:block pointer-events-none">
-                <div className="space-y-3.5">
-                    {group.events.map(event => (
-                        <div key={event.id} className="flex min-h-10 items-center gap-3.5 px-1 py-1">
-                            <span className="size-2.5 shrink-0 rounded-full bg-emerald-500 ring-2 ring-white shadow-sm" aria-hidden="true" />
-                            <EventCapsuleVisual event={event} currentTime={currentTime} />
-                        </div>
-                    ))}
+            <div
+                className="pointer-events-auto absolute -left-4 top-full mt-2.5 hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_14px_36px_rgba(15,23,42,0.2)] group-hover/overflow:block group-focus-within/overflow:block"
+                style={{ width: `${previewLayout.widthPx}px` }}
+            >
+                {/* 填补按钮与浮层间的空隙，鼠标移动时不会意外关闭预览。 */}
+                <div aria-hidden="true" className="absolute inset-x-0 -top-3 h-3" />
+                <div className="space-y-1">
+                    {previewLayout.items.map(({ event, offsetPx }) => {
+                        const correctedTime = getCorrectedTime(event.timeScheduled, releaseEndTime, takeoffEndTime);
+                        const correctedOffsetPx = correctedTime
+                            ? Math.max(0, timeToPixels(correctedTime, timeScale) - group.leftPx)
+                            : undefined;
+                        const greenDotY = 34;
+                        const purpleDotY = 10;
+
+                        return (
+                            <div key={event.id} data-overflow-preview-row className="relative h-14 w-full">
+                                {correctedTime && correctedOffsetPx !== undefined && (
+                                    <>
+                                        {/* 浮层与展开行共用同一组计划点、L 型连线和修正点关系。 */}
+                                        <span
+                                            aria-hidden="true"
+                                            className="pointer-events-none absolute z-20 w-0 border-l-2 border-dashed border-[#A78BFA] opacity-60"
+                                            style={{
+                                                left: `${offsetPx}px`,
+                                                top: `${purpleDotY}px`,
+                                                height: `${greenDotY - purpleDotY}px`,
+                                            }}
+                                        />
+                                        <span
+                                            aria-hidden="true"
+                                            className="pointer-events-none absolute z-20 h-0 border-t-2 border-dashed border-[#A78BFA] opacity-60"
+                                            style={{
+                                                left: `${Math.min(offsetPx, correctedOffsetPx)}px`,
+                                                top: `${purpleDotY}px`,
+                                                width: `${Math.abs(correctedOffsetPx - offsetPx)}px`,
+                                            }}
+                                        />
+                                        <span
+                                            data-overflow-preview-purple-dot
+                                            className="group/corrected absolute z-30 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center"
+                                            style={{ left: `${correctedOffsetPx}px`, top: `${purpleDotY}px` }}
+                                            aria-hidden="true"
+                                            onMouseEnter={(hoverEvent) => onEventHoverChange?.(event.id, true, hoverEvent.currentTarget.parentElement ?? undefined)}
+                                            onMouseLeave={() => onEventHoverChange?.(event.id, false)}
+                                        >
+                                            <span className="size-3.5 rounded-full border-[2.5px] border-white bg-[#A78BFA] shadow-md animate-[calcBreath_2s_ease-in-out_infinite]" />
+                                            <span className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 hidden -translate-x-1/2 group-hover/corrected:block">
+                                                <span className="relative flex min-w-[50px] items-center justify-center rounded-lg border border-gray-100 bg-white px-2 py-1.5 font-mono text-base font-bold leading-none tracking-tighter text-gray-900 shadow-[0_4px_12px_rgba(0,0,0,0.15)]">
+                                                    {correctedTime}
+                                                    <span className="absolute -bottom-1 left-1/2 size-2 -translate-x-1/2 rotate-45 border-b border-r border-gray-100 bg-white" />
+                                                </span>
+                                            </span>
+                                        </span>
+                                    </>
+                                )}
+
+                                <button
+                                    type="button"
+                                    aria-label={`查看${event.label}任务详情${correctedTime ? `，修正时间${correctedTime}` : ''}`}
+                                    className="absolute flex min-h-10 w-max items-center gap-3.5 rounded-xl py-1 pr-1 text-left transition-colors hover:bg-slate-50 focus-visible:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                                    style={{ left: `${offsetPx}px`, top: '14px' }}
+                                    onClick={(clickEvent) => {
+                                        clickEvent.stopPropagation();
+                                        onEventClick?.(event);
+                                    }}
+                                    onMouseEnter={(hoverEvent) => onEventHoverChange?.(event.id, true, hoverEvent.currentTarget.parentElement ?? undefined)}
+                                    onMouseLeave={() => onEventHoverChange?.(event.id, false)}
+                                    onFocus={(focusEvent) => onEventHoverChange?.(event.id, true, focusEvent.currentTarget.parentElement ?? undefined)}
+                                    onBlur={() => onEventHoverChange?.(event.id, false)}
+                                >
+                                    <span data-overflow-preview-green-dot className="size-2.5 shrink-0 -translate-x-1/2 rounded-full bg-emerald-500 ring-2 ring-white shadow-sm" aria-hidden="true" />
+                                    <EventCapsuleVisual event={event} currentTime={currentTime} />
+                                </button>
+                            </div>
+                        );
+                    })}
                 </div>
             </div>
         </div>
@@ -703,6 +802,7 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
     const [contextMenu, setContextMenu] = React.useState<{ x: number, y: number, eventId: string } | null>(null);
     const [hoveredEventId, setHoveredEventId] = React.useState<string | null>(null);
     const hoverTimerRef = React.useRef<NodeJS.Timeout | null>(null);
+    const previewHoverAnchorRef = React.useRef<{ eventId: string; greenDotY: number; purpleDotY?: number } | null>(null);
     const rowRef = React.useRef<HTMLDivElement>(null);
 
     const handleHoverChange = React.useCallback((eventId: string, isHovered: boolean) => {
@@ -719,6 +819,34 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
             }, 250);
         }
     }, []);
+
+    const handlePreviewHoverChange = React.useCallback((eventId: string, isHovered: boolean, previewRow?: HTMLElement) => {
+        if (isHovered && previewRow && rowRef.current) {
+            const rowRect = rowRef.current.getBoundingClientRect();
+            const rowTop = rowRef.current.offsetTop;
+            const greenDotRect = previewRow
+                .querySelector<HTMLElement>('[data-overflow-preview-green-dot]')
+                ?.getBoundingClientRect();
+            const purpleDotRect = previewRow
+                .querySelector<HTMLElement>('[data-overflow-preview-purple-dot]')
+                ?.getBoundingClientRect();
+
+            if (greenDotRect) {
+                previewHoverAnchorRef.current = {
+                    eventId,
+                    // 连线停在圆点上缘，避免高层级虚线压住圆点。
+                    greenDotY: rowTop + greenDotRect.top - rowRect.top,
+                    purpleDotY: purpleDotRect
+                        ? rowTop + purpleDotRect.top - rowRect.top
+                        : undefined,
+                };
+            }
+        } else if (previewHoverAnchorRef.current?.eventId === eventId) {
+            previewHoverAnchorRef.current = null;
+        }
+
+        handleHoverChange(eventId, isHovered);
+    }, [handleHoverChange]);
 
     React.useEffect(() => {
         return () => {
@@ -819,25 +947,17 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
         const capsuleTopY = topPaddingCalc + track * trackSpacing;
         const greenDotPx = timeToPixels(event.timeScheduled, timeScale);
         const rowTop = rowRef.current?.offsetTop || 0;
-        const greenDotY = rowTop + capsuleTopY + 11;
+        const previewAnchor = previewHoverAnchorRef.current?.eventId === event.id
+            ? previewHoverAnchorRef.current
+            : undefined;
+        const greenDotY = previewAnchor?.greenDotY ?? (rowTop + capsuleTopY + 11);
 
         let purpleDotPx: number | undefined = undefined;
         let purpleDotY: number | undefined = undefined;
-        let calcPointTime: string | undefined = undefined;
-
-        if (releaseAnno?.endTime && takeoffAnno?.endTime) {
-            const [rH, rM] = releaseAnno.endTime.split(':').map(Number);
-            const [tH, tM] = takeoffAnno.endTime.split(':').map(Number);
-            const diff = (rH * 60 + rM) - (tH * 60 + tM);
-            if (diff > 15) {
-                const [eH, eM] = event.timeScheduled.split(':').map(Number);
-                const totalMin = eH * 60 + eM + diff;
-                const cH = Math.floor(totalMin / 60) % 24;
-                const cM = totalMin % 60;
-                calcPointTime = `${String(cH).padStart(2, '0')}:${String(cM).padStart(2, '0')}`;
-                purpleDotPx = timeToPixels(calcPointTime, timeScale);
-                purpleDotY = rowTop + capsuleTopY - 10;
-            }
+        const calcPointTime = getCorrectedTime(event.timeScheduled, releaseAnno?.endTime, takeoffAnno?.endTime);
+        if (calcPointTime) {
+            purpleDotPx = timeToPixels(calcPointTime, timeScale);
+            purpleDotY = previewAnchor?.purpleDotY ?? (rowTop + capsuleTopY - 10);
         }
 
         onEventHover?.({
@@ -1078,7 +1198,12 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
                         group={group}
                         top={56}
                         currentTime={currentTime}
+                        timeScale={timeScale}
                         onExpand={() => setExpandedFromEventId(group.events[0]?.id || null)}
+                        onEventClick={onEventClick}
+                        onEventHoverChange={handlePreviewHoverChange}
+                        releaseEndTime={releaseAnno?.endTime}
+                        takeoffEndTime={takeoffAnno?.endTime}
                     />
                 ))}
 
@@ -1103,23 +1228,14 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
 
                 {/* Calculated Scale Points - rendered as separate layer ABOVE all capsules */}
                 {(() => {
-                    const releaseAnno = flight.annotations?.find(a => a.label === '放行');
-                    const takeoffAnno = flight.annotations?.find(a => a.label === '起飞');
                     if (!releaseAnno?.endTime || !takeoffAnno?.endTime) return null;
-                    const [rH, rM] = releaseAnno.endTime.split(':').map(Number);
-                    const [tH, tM] = takeoffAnno.endTime.split(':').map(Number);
-                    const diff = (rH * 60 + rM) - (tH * 60 + tM);
-                    if (diff <= 15) return null;
 
                     const calcColor = '#A78BFA';
 
                     return renderedEvents.map((event) => {
                         if (!event.timeScheduled || event.timeScheduled === '--:--') return null;
-                        const [eH, eM] = event.timeScheduled.split(':').map(Number);
-                        const totalMin = eH * 60 + eM + diff;
-                        const cH = Math.floor(totalMin / 60) % 24;
-                        const cM = totalMin % 60;
-                        const calcPointTime = `${String(cH).padStart(2, '0')}:${String(cM).padStart(2, '0')}`;
+                        const calcPointTime = getCorrectedTime(event.timeScheduled, releaseAnno.endTime, takeoffAnno.endTime);
+                        if (!calcPointTime) return null;
 
                         const track = eventTracks.get(event.id) || 0;
                         const topPaddingCalc = trackSpacing > 30 ? 22 : 4;
