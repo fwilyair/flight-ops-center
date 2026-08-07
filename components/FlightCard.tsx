@@ -230,7 +230,7 @@ export const FlightCard: React.FC<FlightCardProps> = ({
         >
             <div className="flex h-full min-h-0 flex-col">
                 {legPresence.arrival ? (
-                    <section aria-label="进港航班" className="flex min-h-0 flex-1 flex-col justify-center gap-1">
+                    <section aria-label="进港航班" className="flex min-h-0 flex-1 flex-col justify-start gap-1">
                         <div className="grid min-w-0 grid-cols-[72px_65px_31px_31px_minmax(27px,1fr)] items-center gap-x-[3px] text-emerald-700">
                             <span className={`min-w-0 overflow-hidden whitespace-nowrap font-mono font-extrabold leading-none tabular-nums ${getFlightNumberSizeClass(arrivalFlightNo)}`} title={arrivalFlightNo}>
                                 {arrivalFlightNo}
@@ -264,7 +264,7 @@ export const FlightCard: React.FC<FlightCardProps> = ({
                 )}
 
                 {legPresence.departure ? (
-                    <section aria-label="出港航班" className="flex min-h-0 flex-1 flex-col justify-center gap-1">
+                    <section aria-label="出港航班" className="flex min-h-0 flex-1 flex-col justify-end gap-1">
                         <div className="grid min-w-0 grid-cols-[72px_65px_31px_31px_minmax(27px,1fr)] items-center gap-x-[3px] text-blue-700">
                             <span className={`min-w-0 overflow-hidden whitespace-nowrap font-mono font-extrabold leading-none tabular-nums ${getFlightNumberSizeClass(departureFlightNo)}`} title={departureFlightNo}>
                                 {departureFlightNo}
