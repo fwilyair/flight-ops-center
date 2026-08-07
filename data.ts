@@ -13,7 +13,11 @@ export const MOCK_FLIGHTS: Flight[] = [
     aircraftType: 'A320',
     aircraftCategory: 'M',
     route: 'PEK - CTU - SHA',
-    tags: ['冰', 'Q', '控', 'C', 'I', 'D', 'V', '互天', '机', '重要', '冰', 'Q', '控', 'C'],
+    tags: ['冰', 'Q', '控', 'C', 'I', 'D', 'V', '互天', '机', '重要'],
+    arrTags: ['冰', 'Q', '控', 'C'],
+    depTags: ['I', 'D', 'V', '互天', '机', '重要'],
+    arrFlightType: 'REG',
+    depFlightType: 'REG',
     arrInfo: {
       status: '到达',
       stand: '243'
@@ -108,6 +112,10 @@ export const MOCK_FLIGHTS: Flight[] = [
       gate: '32'
     },
     tags: ['V', 'I', '控'],
+    arrTags: ['V'],
+    depTags: ['I', '控'],
+    arrFlightType: 'REG',
+    depFlightType: 'REG',
     route: 'SHA - CTU - CAN',
     times: {
       sta: '09:40',
@@ -151,6 +159,10 @@ export const MOCK_FLIGHTS: Flight[] = [
       gate: '08' // Assuming gate is known
     },
     tags: ['D'],
+    arrTags: ['D'],
+    depTags: ['D'],
+    arrFlightType: 'REG',
+    depFlightType: 'REG',
     route: 'HGH - CTU - SZX',
     times: {
       sta: '09:35',
@@ -188,6 +200,10 @@ export const MOCK_FLIGHTS: Flight[] = [
       gate: '15'
     },
     tags: ['冰', 'C'],
+    arrTags: ['冰', 'C'],
+    depTags: ['冰', 'C'],
+    arrFlightType: 'REG',
+    depFlightType: 'REG',
     route: 'CKG - CTU - XIY',
     times: {
       sta: '09:15',
@@ -230,6 +246,10 @@ export const MOCK_FLIGHTS: Flight[] = [
       gate: '22'
     },
     tags: ['Q', '互天'],
+    arrTags: ['Q'],
+    depTags: ['互天'],
+    arrFlightType: 'REG',
+    depFlightType: 'REG',
     route: 'WUH - CTU - KMG',
     times: {
       sta: '10:05',
@@ -250,6 +270,11 @@ export const MOCK_FLIGHTS: Flight[] = [
     id: '6',
     flightNo: 'ZH9152',
     codeshare: 'ZH9153',
+    tags: [],
+    arrTags: [],
+    depTags: [],
+    arrFlightType: 'REG',
+    depFlightType: 'REG',
     arrInfo: {
       status: '前起',
       stand: '305'
@@ -277,10 +302,15 @@ export const MOCK_FLIGHTS: Flight[] = [
   // 7. 调机航班
   {
     id: '7',
-    flightNo: '3U8888',
+    flightNo: 'ZZMZT6343',
     remarks: '',
     stand: '205',
-    codeshare: '3U8663',
+    codeshare: 'ZZMZT6344',
+    tags: ['冰', 'Q', '控', 'C', 'I', 'D', 'V', '互天', '机', '重要'],
+    arrTags: ['冰', 'Q', '控', 'C', 'I', 'D', 'V', '互天', '机', '重要'],
+    depTags: ['D', 'V', '互天', '机'],
+    arrFlightType: 'REG',
+    depFlightType: 'FERRY',
     arrInfo: {
       status: '入位',
       stand: '318A'

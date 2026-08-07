@@ -238,7 +238,7 @@ test('includes the long-flight-number card fixture', () => {
 Run:
 
 ```bash
-npm test -- --test-name-pattern="independent card metadata|long-flight-number"
+node --experimental-strip-types --test --test-name-pattern="independent card metadata|long-flight-number" components/mockFlights.test.ts
 ```
 
 Expected: FAIL because current mock flights use legacy shared metadata.
@@ -297,7 +297,7 @@ depFlightType: 'FERRY',
 Run:
 
 ```bash
-npm test -- --test-name-pattern="STA and STD|independent card metadata|long-flight-number"
+node --experimental-strip-types --test --test-name-pattern="STA and STD|independent card metadata|long-flight-number" components/mockFlights.test.ts
 ```
 
 Expected: all selected tests PASS.
