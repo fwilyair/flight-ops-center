@@ -37,8 +37,8 @@ export const getTypeVisibility = (arrivalType: FlightType | undefined, departure
 
 export const getFlightNumberSizeClass = (flightNo: string): string =>
     flightNo.length >= 8
-        ? 'text-[12px] tracking-[-0.65px]'
-        : 'text-[17px]';
+        ? 'text-[13px] tracking-[-0.7px]'
+        : 'text-[19px] tracking-[-0.25px]';
 
 export const getTagDisplay = (tags: string[], capacity: number) => {
     if (tags.length <= capacity) return { visibleTags: tags, hiddenCount: 0 };

@@ -192,9 +192,9 @@ test('falls back to the single flight number for a departure without codeshare',
 });
 
 test('uses compact typography at the eight-character boundary', () => {
-    assert.equal(getFlightNumberSizeClass('ABC1234'), 'text-[17px]');
-    assert.equal(getFlightNumberSizeClass('ABCD1234'), 'text-[12px] tracking-[-0.65px]');
-    assert.equal(getFlightNumberSizeClass('ABCDEF1234'), 'text-[12px] tracking-[-0.65px]');
+    assert.equal(getFlightNumberSizeClass('ABC1234'), 'text-[19px] tracking-[-0.25px]');
+    assert.equal(getFlightNumberSizeClass('ABCD1234'), 'text-[13px] tracking-[-0.7px]');
+    assert.equal(getFlightNumberSizeClass('ABCDEF1234'), 'text-[13px] tracking-[-0.7px]');
 });
 
 test('adds a tag only to the selected leg and synchronizes legacy detail tags', () => {

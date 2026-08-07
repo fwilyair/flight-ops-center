@@ -79,8 +79,8 @@ const LegTagRow: React.FC<{
     const isDeparture = leg === 'departure';
 
     return (
-        <div className="flex h-[22px] min-w-0 items-center justify-between">
-            <div className="flex min-w-0 items-center gap-[3px]">
+        <div className="relative flex h-[22px] min-w-0 items-center">
+            <div className="mx-auto flex min-w-0 items-center justify-center gap-1">
                 {visibleTags.map((tag, index) => (
                     <TagDot key={`${leg}-${tag}-${index}`} tag={tag} />
                 ))}
@@ -103,7 +103,7 @@ const LegTagRow: React.FC<{
                     type="button"
                     title="播放监控视频"
                     aria-label="播放监控视频"
-                    className="ml-1 flex size-[20px] shrink-0 items-center justify-center rounded-full text-blue-600 hover:bg-blue-50"
+                    className="absolute right-0 flex size-[20px] shrink-0 items-center justify-center rounded-full text-blue-600 hover:bg-blue-50"
                     onClick={(event) => {
                         event.stopPropagation();
                         onVideoClick?.();
@@ -227,17 +227,17 @@ export const FlightCard: React.FC<FlightCardProps> = ({
         >
             <div className="grid h-[122px] grid-rows-[28px_22px_1px_28px_22px] gap-y-1">
                 {legPresence.arrival ? (
-                    <div className="grid min-w-0 grid-cols-[69px_62px_27px_30px_minmax(28px,1fr)] items-center gap-x-[3px] text-emerald-700">
-                        <span className={`min-w-0 overflow-hidden whitespace-nowrap font-mono font-bold leading-none tabular-nums ${getFlightNumberSizeClass(arrivalFlightNo)}`} title={arrivalFlightNo}>
+                    <div className="grid min-w-0 grid-cols-[72px_65px_31px_31px_minmax(27px,1fr)] items-center gap-x-[3px] text-emerald-700">
+                        <span className={`min-w-0 overflow-hidden whitespace-nowrap font-mono font-extrabold leading-none tabular-nums ${getFlightNumberSizeClass(arrivalFlightNo)}`} title={arrivalFlightNo}>
                             {arrivalFlightNo}
                         </span>
-                        <span className="min-w-0 whitespace-nowrap text-center font-mono text-[10px] font-bold leading-none tabular-nums">
+                        <span className="min-w-0 whitespace-nowrap text-center font-mono text-[12px] font-extrabold leading-none text-emerald-900 tabular-nums">
                             {formatCardTime(flight.times?.sta)}
                         </span>
-                        <span className={`min-w-0 whitespace-nowrap text-center text-[12px] font-bold leading-none ${flight.arrInfo?.status === '延误' ? 'text-red-600' : ''}`}>
+                        <span className={`flex h-5 min-w-0 items-center justify-center whitespace-nowrap rounded-[4px] px-[3px] text-center text-[11px] font-bold leading-none ${flight.arrInfo?.status === '延误' ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-800'}`}>
                             {flight.arrInfo?.status || '-'}
                         </span>
-                        <span className="min-w-0 whitespace-nowrap text-center font-mono text-[12px] font-bold leading-none">
+                        <span className="flex h-5 min-w-0 items-center justify-center whitespace-nowrap rounded-[4px] bg-emerald-100/75 px-0.5 text-center font-mono text-[11px] font-bold leading-none text-emerald-900">
                             {flight.arrInfo?.stand || '-'}
                         </span>
                         <span className="min-w-0 text-right leading-none">
@@ -260,17 +260,17 @@ export const FlightCard: React.FC<FlightCardProps> = ({
                 <div className="h-px bg-slate-300" aria-hidden="true" />
 
                 {legPresence.departure ? (
-                    <div className="grid min-w-0 grid-cols-[69px_62px_27px_30px_minmax(28px,1fr)] items-center gap-x-[3px] text-blue-700">
-                        <span className={`min-w-0 overflow-hidden whitespace-nowrap font-mono font-bold leading-none tabular-nums ${getFlightNumberSizeClass(departureFlightNo)}`} title={departureFlightNo}>
+                    <div className="grid min-w-0 grid-cols-[72px_65px_31px_31px_minmax(27px,1fr)] items-center gap-x-[3px] text-blue-700">
+                        <span className={`min-w-0 overflow-hidden whitespace-nowrap font-mono font-extrabold leading-none tabular-nums ${getFlightNumberSizeClass(departureFlightNo)}`} title={departureFlightNo}>
                             {departureFlightNo}
                         </span>
-                        <span className="min-w-0 whitespace-nowrap text-center font-mono text-[10px] font-bold leading-none tabular-nums">
+                        <span className="min-w-0 whitespace-nowrap text-center font-mono text-[12px] font-extrabold leading-none text-blue-900 tabular-nums">
                             {formatCardTime(flight.times?.std)}
                         </span>
-                        <span className={`min-w-0 whitespace-nowrap text-center text-[12px] font-bold leading-none ${flight.depInfo?.status === '延误' ? 'text-red-600' : ''}`}>
+                        <span className={`flex h-5 min-w-0 items-center justify-center whitespace-nowrap rounded-[4px] px-[3px] text-center text-[11px] font-bold leading-none ${flight.depInfo?.status === '延误' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-800'}`}>
                             {flight.depInfo?.status || '-'}
                         </span>
-                        <span className="min-w-0 whitespace-nowrap text-center font-mono text-[12px] font-bold leading-none">
+                        <span className="flex h-5 min-w-0 items-center justify-center whitespace-nowrap rounded-[4px] bg-blue-100/75 px-0.5 text-center font-mono text-[11px] font-bold leading-none text-blue-900">
                             {flight.depInfo?.gate || '-'}
                         </span>
                         <span className="min-w-0 text-right leading-none">
