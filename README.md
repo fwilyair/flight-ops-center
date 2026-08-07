@@ -1,22 +1,18 @@
 <div align="center">
-  <img src="./public/logo.png" height="48" alt="Flight Operations Center logo" />
+  <img src="./public/logo.png" height="48" alt="Flight Control Center logo" />
 
-  # Flight Operations Center
+  # Flight Control Center
 
-  **航班运行控制中心**
+  **航班控制中心**
 
   把航班保障节点、运行偏差与关键基线，放进一条可以缩放、拖拽与穿透查看的时间轴。
 
   [**在线体验**](https://fwilyair.github.io/flight-ops-center/) · [查看源码](https://github.com/fwilyair/flight-ops-center)
 </div>
 
-<div align="center">
-  <img src="./public/posters/flight-ops-zine-poster.png" width="560" alt="Flight Operations Center — Every Minute Has a Heading" />
-</div>
-
 ## 关于项目
 
-Flight Operations Center 是一个面向航班运行场景的交互式可视化前端原型。它使用甘特时间轴组织航班保障事件，在同一视图中呈现计划时间、实际时间、关键基线、偏差预判和运行告警，帮助使用者更快理解一架航班当前发生了什么、接下来将发生什么。
+Flight Control Center 是一个面向航班运行场景的交互式可视化前端原型。它使用甘特时间轴组织航班保障事件，在同一视图中呈现计划时间、实际时间、关键基线、偏差预判和运行告警，帮助使用者更快理解一架航班当前发生了什么、接下来将发生什么。
 
 当前版本使用本地模拟数据，重点展示信息组织方式、时间轴交互和运行协同体验。
 
@@ -79,9 +75,7 @@ npm run build
 ├── types.ts
 ├── index.tsx
 └── public/
-    ├── logo.png
-    └── posters/
-        └── flight-ops-zine-poster.png
+    └── logo.png
 ```
 
 ## 项目状态
