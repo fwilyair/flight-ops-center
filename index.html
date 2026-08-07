@@ -131,6 +131,47 @@
       background: transparent;
     }
 
+    /* 航班行分组：利用现有行间距建立边界，不增加行高 */
+    .flight-row {
+      --flight-row-surface: #ffffff;
+      background-color: var(--flight-row-surface);
+      transition: height 300ms ease, box-shadow 200ms ease, background-color 160ms ease;
+    }
+
+    .flight-row:nth-child(even) {
+      --flight-row-surface: #f8fafc;
+    }
+
+    .flight-row:hover {
+      --flight-row-surface: #f1f5f9;
+    }
+
+    .gantt-row-edge {
+      background-color: var(--flight-row-surface);
+      border-color: rgba(148, 163, 184, 0.44);
+      transition: background-color 160ms ease, border-color 160ms ease;
+    }
+
+    .flight-row:hover .gantt-row-edge {
+      border-color: rgba(100, 116, 139, 0.62);
+    }
+
+    .dark .flight-row {
+      --flight-row-surface: #0f172a;
+    }
+
+    .dark .flight-row:nth-child(even) {
+      --flight-row-surface: #1e293b;
+    }
+
+    .dark .flight-row:hover {
+      --flight-row-surface: #263449;
+    }
+
+    .dark .gantt-row-edge {
+      border-color: rgba(148, 163, 184, 0.48);
+    }
+
     .no-scrollbar::-webkit-scrollbar {
       display: none;
     }
@@ -178,6 +219,28 @@
       to {
         stroke-dashoffset: -26;
       }
+    }
+
+    /* 折叠任务入口：间歇式呼吸，不与业务状态色混淆 */
+    @keyframes overflowAttention {
+
+      0%,
+      100% {
+        transform: scale(1);
+        filter: brightness(1);
+        box-shadow: 0 4px 14px rgba(154, 52, 18, 0.34);
+      }
+
+      50% {
+        transform: scale(1.06);
+        filter: brightness(1.08) saturate(1.06);
+        box-shadow: 0 8px 20px rgba(154, 52, 18, 0.42);
+      }
+    }
+
+    .overflow-attention {
+      animation: overflowAttention 2.5s ease-in-out infinite;
+      transform-origin: center;
     }
 
     @media (prefers-reduced-motion: reduce) {

@@ -17,7 +17,7 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
       onClose={onClose}
       ariaLabel="穿透管控使用手册"
       containerClassName="p-4 sm:p-6 overflow-hidden"
-      panelClassName="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-4xl h-[570px] max-h-[85vh] flex flex-col overflow-hidden border border-gray-100 dark:border-gray-800"
+      panelClassName="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-4xl h-[760px] max-h-[calc(100vh-2rem)] sm:max-h-[calc(100vh-3rem)] flex flex-col overflow-hidden border border-gray-100 dark:border-gray-800"
     >
         
         {/* Modal Header */}
@@ -31,6 +31,8 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
             </div>
           </div>
           <button
+            type="button"
+            aria-label="关闭使用手册"
             onClick={onClose}
             className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-all hover:scale-110"
           >
@@ -71,7 +73,7 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
             }`}
           >
             <span className="material-symbols-outlined text-lg">touch_app</span>
-            穿透管控
+            常用操作
           </button>
         </div>
 
@@ -157,6 +159,7 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
                   </div>
                 </div>
               </section>
+
             </div>
           )}
 
@@ -239,25 +242,74 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
                   </div>
                 </div>
               </section>
+
+              {/* Fixed Row Height and Overflow Tasks */}
+              <section className="space-y-4">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2.5">
+                  <span className="w-2 h-5 bg-blue-600 rounded-full"></span>
+                  固定行高与折叠任务
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="p-4 rounded-xl border border-orange-100 bg-orange-50/60 dark:bg-orange-900/10 dark:border-orange-900/30 space-y-2">
+                    <div className="inline-flex h-7 items-center gap-1 rounded-full bg-orange-500 px-3 text-xs font-black text-white shadow-sm">
+                      +N 项
+                      <span className="material-symbols-outlined text-[15px]">expand_more</span>
+                    </div>
+                    <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-300">
+                      鼠标悬停可预览<b className="font-bold text-gray-900 dark:text-white">被折叠</b>任务胶囊；点击<b className="font-bold text-gray-900 dark:text-white">展开所有</b>任务胶囊。
+                    </p>
+                  </div>
+
+                  <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/70 dark:bg-gray-800/60 dark:border-gray-700 space-y-2">
+                    <div className="inline-flex h-7 items-center gap-1 rounded-full border border-slate-300 bg-white px-3 text-xs font-black text-slate-700 shadow-sm">
+                      收起
+                      <span className="material-symbols-outlined text-[15px]">expand_less</span>
+                    </div>
+                    <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-300">
+                      点击<b className="font-bold text-gray-900 dark:text-white">收起</b>按钮收起任务胶囊。
+                    </p>
+                  </div>
+
+                  <div className="p-4 rounded-xl border border-blue-100 bg-blue-50/50 dark:bg-blue-900/10 dark:border-blue-900/30 space-y-2">
+                    <div className="flex items-center gap-2 font-bold text-sm text-blue-800 dark:text-blue-300">
+                      <span className="material-symbols-outlined text-lg">priority_high</span>
+                      折叠顺序
+                    </div>
+                    <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-300">
+                      依次折叠超时完成、临期预警、关联告警、超时未完成。
+                    </p>
+                  </div>
+                </div>
+              </section>
             </div>
           )}
 
-          {/* TAB 4: INTERACTIONS */}
+          {/* TAB 3: INTERACTIONS */}
           {activeTab === 'interactions' && (
             <div className="space-y-4 animate-in fade-in duration-150">
               <section className="space-y-3">
-                <div className="p-3.5 sm:p-4 rounded-xl border border-blue-100 bg-blue-50/50 dark:bg-blue-900/10 dark:border-blue-900/30 flex items-start gap-3.5 shadow-sm hover:shadow-md transition-all">
-                  <div className="w-9 h-9 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-base shrink-0 shadow-sm">1</div>
+                <div className="p-3.5 sm:p-4 rounded-xl border border-violet-100 bg-violet-50/50 dark:bg-violet-900/10 dark:border-violet-900/30 flex items-start gap-3.5 shadow-sm hover:shadow-md transition-all">
+                  <div className="w-9 h-9 rounded-lg bg-violet-600 text-white flex items-center justify-center font-bold text-base shrink-0 shadow-sm">1</div>
                   <div>
-                    <h4 className="font-bold text-gray-900 dark:text-white text-sm sm:text-base">航班卡片与详情抽屉</h4>
+                    <h4 className="font-bold text-gray-900 dark:text-white text-sm sm:text-base">顶部视图与批量展开</h4>
                     <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mt-0.5 leading-normal">
-                      点击左侧航班卡片展开<b className="font-bold text-gray-900 dark:text-white">航班详情抽屉</b>，提供<b className="font-bold text-gray-900 dark:text-white">航班备注、快捷短语、查看保障时间轴</b>等功能。
+                      点击<b className="font-bold text-gray-900 dark:text-white">穿透视图/管控视图</b>切换视图入口状态；右侧<b className="font-bold text-gray-900 dark:text-white">全部展开/全部收起</b>按钮可一次调整当前航班列表。
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-3.5 sm:p-4 rounded-xl border border-blue-100 bg-blue-50/50 dark:bg-blue-900/10 dark:border-blue-900/30 flex items-start gap-3.5 shadow-sm hover:shadow-md transition-all">
+                  <div className="w-9 h-9 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-base shrink-0 shadow-sm">2</div>
+                  <div>
+                    <h4 className="font-bold text-gray-900 dark:text-white text-sm sm:text-base">航班详情与标记添加</h4>
+                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mt-0.5 leading-normal">
+                      点击左侧航班卡片打开<b className="font-bold text-gray-900 dark:text-white">航班详情</b>。点击标记末尾的<b className="font-bold text-gray-900 dark:text-white">“+”</b>选择并添加航班标记；已添加项不可重复选择。
                     </p>
                   </div>
                 </div>
 
                 <div className="p-3.5 sm:p-4 rounded-xl border border-purple-100 bg-purple-50/50 dark:bg-purple-900/10 dark:border-purple-900/30 flex items-start gap-3.5 shadow-sm hover:shadow-md transition-all">
-                  <div className="w-9 h-9 rounded-lg bg-purple-600 text-white flex items-center justify-center font-bold text-base shrink-0 shadow-sm">2</div>
+                  <div className="w-9 h-9 rounded-lg bg-purple-600 text-white flex items-center justify-center font-bold text-base shrink-0 shadow-sm">3</div>
                   <div>
                     <h4 className="font-bold text-gray-900 dark:text-white text-sm sm:text-base">保障胶囊与航班管控</h4>
                     <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mt-0.5 leading-normal">
@@ -267,7 +319,7 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
                 </div>
 
                 <div className="p-3.5 sm:p-4 rounded-xl border border-emerald-100 bg-emerald-50/50 dark:bg-emerald-900/10 dark:border-emerald-900/30 flex items-start gap-3.5 shadow-sm hover:shadow-md transition-all">
-                  <div className="w-9 h-9 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-base shrink-0 shadow-sm">3</div>
+                  <div className="w-9 h-9 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-base shrink-0 shadow-sm">4</div>
                   <div>
                     <h4 className="font-bold text-gray-900 dark:text-white text-sm sm:text-base">右键菜单与弱化显示</h4>
                     <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mt-0.5 leading-normal">
@@ -277,7 +329,7 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
                 </div>
 
                 <div className="p-3.5 sm:p-4 rounded-xl border border-amber-100 bg-amber-50/50 dark:bg-amber-900/10 dark:border-amber-900/30 flex items-start gap-3.5 shadow-sm hover:shadow-md transition-all">
-                  <div className="w-9 h-9 rounded-lg bg-amber-600 text-white flex items-center justify-center font-bold text-base shrink-0 shadow-sm">4</div>
+                  <div className="w-9 h-9 rounded-lg bg-amber-600 text-white flex items-center justify-center font-bold text-base shrink-0 shadow-sm">5</div>
                   <div>
                     <h4 className="font-bold text-gray-900 dark:text-white text-sm sm:text-base">时间轴缩放与搜索</h4>
                     <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mt-0.5 leading-normal">

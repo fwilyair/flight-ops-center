@@ -37,6 +37,10 @@ const App: React.FC = () => {
 
   // 时间轴比例尺状态 (分钟数)
   const [timeScale, setTimeScale] = useState<5 | 10 | 30 | 60>(10);
+  // 视图切换暂作交互示例，待业务筛选规则明确后再接入实际数据变换。
+  const [isControlView, setIsControlView] = useState(false);
+  // 全局展开状态作为所有可见航班行共享的密度指令。
+  const [expandAllRows, setExpandAllRows] = useState(false);
 
   // 悬浮在事件胶囊上时的虚线与时间标签信息
   const [hoveredEventInfo, setHoveredEventInfo] = useState<EventHoverInfo | null>(null);
@@ -532,10 +536,41 @@ const App: React.FC = () => {
           <div ref={timelineLayoutRef} className="min-w-max h-full flex flex-col relative">
 
             {/* Sticky Timeline Header */}
-            <div className="sticky top-0 z-40 flex h-14 border-b bg-white dark:bg-gray-900" style={{ borderColor: 'var(--border-color)', boxShadow: 'var(--shadow-sm)' }}>
+            <div className="sticky top-0 z-[60] flex h-14 border-b bg-white dark:bg-gray-900" style={{ borderColor: 'var(--border-color)', boxShadow: 'var(--shadow-sm)' }}>
               {/* Corner Box (Intersection of sticky headers) */}
-              <div className="sticky left-0 z-50 w-[260px] min-w-[260px] border-r flex items-center px-3 justify-between bg-white dark:bg-gray-900" style={{ borderColor: 'var(--border-color)', boxShadow: 'var(--shadow-sm)' }}>
-                {/* 航班列表 Header Content Removed */}
+              <div className="sticky left-0 z-[70] flex w-[260px] min-w-[260px] items-center gap-1.5 border-r bg-white px-4 dark:bg-gray-900" style={{ borderColor: 'var(--border-color)', boxShadow: 'var(--shadow-sm)' }}>
+                {/* 保留左侧半宽作为视图模式入口，并用独立色相区分穿透/管控状态。 */}
+                <button
+                  type="button"
+                  aria-pressed={isControlView}
+                  aria-label={`当前为${isControlView ? '管控视图' : '穿透视图'}，点击切换为${isControlView ? '穿透视图' : '管控视图'}`}
+                  onClick={() => setIsControlView(previous => !previous)}
+                  className={`flex h-8 min-w-0 flex-1 items-center justify-center gap-1 rounded-full border border-white/90 px-2 text-[13px] font-semibold transition-[background-color,background-image,border-color,color,box-shadow] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${isControlView
+                    ? 'bg-teal-50 bg-[radial-gradient(circle_at_center,#ccfbf1_0%,#f0fdfa_68%,#ffffff_100%)] text-teal-800 shadow-[0_2px_8px_rgba(13,148,136,0.14)] hover:bg-[radial-gradient(circle_at_center,#99f6e4_0%,#ccfbf1_68%,#f0fdfa_100%)] focus-visible:ring-teal-500'
+                    : 'bg-violet-50 bg-[radial-gradient(circle_at_center,#ede9fe_0%,#f5f3ff_68%,#ffffff_100%)] text-violet-700 shadow-[0_2px_8px_rgba(124,58,237,0.14)] hover:bg-[radial-gradient(circle_at_center,#ddd6fe_0%,#ede9fe_68%,#f5f3ff_100%)] focus-visible:ring-violet-500'
+                    }`}
+                >
+                  <span className="material-symbols-outlined text-[18px] leading-none" aria-hidden="true">swap_horiz</span>
+                  <span className="truncate">{isControlView ? '管控视图' : '穿透视图'}</span>
+                </button>
+
+                {/* 同一按钮复用展开/收起操作，避免占用额外顶部空间。 */}
+                <button
+                  type="button"
+                  aria-pressed={expandAllRows}
+                  aria-label={expandAllRows ? '收起全部航班任务' : '展开全部航班任务'}
+                  disabled={filteredFlights.length === 0}
+                  onClick={() => setExpandAllRows(previous => !previous)}
+                  className={`flex h-8 min-w-0 flex-1 items-center justify-center gap-1 rounded-full border border-white/90 px-2 text-[13px] font-semibold transition-[background-color,background-image,border-color,color,box-shadow] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40 ${expandAllRows
+                    ? 'bg-white text-slate-700 shadow-[0_2px_8px_rgba(15,23,42,0.12)] hover:bg-slate-50 focus-visible:ring-slate-400'
+                    : 'bg-orange-50 bg-[radial-gradient(circle_at_center,#ffedd5_0%,#fff7ed_68%,#ffffff_100%)] text-orange-800 shadow-[0_2px_8px_rgba(234,88,12,0.14)] hover:bg-[radial-gradient(circle_at_center,#fed7aa_0%,#ffedd5_68%,#fff7ed_100%)] focus-visible:ring-orange-500'
+                    }`}
+                >
+                  <span className="material-symbols-outlined text-[18px] leading-none" aria-hidden="true">
+                    {expandAllRows ? 'unfold_less' : 'unfold_more'}
+                  </span>
+                  <span>{expandAllRows ? '全部收起' : '全部展开'}</span>
+                </button>
               </div>
 
               {/* Timeline Ticks */}
@@ -685,6 +720,7 @@ const App: React.FC = () => {
                     flight={flight}
                     timeScale={timeScale}
                     currentTime={currentTime}
+                    expandAllRows={expandAllRows}
                     onClick={() => handleFlightClick(flight)}
                     onEventClick={(event) => handleEventClick(event, flight)}
                     onVideoClick={handleVideoClick}

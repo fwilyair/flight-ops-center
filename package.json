@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build && mkdir -p dist/server && cp sites-worker.js dist/server/index.js",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "node --experimental-strip-types --test components/*.test.ts",
+    "typecheck": "tsc --noEmit",
+    "check": "npm run typecheck && npm test && npm run build"
   },
   "dependencies": {
     "gsap": "^3.15.0",

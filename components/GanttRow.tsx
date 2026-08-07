@@ -1,6 +1,8 @@
 import React from 'react';
 import { Flight, TimelineEvent, Annotation, FlightType, ProcessMarker } from '../types';
 import { timeToPixels, getColorForEventType } from '../utils';
+import { assignPriorityTracks, buildFixedRowOverflow, getExpandedControlTop, getExpansionTargetEventId, getFlightRowHeight } from './flightRowLayout';
+import type { OverflowGroup } from './flightRowLayout';
 
 export interface EventHoverInfo {
     eventId: string;
@@ -16,13 +18,15 @@ export interface GanttRowProps {
     flight: Flight;
     timeScale: number;
     currentTime?: string;
+    expandAllRows?: boolean;
     onClick?: () => void;
     onEventClick?: (event: TimelineEvent) => void;
     onVideoClick?: () => void;
     onEventHover?: (info: EventHoverInfo | null) => void;
 }
 
-const tagColorMap: Record<string, string> = {
+// 航班列表用高区分度配色容纳多个小标记；详情面板则保留独立的状态强调色。
+const flightCardTagColorMap: Record<string, string> = {
     '冰': 'bg-blue-500',
     'Q': 'bg-blue-600',
     '控': 'bg-yellow-400 text-yellow-900',
@@ -134,19 +138,10 @@ const CalcPointWithTooltip: React.FC<{
     );
 };
 
-const EventPill: React.FC<{
+const EventCapsuleVisual: React.FC<{
     event: TimelineEvent;
-    flightId: string;
-    track: number;
-    timeScale: number;
     currentTime?: string;
-    onEventClick?: (event: TimelineEvent) => void;
-    onContextMenu?: (e: React.MouseEvent, event: TimelineEvent) => void;
-    isDimmed?: boolean;
-    trackSpacing?: number;
-    onHoverChange?: (isHovered: boolean) => void;
-}> = ({ event, flightId, track, timeScale, currentTime, onEventClick, onContextMenu, isDimmed, trackSpacing = 30, onHoverChange }) => {
-    const leftPos = timeToPixels(event.timeScheduled || event.timeActual || '', timeScale);
+}> = ({ event, currentTime }) => {
     const colors = getColorForEventType(event.type, event.status);
     const isDelayed = event.status === 'delayed';
 
@@ -163,53 +158,8 @@ const EventPill: React.FC<{
         timeDiffColor = diffMins > 0 ? 'text-red-500' : diffMins < 0 ? 'text-emerald-500' : 'text-gray-500';
     }
 
-    // 根据轨道索引计算垂直位置
-    const topPadding = trackSpacing > 30 ? 22 : 4; // 有计算刻度点时增加顶部偏移
-    const topPos = topPadding + (track * trackSpacing);
-
-    const [isGreenDotHovered, setIsGreenDotHovered] = React.useState(false);
-
     return (
-        <div
-            data-motion-layout
-            data-flip-id={`event-${flightId}-${event.id}`}
-            className={`absolute flex items-center z-10 hover:z-20 cursor-pointer select-none group overflow-visible ${isDimmed ? 'opacity-40 grayscale-[80%]' : ''}`}
-            style={{ left: `${leftPos}px`, top: `${topPos}px` }}
-            onClick={(e) => {
-                e.stopPropagation();
-                onEventClick?.(event);
-            }}
-            onContextMenu={(e) => {
-                onContextMenu?.(e, event);
-            }}
-            onMouseEnter={() => onHoverChange?.(true)}
-            onMouseLeave={(e) => {
-                if (e.relatedTarget && e.currentTarget.contains(e.relatedTarget as Node)) {
-                    return;
-                }
-                onHoverChange?.(false);
-            }}
-        >
-            {/* 对齐时间刻度的圆点 (中心对齐 leftPos) - 尺寸增大 - 统一绿色 */}
-            <div
-                className={`absolute left-0 top-1/2 -translate-x-1/2 -translate-y-1/2 size-2.5 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-gray-900 shadow-sm z-30 pointer-events-auto`}
-                onMouseEnter={() => setIsGreenDotHovered(true)}
-                onMouseLeave={() => setIsGreenDotHovered(false)}
-            >
-                {/* Green dot hover tooltip */}
-                {isGreenDotHovered && event.timeScheduled && event.timeScheduled !== '--:--' && (
-                    <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 z-50 pointer-events-none">
-                        <div className="bg-white px-2 py-1.5 rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.15)] border border-gray-100 flex flex-col items-center min-w-[50px]">
-                            <span className="text-base font-bold text-gray-900 font-mono tracking-tighter leading-none">
-                                {event.timeScheduled}
-                            </span>
-                            <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-white border-b border-r border-gray-100" style={{ transform: 'rotate(45deg)' }}></div>
-                        </div>
-                    </div>
-                )}
-            </div>
-
-            <div className="relative ml-4">
+        <div className="relative">
                 {/* Capsule outline: 0=无框线, 1=虚线转动(已发管控), 2=渐变实线(已收回执) */}
                 {(() => {
                     // 用 event.id 的字符码之和 mod 3 做稳定随机分配
@@ -286,55 +236,68 @@ const EventPill: React.FC<{
                         )}
                     </div>
                 </div>
-            </div>{/* capsule inner + outline wrapper */}
+            </div>
+    );
+};
 
+const EventPill: React.FC<{
+    event: TimelineEvent;
+    flightId: string;
+    track: number;
+    timeScale: number;
+    currentTime?: string;
+    onEventClick?: (event: TimelineEvent) => void;
+    onContextMenu?: (e: React.MouseEvent, event: TimelineEvent) => void;
+    isDimmed?: boolean;
+    trackSpacing?: number;
+    onHoverChange?: (isHovered: boolean) => void;
+}> = ({ event, flightId, track, timeScale, currentTime, onEventClick, onContextMenu, isDimmed, trackSpacing = 30, onHoverChange }) => {
+    const leftPos = timeToPixels(event.timeScheduled || event.timeActual || '', timeScale);
+    const topPadding = trackSpacing > 30 ? 22 : 4;
+    const topPos = topPadding + (track * trackSpacing);
+    const [isGreenDotHovered, setIsGreenDotHovered] = React.useState(false);
+
+    return (
+        <div
+            data-motion-layout
+            data-flip-id={`event-${flightId}-${event.id}`}
+            className={`absolute flex items-center z-20 hover:z-[25] cursor-pointer select-none group overflow-visible ${isDimmed ? 'opacity-40 grayscale-[80%]' : ''}`}
+            style={{ left: `${leftPos}px`, top: `${topPos}px` }}
+            onClick={(e) => {
+                e.stopPropagation();
+                onEventClick?.(event);
+            }}
+            onContextMenu={(e) => onContextMenu?.(e, event)}
+            onMouseEnter={() => onHoverChange?.(true)}
+            onMouseLeave={(e) => {
+                if (e.relatedTarget && e.currentTarget.contains(e.relatedTarget as Node)) return;
+                onHoverChange?.(false);
+            }}
+        >
+            <div
+                className="absolute left-0 top-1/2 -translate-x-1/2 -translate-y-1/2 size-2.5 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-gray-900 shadow-sm z-30 pointer-events-auto"
+                onMouseEnter={() => setIsGreenDotHovered(true)}
+                onMouseLeave={() => setIsGreenDotHovered(false)}
+            >
+                {isGreenDotHovered && event.timeScheduled && event.timeScheduled !== '--:--' && (
+                    <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 z-50 pointer-events-none">
+                        <div className="bg-white px-2 py-1.5 rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.15)] border border-gray-100 flex flex-col items-center min-w-[50px]">
+                            <span className="text-base font-bold text-gray-900 font-mono tracking-tighter leading-none">{event.timeScheduled}</span>
+                            <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-white border-b border-r border-gray-100" style={{ transform: 'rotate(45deg)' }}></div>
+                        </div>
+                    </div>
+                )}
+            </div>
+            <div className="relative ml-4">
+                <EventCapsuleVisual event={event} currentTime={currentTime} />
+            </div>
         </div>
     );
 };
 
-// 计算事件的轨道分配，避免重叠
-const calculateEventTracks = (events: TimelineEvent[], timeScale: number): Map<string, number> => {
-    const tracks = new Map<string, number>();
-    const trackEndTimes: number[] = []; // 每个轨道的结束时间（像素）
-
-    // 按开始时间排序
-    const sortedEvents = [...events].sort((a, b) => {
-        const aTime = timeToPixels(a.timeScheduled || a.timeActual || '', timeScale);
-        const bTime = timeToPixels(b.timeScheduled || b.timeActual || '', timeScale);
-        return aTime - bTime;
-    });
-
-    sortedEvents.forEach(event => {
-        const startPx = timeToPixels(event.timeScheduled || event.timeActual || '', timeScale);
-        // 新设计的胶囊宽度：标签 + 时间部分
-        const labelLength = event.label.length;
-        // 修正：text-sm font-bold 每个汉字约16-18px，加上padding
-        const labelWidth = labelLength * 18 + 24;
-        const timeWidth = 190; // 时间部分固定宽度（适配 text-sm 大字体 + padding）
-        const eventWidth = labelWidth + timeWidth + 10; // 额外加 10px buffer 防止边缘重叠
-        const endPx = startPx + eventWidth;
-
-        // 找到第一个可用的轨道
-        let assignedTrack = 0;
-        for (let i = 0; i < trackEndTimes.length; i++) {
-            if (trackEndTimes[i] <= startPx) {
-                assignedTrack = i;
-                trackEndTimes[i] = endPx;
-                break;
-            }
-        }
-
-        // 如果没有找到可用轨道，创建新轨道
-        if (assignedTrack === trackEndTimes.length || trackEndTimes[assignedTrack] > startPx) {
-            assignedTrack = trackEndTimes.length;
-            trackEndTimes.push(endPx);
-        }
-
-        tracks.set(event.id, assignedTrack);
-    });
-
-    return tracks;
-};
+const getEstimatedEventWidth = (event: TimelineEvent): number => (
+    (event.label.length * 18) + 24 + 190 + 10
+);
 
 const ProcessDiamond: React.FC<{
     marker: ProcessMarker;
@@ -671,7 +634,70 @@ const ContextMenu: React.FC<{
     );
 };
 
-const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime, onClick, onEventClick, onVideoClick, onEventHover }) => {
+const OverflowPill: React.FC<{
+    group: OverflowGroup<TimelineEvent>;
+    top: number;
+    currentTime?: string;
+    onExpand?: () => void;
+}> = ({ group, top, currentTime, onExpand }) => {
+    return (
+        // 预览浮层复用真实胶囊视觉，确保折叠前后的状态识别一致。
+        <div
+            className="absolute z-30 group/overflow"
+            style={{ left: `${group.leftPx}px`, top: `${top}px` }}
+        >
+            <button
+                type="button"
+                className="overflow-attention relative flex h-7 min-w-[72px] items-center justify-center gap-1 overflow-hidden rounded-full border border-orange-700 bg-orange-500 px-3 text-xs font-black tracking-tight text-white shadow-[0_4px_14px_rgba(154,52,18,0.34)] transition-colors hover:bg-orange-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2"
+                style={{ animationDelay: `${-((group.leftPx % 700) / 700) * 2.5}s` }}
+                aria-label={`还有 ${group.events.length} 项任务未在当前行展示，展开当前航班`}
+                onClick={(event) => {
+                    event.stopPropagation();
+                    onExpand?.();
+                }}
+            >
+                <span aria-hidden="true">+{group.events.length}</span>
+                <span aria-hidden="true">项</span>
+                <span className="material-symbols-outlined text-[15px] leading-none text-orange-100" aria-hidden="true">expand_more</span>
+            </button>
+
+            <div className="absolute left-0 top-full mt-2.5 hidden w-max min-w-[340px] max-w-[560px] rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_14px_36px_rgba(15,23,42,0.2)] group-hover/overflow:block group-focus-within/overflow:block pointer-events-none">
+                <div className="space-y-3.5">
+                    {group.events.map(event => (
+                        <div key={event.id} className="flex min-h-10 items-center gap-3.5 px-1 py-1">
+                            <span className="size-2.5 shrink-0 rounded-full bg-emerald-500 ring-2 ring-white shadow-sm" aria-hidden="true" />
+                            <EventCapsuleVisual event={event} currentTime={currentTime} />
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const CollapsePill: React.FC<{
+    flightNo: string;
+    left: number;
+    top: number;
+    onCollapse: () => void;
+}> = ({ flightNo, left, top, onCollapse }) => (
+    <button
+        type="button"
+        className="absolute z-30 flex h-7 min-w-[72px] items-center justify-center gap-0.5 rounded-full border border-slate-400 bg-white px-3 text-xs font-black tracking-tight text-slate-800 shadow-[0_4px_12px_rgba(15,23,42,0.18)] transition-colors hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-500 focus-visible:ring-offset-2"
+        style={{ left: `${left}px`, top: `${top}px` }}
+        aria-label={`收起 ${flightNo} 的全部任务`}
+        onClick={(event) => {
+            event.stopPropagation();
+            onCollapse();
+        }}
+    >
+        <span aria-hidden="true">收起</span>
+        <span className="material-symbols-outlined text-[15px] leading-none" aria-hidden="true">expand_less</span>
+    </button>
+);
+
+const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime, expandAllRows = false, onClick, onEventClick, onVideoClick, onEventHover }) => {
+    const [expandedFromEventId, setExpandedFromEventId] = React.useState<string | null>(null);
     const [dimmedEventIds, setDimmedEventIds] = React.useState<Set<string>>(new Set());
     const [contextMenu, setContextMenu] = React.useState<{ x: number, y: number, eventId: string } | null>(null);
     const [hoveredEventId, setHoveredEventId] = React.useState<string | null>(null);
@@ -722,10 +748,16 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
     const isDelay = flight.tags?.includes('D') || flight.arrInfo?.status === '延误' || flight.depInfo?.status === '延误';
 
     // 计算事件的轨道分配
-    const eventTracks = React.useMemo(() => calculateEventTracks(flight.events, timeScale), [flight.events, timeScale]);
+    const eventTracks = React.useMemo(
+        () => assignPriorityTracks(
+            flight.events,
+            event => timeToPixels(event.timeScheduled || event.timeActual || '', timeScale),
+            getEstimatedEventWidth,
+        ),
+        [flight.events, timeScale],
+    );
     const maxTrack = Math.max(0, ...(Array.from(eventTracks.values()) as number[]));
     const trackCount = maxTrack + 1;
-
     // 判断是否有计算刻度点（需要更大的轨道间距来容纳紫色圆点）
     const releaseAnno = React.useMemo(() => flight.annotations?.find(a => a.label === '放行'), [flight.annotations]);
     const takeoffAnno = React.useMemo(() => flight.annotations?.find(a => a.label === '起飞'), [flight.annotations]);
@@ -737,15 +769,33 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
         hasCalcPoints = diff > 15;
     }
     const trackSpacing = hasCalcPoints ? 48 : 30;
-
-    // 计算基线区域高度
+    const maxVisibleTracks = hasCalcPoints ? 1 : 2;
+    const fixedRowLayout = React.useMemo(
+        () => buildFixedRowOverflow<TimelineEvent>(
+            flight.events,
+            eventTracks,
+            maxVisibleTracks,
+            event => timeToPixels(event.timeScheduled || event.timeActual || '', timeScale),
+        ),
+        [flight.events, eventTracks, maxVisibleTracks, timeScale],
+    );
+    const isExpanded = expandedFromEventId !== null;
+    const expandedControlGroup = expandedFromEventId
+        ? fixedRowLayout.overflowGroups.find(group => group.events.some(event => event.id === expandedFromEventId))
+        : undefined;
+    const expandedControlEvent = expandedFromEventId
+        ? flight.events.find(event => event.id === expandedFromEventId)
+        : undefined;
+    const expandedControlLeft = expandedControlGroup?.leftPx
+        ?? (expandedControlEvent ? timeToPixels(expandedControlEvent.timeScheduled || expandedControlEvent.timeActual || '', timeScale) : 0);
     const annotationCount = flight.annotations?.length || 0;
+    const rowHeight = getFlightRowHeight({ isExpanded, hasCalcPoints, trackCount, annotationCount });
+    const expandedControlTop = getExpandedControlTop({ hasCalcPoints, trackCount });
+    const renderedEvents = isExpanded ? flight.events : fixedRowLayout.visibleEvents;
 
-    // Calculate row height based on tracks
-    // Base height needs to be taller to accommodate the 6px border-bottom and padding + new tag row
-    const minHeight = 130;
-    const topPaddingRow = hasCalcPoints ? 22 : 4;
-    const rowHeight = Math.max(minHeight, topPaddingRow + (trackCount * trackSpacing) + (annotationCount * 34) + 10);
+    React.useEffect(() => {
+        setExpandedFromEventId(getExpansionTargetEventId(expandAllRows, fixedRowLayout.overflowGroups));
+    }, [expandAllRows, fixedRowLayout.overflowGroups]);
 
     // 当鼠标悬浮在胶囊或点上时，报告绿点/紫点的位置与时间信息
     React.useEffect(() => {
@@ -802,10 +852,9 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
             ref={rowRef}
             data-motion-flight-row
             data-flight-id={flight.id}
-            className="flex group transition-shadow duration-200 relative mb-3 rounded-xl shadow-sm hover:shadow-md border border-slate-100"
+            className="flight-row flex group relative mb-3 rounded-xl shadow-sm hover:shadow-md border border-slate-100"
             style={{
                 height: `${rowHeight}px`,
-                background: '#ffffff' // Pure white card background
             }}
         >
 
@@ -938,7 +987,7 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
                                         const isDualChar = tag.length > 1 && !isMore;
                                         const colorClass = isMore
                                             ? 'bg-slate-300 text-slate-700 outline outline-[1.5px] outline-slate-200 outline-offset-[-1.5px]'
-                                            : (tagColorMap[tag] || 'bg-gray-400');
+                                            : (flightCardTagColorMap[tag] || 'bg-gray-400');
                                         const textStyle = (tag === '控' || isMore) ? '' : 'text-white';
 
                                         return (
@@ -966,7 +1015,7 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
                                     <div className="flex items-center gap-1 flex-wrap max-w-[200px]">
                                         {flight.tags.map((tag, idx) => {
                                             const isDualChar = tag.length > 1;
-                                            const colorClass = tagColorMap[tag] || 'bg-gray-400';
+                                            const colorClass = flightCardTagColorMap[tag] || 'bg-gray-400';
                                             return (
                                                 <div
                                                     key={`hover-tag-${idx}`}
@@ -992,10 +1041,14 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
 
             {/* Right Content: Timeline */}
             <div className="flex-1 relative gantt-grid-bg" style={{ overflow: 'visible' }}>
+                {/* 用行内表面色覆盖边缘点阵，只强化分组而不增加行高。 */}
+                <div aria-hidden="true" className="gantt-row-edge absolute inset-x-0 top-0 z-[15] h-1.5 border-t pointer-events-none" />
+                <div aria-hidden="true" className="gantt-row-edge absolute inset-x-0 bottom-0 z-[15] h-1.5 border-b pointer-events-none" />
+
                 {flight.annotations?.map((anno, idx) => (
                     <AnnotationLine key={`anno-${idx}`} annotation={anno} flightId={flight.id} index={idx} timeScale={timeScale} />
                 ))}
-                {flight.events.map((event) => (
+                {renderedEvents.map((event) => (
                     <EventPill
                         key={event.id}
                         event={event}
@@ -1010,6 +1063,26 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
                         onHoverChange={(isHovered) => handleHoverChange(event.id, isHovered)}
                     />
                 ))}
+
+                {/* 紧凑行仅显示隐藏任务入口；展开后在同一时间位置复用为收起入口。 */}
+                {!isExpanded && fixedRowLayout.overflowGroups.map((group) => (
+                    <OverflowPill
+                        key={`overflow-${group.leftPx}-${group.events[0]?.id}`}
+                        group={group}
+                        top={56}
+                        currentTime={currentTime}
+                        onExpand={() => setExpandedFromEventId(group.events[0]?.id || null)}
+                    />
+                ))}
+
+                {isExpanded && expandedFromEventId && (
+                    <CollapsePill
+                        flightNo={flight.flightNo.split(' / ')[0]}
+                        left={expandedControlLeft}
+                        top={expandedControlTop}
+                        onCollapse={() => setExpandedFromEventId(null)}
+                    />
+                )}
 
                 {contextMenu && (
                     <ContextMenu
@@ -1033,7 +1106,7 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
 
                     const calcColor = '#A78BFA';
 
-                    return flight.events.map((event) => {
+                    return renderedEvents.map((event) => {
                         if (!event.timeScheduled || event.timeScheduled === '--:--') return null;
                         const [eH, eM] = event.timeScheduled.split(':').map(Number);
                         const totalMin = eH * 60 + eM + diff;
@@ -1108,6 +1181,7 @@ export const GanttRow = React.memo(GanttRowInner, (prevProps, nextProps) => {
         prevProps.flight === nextProps.flight &&
         prevProps.timeScale === nextProps.timeScale &&
         prevProps.currentTime === nextProps.currentTime &&
+        prevProps.expandAllRows === nextProps.expandAllRows &&
         prevProps.onClick === nextProps.onClick &&
         prevProps.onEventClick === nextProps.onEventClick &&
         prevProps.onVideoClick === nextProps.onVideoClick &&

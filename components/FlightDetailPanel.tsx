@@ -1,8 +1,11 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { Flight } from '../types';
 import { gsap } from '../motion/gsap';
 import { MOTION_DURATION, MOTION_EASE, MOTION_STAGGER } from '../motion/tokens';
 import { prefersReducedMotion, REDUCED_MOTION_QUERY } from '../motion/preferences';
+import { addFlightTag, FLIGHT_TAG_OPTIONS, flightDetailTagColorMap, getCenteredTagPickerPosition } from './flightTags';
+import type { FlightTag } from './flightTags';
 
 interface FlightDetailPanelProps {
     flight: Flight | null;
@@ -10,17 +13,6 @@ interface FlightDetailPanelProps {
     onClose: () => void;
     onFlightUpdate?: (flight: Flight) => void;
 }
-
-const tagColorMap: Record<string, string> = {
-    '冰': 'bg-blue-500',
-    'Q': 'bg-blue-600',
-    '控': 'bg-yellow-400 text-yellow-900',
-    'C': 'bg-cyan-500',
-    'I': 'bg-green-700',
-    'D': 'bg-red-600',
-    'V': 'bg-orange-600',
-    '互天': 'bg-purple-600'
-};
 
 // Format time to HH:MM(DD) format
 const formatTime = (time?: string): string => {
@@ -37,9 +29,14 @@ export const FlightDetailPanel: React.FC<FlightDetailPanelProps> = ({
     onFlightUpdate,
 }) => {
     const [isEditingRemarks, setIsEditingRemarks] = React.useState(false);
+    const [isTagPickerOpen, setIsTagPickerOpen] = React.useState(false);
+    const [tagPickerPosition, setTagPickerPosition] = React.useState<{ left: number; top: number } | null>(null);
     const [tempRemarks, setTempRemarks] = React.useState('');
     const backdropRef = React.useRef<HTMLDivElement>(null);
     const panelRef = React.useRef<HTMLDivElement>(null);
+    const tagPickerRef = React.useRef<HTMLDivElement>(null);
+    const tagPickerButtonRef = React.useRef<HTMLButtonElement>(null);
+    const tagPickerPopoverRef = React.useRef<HTMLDivElement>(null);
     const drawerTimelineRef = React.useRef<gsap.core.Timeline | null>(null);
     const initializedPanelRef = React.useRef<HTMLDivElement | null>(null);
     const initializedFlightIdRef = React.useRef<string | null>(null);
@@ -47,8 +44,88 @@ export const FlightDetailPanel: React.FC<FlightDetailPanelProps> = ({
     // Reset editing state when flight changes or panel closes
     React.useEffect(() => {
         setIsEditingRemarks(false);
+        setIsTagPickerOpen(false);
+        setTagPickerPosition(null);
         setTempRemarks('');
     }, [flight?.id, isOpen]);
+
+    const updateTagPickerPosition = React.useCallback(() => {
+        const panel = panelRef.current;
+        const anchor = tagPickerButtonRef.current;
+        if (!panel || !anchor) return;
+
+        setTagPickerPosition(getCenteredTagPickerPosition(
+            panel.getBoundingClientRect(),
+            anchor.getBoundingClientRect(),
+        ));
+    }, []);
+
+    React.useEffect(() => {
+        if (!isTagPickerOpen) return;
+
+        // Portal 不在抽屉 DOM 树内，因此同时检查触发器和浮层来判断外部点击。
+        const handlePointerDown = (event: PointerEvent) => {
+            const target = event.target as Node;
+            const isInsideTrigger = tagPickerRef.current?.contains(target);
+            const isInsidePopover = tagPickerPopoverRef.current?.contains(target);
+            if (!isInsideTrigger && !isInsidePopover) {
+                setIsTagPickerOpen(false);
+            }
+        };
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') setIsTagPickerOpen(false);
+        };
+
+        document.addEventListener('pointerdown', handlePointerDown);
+        document.addEventListener('keydown', handleKeyDown);
+        return () => {
+            document.removeEventListener('pointerdown', handlePointerDown);
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [isTagPickerOpen]);
+
+    React.useEffect(() => {
+        if (!isTagPickerOpen || !tagPickerPosition) return;
+
+        // 打开后将键盘焦点移入选择器，让用户无需重新 Tab 定位。
+        const frameId = window.requestAnimationFrame(() => {
+            tagPickerPopoverRef.current
+                ?.querySelector<HTMLButtonElement>('button:not(:disabled)')
+                ?.focus();
+        });
+        return () => window.cancelAnimationFrame(frameId);
+    }, [isTagPickerOpen, tagPickerPosition]);
+
+    React.useEffect(() => {
+        if (!isTagPickerOpen) return;
+
+        // 弹层关闭后返回原入口，保持键盘用户的位置连续性。
+        return () => {
+            window.requestAnimationFrame(() => tagPickerButtonRef.current?.focus());
+        };
+    }, [isTagPickerOpen]);
+
+    React.useLayoutEffect(() => {
+        if (!isTagPickerOpen) return;
+
+        updateTagPickerPosition();
+        window.addEventListener('resize', updateTagPickerPosition);
+        window.addEventListener('scroll', updateTagPickerPosition, true);
+        return () => {
+            window.removeEventListener('resize', updateTagPickerPosition);
+            window.removeEventListener('scroll', updateTagPickerPosition, true);
+        };
+    }, [isTagPickerOpen, updateTagPickerPosition]);
+
+    const handleAddFlightTag = React.useCallback((tag: FlightTag) => {
+        if (!flight) return;
+
+        const nextTags = addFlightTag(flight.tags, tag);
+        if (nextTags !== flight.tags) {
+            onFlightUpdate?.({ ...flight, tags: nextTags });
+        }
+        setIsTagPickerOpen(false);
+    }, [flight, onFlightUpdate]);
 
     React.useLayoutEffect(() => {
         drawerTimelineRef.current?.kill();
@@ -313,24 +390,96 @@ export const FlightDetailPanel: React.FC<FlightDetailPanelProps> = ({
                                 <div className="h-px w-10 bg-gradient-to-l from-transparent to-slate-300"></div>
                             </div>
 
-                            {/* Flight Tags Area */}
-                            {flight.tags && flight.tags.length > 0 && (
-                                <div className="flex items-center justify-center gap-2 mt-4 mb-2 flex-wrap">
-                                    {flight.tags.map((tag, idx) => {
-                                        const colorClass = tagColorMap[tag] || 'bg-slate-500';
-                                        const isDualChar = tag.length > 1;
-                                        return (
-                                            <div
-                                                key={`${tag}-${idx}`}
-                                                className={`flex items-center justify-center size-[28px] rounded-full text-white font-bold shadow-sm transition-all duration-200 hover:scale-110 hover:shadow-md cursor-default ${colorClass} ${isDualChar ? 'text-[10px] tracking-tighter leading-none' : 'text-xs'}`}
-                                                title={`标记: ${tag}`}
-                                            >
-                                                {tag}
-                                            </div>
-                                        );
-                                    })}
+                            {/* 航班标记与添加入口：无标记时仍保持入口居中。 */}
+                            <div className="mt-4 mb-2 flex flex-wrap items-center justify-center gap-2">
+                                {flight.tags?.map((tag, idx) => {
+                                    const colorClass = flightDetailTagColorMap[tag] || 'bg-slate-500';
+                                    const isDualChar = tag.length > 1;
+                                    return (
+                                        <div
+                                            key={`${tag}-${idx}`}
+                                            className={`flex items-center justify-center size-[28px] rounded-full text-white font-bold shadow-sm transition-all duration-200 hover:scale-110 hover:shadow-md cursor-default ${colorClass} ${isDualChar ? 'text-[10px] tracking-tighter leading-none' : 'text-xs'}`}
+                                            title={`标记: ${tag}`}
+                                        >
+                                            {tag}
+                                        </div>
+                                    );
+                                })}
+
+                                <div ref={tagPickerRef} className="relative flex shrink-0">
+                                    <button
+                                        ref={tagPickerButtonRef}
+                                        type="button"
+                                        aria-label="添加航班标记"
+                                        aria-haspopup="dialog"
+                                        aria-expanded={isTagPickerOpen}
+                                        aria-controls="flight-tag-picker"
+                                        onClick={() => {
+                                            if (!isTagPickerOpen) updateTagPickerPosition();
+                                            setIsTagPickerOpen(previous => !previous);
+                                        }}
+                                        className="flex size-[28px] items-center justify-center rounded-full border border-dashed border-slate-300 bg-white/85 text-slate-600 shadow-sm transition-[background-color,border-color,color,box-shadow] duration-200 hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                                    >
+                                        <span className="material-symbols-outlined text-[19px] leading-none" aria-hidden="true">add</span>
+                                    </button>
                                 </div>
-                            )}
+
+                                {/* Portal 避免选择器被抽屉滚动容器裁剪，并建立独立的最高层叠层。 */}
+                                {isTagPickerOpen && tagPickerPosition && createPortal(
+                                    (
+                                        <div
+                                            ref={tagPickerPopoverRef}
+                                            id="flight-tag-picker"
+                                            role="dialog"
+                                            aria-modal="true"
+                                            aria-label="选择要添加的航班标记"
+                                            className="fixed z-[200] w-[280px] -translate-x-1/2 rounded-2xl border border-white/90 bg-white p-3.5 shadow-[0_18px_48px_rgba(15,23,42,0.28)]"
+                                            style={{ left: `${tagPickerPosition.left}px`, top: `${tagPickerPosition.top}px` }}
+                                            onKeyDown={(event) => {
+                                                if (event.key !== 'Tab') return;
+
+                                                const optionNodes = tagPickerPopoverRef.current
+                                                    ?.querySelectorAll<HTMLButtonElement>('button:not(:disabled)');
+                                                const enabledOptions = optionNodes
+                                                    ? Array.from(optionNodes) as HTMLButtonElement[]
+                                                    : [];
+                                                const firstOption = enabledOptions[0];
+                                                const lastOption = enabledOptions.at(-1);
+                                                if (!firstOption || !lastOption) return;
+
+                                                if (event.shiftKey && document.activeElement === firstOption) {
+                                                    event.preventDefault();
+                                                    lastOption.focus();
+                                                } else if (!event.shiftKey && document.activeElement === lastOption) {
+                                                    event.preventDefault();
+                                                    firstOption.focus();
+                                                }
+                                            }}
+                                        >
+                                            <div className="grid grid-cols-5 gap-2.5">
+                                                {FLIGHT_TAG_OPTIONS.map(tag => {
+                                                    const isAdded = flight.tags?.includes(tag) ?? false;
+                                                    const isDualChar = tag.length > 1;
+                                                    return (
+                                                        <button
+                                                            key={tag}
+                                                            type="button"
+                                                            disabled={isAdded}
+                                                            aria-label={isAdded ? `${tag}标记已添加` : `添加${tag}标记`}
+                                                            title={isAdded ? '已添加' : `添加标记：${tag}`}
+                                                            onClick={() => handleAddFlightTag(tag)}
+                                                            className={`flex size-9 items-center justify-center rounded-full font-bold text-white shadow-sm transition-[transform,box-shadow,opacity] duration-200 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:translate-y-0 disabled:hover:shadow-sm ${flightDetailTagColorMap[tag]} ${isDualChar ? 'text-[10px] tracking-tighter' : 'text-sm'}`}
+                                                        >
+                                                            {tag}
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    ),
+                                    document.body,
+                                )}
+                            </div>
                         </div>
 
                         {/* Aircraft & Gate Info - 5 items in one row */}
