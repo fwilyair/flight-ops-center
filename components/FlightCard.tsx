@@ -91,10 +91,10 @@ const LegTagRow: React.FC<{
                     aria-label={`添加${isDeparture ? '出港' : '进港'}标记`}
                     aria-haspopup="dialog"
                     aria-expanded={isPickerOpen}
-                    className="flex size-[18px] shrink-0 items-center justify-center rounded-full border border-dashed border-slate-400 bg-white/80 text-slate-500 hover:border-blue-500 hover:bg-blue-50 hover:text-blue-600"
+                    className="flex size-[18px] shrink-0 items-center justify-center rounded-full border border-dashed border-slate-400 bg-white/80 text-blue-600 hover:border-blue-500 hover:bg-blue-50 hover:text-blue-700"
                     onClick={(event) => onAddClick(event, leg)}
                 >
-                    <span className="material-symbols-outlined text-[14px] leading-none" aria-hidden="true">add</span>
+                    <span className="text-[14px] font-semibold leading-none" aria-hidden="true">+</span>
                 </button>
             </div>
 
@@ -109,7 +109,19 @@ const LegTagRow: React.FC<{
                         onVideoClick?.();
                     }}
                 >
-                    <span className="material-symbols-outlined text-[19px] leading-none" aria-hidden="true">play_circle</span>
+                    <svg
+                        aria-hidden="true"
+                        className="size-[19px]"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                    >
+                        <circle cx="12" cy="12" r="9" />
+                        <path d="m10 8.5 5 3.5-5 3.5Z" />
+                    </svg>
                 </button>
             )}
         </div>
