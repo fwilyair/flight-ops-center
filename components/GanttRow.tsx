@@ -653,10 +653,12 @@ const OverflowPill: React.FC<{
     timeScale: number;
     onExpand?: () => void;
     onEventClick?: (event: TimelineEvent) => void;
+    onEventContextMenu?: (event: React.MouseEvent, timelineEvent: TimelineEvent) => void;
     onEventHoverChange?: (eventId: string, isHovered: boolean, previewRow?: HTMLElement) => void;
+    dimmedEventIds: ReadonlySet<string>;
     releaseEndTime?: string;
     takeoffEndTime?: string;
-}> = ({ group, top, currentTime, timeScale, onExpand, onEventClick, onEventHoverChange, releaseEndTime, takeoffEndTime }) => {
+}> = ({ group, top, currentTime, timeScale, onExpand, onEventClick, onEventContextMenu, onEventHoverChange, dimmedEventIds, releaseEndTime, takeoffEndTime }) => {
     const previewLayout = buildOverflowPreviewLayout<TimelineEvent>(
         group.events,
         group.leftPx,
@@ -701,6 +703,7 @@ const OverflowPill: React.FC<{
                 <div className="space-y-1">
                     {previewLayout.items.map(({ event, offsetPx }) => {
                         const correctedTime = getCorrectedTime(event.timeScheduled, releaseEndTime, takeoffEndTime);
+                        const isDimmed = dimmedEventIds.has(event.id);
                         const correctedOffsetPx = correctedTime
                             ? Math.max(0, timeToPixels(correctedTime, timeScale) - group.leftPx)
                             : undefined;
@@ -752,12 +755,13 @@ const OverflowPill: React.FC<{
                                 <button
                                     type="button"
                                     aria-label={`查看${event.label}任务详情${correctedTime ? `，修正时间${correctedTime}` : ''}`}
-                                    className="absolute flex min-h-10 w-max items-center gap-3.5 rounded-xl py-1 pr-1 text-left transition-colors hover:bg-slate-50 focus-visible:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                                    className={`absolute flex min-h-10 w-max items-center gap-3.5 rounded-xl py-1 pr-1 text-left transition-[background-color,filter,opacity] hover:bg-slate-50 focus-visible:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${isDimmed ? 'opacity-40 grayscale-[80%]' : ''}`}
                                     style={{ left: `${offsetPx}px`, top: '14px' }}
                                     onClick={(clickEvent) => {
                                         clickEvent.stopPropagation();
                                         onEventClick?.(event);
                                     }}
+                                    onContextMenu={(contextEvent) => onEventContextMenu?.(contextEvent, event)}
                                     onMouseEnter={(hoverEvent) => onEventHoverChange?.(event.id, true, hoverEvent.currentTarget.parentElement ?? undefined)}
                                     onMouseLeave={() => onEventHoverChange?.(event.id, false)}
                                     onFocus={(focusEvent) => onEventHoverChange?.(event.id, true, focusEvent.currentTarget.parentElement ?? undefined)}
@@ -1201,7 +1205,9 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
                         timeScale={timeScale}
                         onExpand={() => setExpandedFromEventId(group.events[0]?.id || null)}
                         onEventClick={onEventClick}
+                        onEventContextMenu={handleContextMenu}
                         onEventHoverChange={handlePreviewHoverChange}
+                        dimmedEventIds={dimmedEventIds}
                         releaseEndTime={releaseAnno?.endTime}
                         takeoffEndTime={takeoffAnno?.endTime}
                     />
