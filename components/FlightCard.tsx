@@ -272,7 +272,7 @@ export const FlightCard: React.FC<FlightCardProps> = ({
                 ) : null}
 
                 {legPresence.arrival && legPresence.departure && (
-                    <div className="h-px shrink-0 bg-slate-300" aria-hidden="true" />
+                    <div className="h-px shrink-0 bg-slate-200/60" aria-hidden="true" />
                 )}
 
                 {legPresence.departure ? (
