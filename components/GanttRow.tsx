@@ -1,7 +1,7 @@
 import React from 'react';
 import { Flight, TimelineEvent, Annotation, FlightType, ProcessMarker } from '../types';
 import { timeToPixels, getColorForEventType } from '../utils';
-import { assignPriorityTracks, buildFixedRowOverflow, buildOverflowPreviewLayout, getCorrectedTime, getExpandedControlTop, getExpansionTargetEventId, getFlightRowHeight, getTimeDifferenceMinutes } from './flightRowLayout';
+import { assignPriorityTracks, buildFixedRowOverflow, buildOverflowPreviewLayout, getCorrectedTime, getExpandedControlTop, getExpansionTargetEventId, getFlightRowHeight, getStateAfterExpansionChange, getTimeDifferenceMinutes } from './flightRowLayout';
 import type { OverflowGroup } from './flightRowLayout';
 import { TimeKindBadge } from './TimeKindBadge';
 
@@ -681,7 +681,7 @@ const OverflowPill: React.FC<{
         >
             <button
                 type="button"
-                className="overflow-attention relative flex h-7 min-w-[72px] items-center justify-center gap-1 overflow-hidden rounded-full border border-orange-700 bg-orange-500 px-3 text-xs font-black tracking-tight text-white shadow-[0_4px_14px_rgba(154,52,18,0.34)] transition-colors hover:bg-orange-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2"
+                className="overflow-attention relative flex h-7 min-w-[72px] items-center justify-center gap-1 overflow-hidden rounded-full border border-orange-700 bg-orange-500 px-3 text-xs font-black tracking-tight text-white shadow-[0_4px_14px_rgba(154,52,18,0.34)] transition-colors hover:bg-orange-600"
                 style={{ animationDelay: `${-((group.leftPx % 700) / 700) * 2.5}s` }}
                 aria-label={`还有 ${group.events.length} 项任务未在当前行展示，展开当前航班`}
                 onClick={(event) => {
@@ -695,7 +695,7 @@ const OverflowPill: React.FC<{
             </button>
 
             <div
-                className="pointer-events-auto absolute -left-4 top-full mt-2.5 hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_14px_36px_rgba(15,23,42,0.2)] group-hover/overflow:block group-focus-within/overflow:block"
+                className="pointer-events-auto absolute -left-4 top-full mt-2.5 hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_14px_36px_rgba(15,23,42,0.2)] group-hover/overflow:block"
                 style={{ width: `${previewLayout.widthPx}px` }}
             >
                 {/* 填补按钮与浮层间的空隙，鼠标移动时不会意外关闭预览。 */}
@@ -755,7 +755,7 @@ const OverflowPill: React.FC<{
                                 <button
                                     type="button"
                                     aria-label={`查看${event.label}任务详情${correctedTime ? `，修正时间${correctedTime}` : ''}`}
-                                    className={`absolute flex min-h-10 w-max items-center gap-3.5 rounded-xl py-1 pr-1 text-left transition-[background-color,filter,opacity] hover:bg-slate-50 focus-visible:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${isDimmed ? 'opacity-40 grayscale-[80%]' : ''}`}
+                                    className={`absolute flex min-h-10 w-max items-center gap-3.5 rounded-xl py-1 pr-1 text-left transition-[background-color,filter,opacity] hover:bg-slate-50 ${isDimmed ? 'opacity-40 grayscale-[80%]' : ''}`}
                                     style={{ left: `${offsetPx}px`, top: '14px' }}
                                     onClick={(clickEvent) => {
                                         clickEvent.stopPropagation();
@@ -764,8 +764,6 @@ const OverflowPill: React.FC<{
                                     onContextMenu={(contextEvent) => onEventContextMenu?.(contextEvent, event)}
                                     onMouseEnter={(hoverEvent) => onEventHoverChange?.(event.id, true, hoverEvent.currentTarget.parentElement ?? undefined)}
                                     onMouseLeave={() => onEventHoverChange?.(event.id, false)}
-                                    onFocus={(focusEvent) => onEventHoverChange?.(event.id, true, focusEvent.currentTarget.parentElement ?? undefined)}
-                                    onBlur={() => onEventHoverChange?.(event.id, false)}
                                 >
                                     <span data-overflow-preview-green-dot className="size-2.5 shrink-0 -translate-x-1/2 rounded-full bg-emerald-500 ring-2 ring-white shadow-sm" aria-hidden="true" />
                                     <EventCapsuleVisual event={event} currentTime={currentTime} />
@@ -787,7 +785,7 @@ const CollapsePill: React.FC<{
 }> = ({ flightNo, left, top, onCollapse }) => (
     <button
         type="button"
-        className="absolute z-30 flex h-7 min-w-[72px] items-center justify-center gap-0.5 rounded-full border border-slate-400 bg-white px-3 text-xs font-black tracking-tight text-slate-800 shadow-[0_4px_12px_rgba(15,23,42,0.18)] transition-colors hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime-500 focus-visible:ring-offset-2"
+        className="absolute z-30 flex h-7 min-w-[72px] items-center justify-center gap-0.5 rounded-full border border-slate-400 bg-white px-3 text-xs font-black tracking-tight text-slate-800 shadow-[0_4px_12px_rgba(15,23,42,0.18)] transition-colors hover:bg-slate-100"
         style={{ left: `${left}px`, top: `${top}px` }}
         aria-label={`收起 ${flightNo} 的全部任务`}
         onClick={(event) => {
@@ -878,6 +876,12 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
         });
     };
 
+    const handleExpansionChange = React.useCallback((nextExpandedFromEventId: string | null) => {
+        const nextState = getStateAfterExpansionChange(nextExpandedFromEventId);
+        setExpandedFromEventId(nextState.expandedFromEventId);
+        setContextMenu(nextState.contextMenu);
+    }, []);
+
     const isDelay = flight.tags?.includes('D') || flight.arrInfo?.status === '延误' || flight.depInfo?.status === '延误';
     const formatFlightCardTime = (time?: string) => (
         time && time !== '--:--' ? `${time}(05)` : '--:--'
@@ -930,8 +934,8 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
     const renderedEvents = isExpanded ? flight.events : fixedRowLayout.visibleEvents;
 
     React.useEffect(() => {
-        setExpandedFromEventId(getExpansionTargetEventId(expandAllRows, fixedRowLayout.overflowGroups));
-    }, [expandAllRows, fixedRowLayout.overflowGroups]);
+        handleExpansionChange(getExpansionTargetEventId(expandAllRows, fixedRowLayout.overflowGroups));
+    }, [expandAllRows, fixedRowLayout.overflowGroups, handleExpansionChange]);
 
     // 当鼠标悬浮在胶囊或点上时，报告绿点/紫点的位置与时间信息
     React.useEffect(() => {
@@ -1203,7 +1207,7 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
                         top={56}
                         currentTime={currentTime}
                         timeScale={timeScale}
-                        onExpand={() => setExpandedFromEventId(group.events[0]?.id || null)}
+                        onExpand={() => handleExpansionChange(group.events[0]?.id || null)}
                         onEventClick={onEventClick}
                         onEventContextMenu={handleContextMenu}
                         onEventHoverChange={handlePreviewHoverChange}
@@ -1218,7 +1222,7 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
                         flightNo={flight.flightNo.split(' / ')[0]}
                         left={expandedControlLeft}
                         top={expandedControlTop}
-                        onCollapse={() => setExpandedFromEventId(null)}
+                        onCollapse={() => handleExpansionChange(null)}
                     />
                 )}
 

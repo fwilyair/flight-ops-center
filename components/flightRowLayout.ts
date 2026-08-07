@@ -161,6 +161,12 @@ export const getExpansionTargetEventId = <T extends FixedRowEvent>(
     return overflowGroups[0]?.events[0]?.id ?? null;
 };
 
+export const getStateAfterExpansionChange = (expandedFromEventId: string | null) => ({
+    expandedFromEventId,
+    // 展开或收起会改变胶囊位置；旧坐标上的右键菜单必须同步关闭。
+    contextMenu: null,
+});
+
 export const getCorrectedTime = (
     scheduledTime?: string,
     releaseEndTime?: string,

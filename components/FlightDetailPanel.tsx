@@ -7,6 +7,8 @@ import { prefersReducedMotion, REDUCED_MOTION_QUERY } from '../motion/preference
 import { addFlightTag, FLIGHT_TAG_OPTIONS, flightDetailTagColorMap, getCenteredTagPickerPosition } from './flightTags';
 import type { FlightTag } from './flightTags';
 import { TimeKindBadge } from './TimeKindBadge';
+import { getFlightRemarkKeyAction, shouldCloseWithEscape } from './keyboardPolicy';
+import { splitFlightRemarkLines } from './flightRemarks';
 
 interface FlightDetailPanelProps {
     flight: Flight | null;
@@ -73,38 +75,22 @@ export const FlightDetailPanel: React.FC<FlightDetailPanelProps> = ({
                 setIsTagPickerOpen(false);
             }
         };
-        const handleKeyDown = (event: KeyboardEvent) => {
-            if (event.key === 'Escape') setIsTagPickerOpen(false);
-        };
-
         document.addEventListener('pointerdown', handlePointerDown);
-        document.addEventListener('keydown', handleKeyDown);
         return () => {
             document.removeEventListener('pointerdown', handlePointerDown);
-            document.removeEventListener('keydown', handleKeyDown);
         };
     }, [isTagPickerOpen]);
 
     React.useEffect(() => {
-        if (!isTagPickerOpen || !tagPickerPosition) return;
+        if (!isOpen) return;
 
-        // 打开后将键盘焦点移入选择器，让用户无需重新 Tab 定位。
-        const frameId = window.requestAnimationFrame(() => {
-            tagPickerPopoverRef.current
-                ?.querySelector<HTMLButtonElement>('button:not(:disabled)')
-                ?.focus();
-        });
-        return () => window.cancelAnimationFrame(frameId);
-    }, [isTagPickerOpen, tagPickerPosition]);
-
-    React.useEffect(() => {
-        if (!isTagPickerOpen) return;
-
-        // 弹层关闭后返回原入口，保持键盘用户的位置连续性。
-        return () => {
-            window.requestAnimationFrame(() => tagPickerButtonRef.current?.focus());
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (shouldCloseWithEscape('flight-detail', event.key)) onClose();
         };
-    }, [isTagPickerOpen]);
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isOpen, onClose]);
 
     React.useLayoutEffect(() => {
         if (!isTagPickerOpen) return;
@@ -127,6 +113,30 @@ export const FlightDetailPanel: React.FC<FlightDetailPanelProps> = ({
         }
         setIsTagPickerOpen(false);
     }, [flight, onFlightUpdate]);
+
+    const cancelRemarkEditing = React.useCallback(() => {
+        setIsEditingRemarks(false);
+    }, []);
+
+    const submitRemark = React.useCallback(() => {
+        if (flight && tempRemarks.trim()) {
+            const now = new Date();
+            const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+            const newEntry = {
+                id: Math.random().toString(36).substr(2, 9),
+                content: tempRemarks,
+                timestamp: timeStr,
+                author: 'USER'
+            };
+            const updatedHistory = [newEntry, ...(flight.remarksHistory || [])];
+            onFlightUpdate?.({
+                ...flight,
+                remarks: tempRemarks,
+                remarksHistory: updatedHistory
+            });
+        }
+        setIsEditingRemarks(false);
+    }, [flight, onFlightUpdate, tempRemarks]);
 
     React.useLayoutEffect(() => {
         drawerTimelineRef.current?.kill();
@@ -419,7 +429,7 @@ export const FlightDetailPanel: React.FC<FlightDetailPanelProps> = ({
                                             if (!isTagPickerOpen) updateTagPickerPosition();
                                             setIsTagPickerOpen(previous => !previous);
                                         }}
-                                        className="flex size-[28px] items-center justify-center rounded-full border border-dashed border-slate-300 bg-white/85 text-slate-600 shadow-sm transition-[background-color,border-color,color,box-shadow] duration-200 hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                                        className="flex size-[28px] items-center justify-center rounded-full border border-dashed border-slate-300 bg-white/85 text-slate-600 shadow-sm transition-[background-color,border-color,color,box-shadow] duration-200 hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 hover:shadow-md"
                                     >
                                         <span className="material-symbols-outlined text-[19px] leading-none" aria-hidden="true">add</span>
                                     </button>
@@ -436,26 +446,6 @@ export const FlightDetailPanel: React.FC<FlightDetailPanelProps> = ({
                                             aria-label="选择要添加的航班标记"
                                             className="fixed z-[200] w-[280px] -translate-x-1/2 rounded-2xl border border-white/90 bg-white p-3.5 shadow-[0_18px_48px_rgba(15,23,42,0.28)]"
                                             style={{ left: `${tagPickerPosition.left}px`, top: `${tagPickerPosition.top}px` }}
-                                            onKeyDown={(event) => {
-                                                if (event.key !== 'Tab') return;
-
-                                                const optionNodes = tagPickerPopoverRef.current
-                                                    ?.querySelectorAll<HTMLButtonElement>('button:not(:disabled)');
-                                                const enabledOptions = optionNodes
-                                                    ? Array.from(optionNodes) as HTMLButtonElement[]
-                                                    : [];
-                                                const firstOption = enabledOptions[0];
-                                                const lastOption = enabledOptions.at(-1);
-                                                if (!firstOption || !lastOption) return;
-
-                                                if (event.shiftKey && document.activeElement === firstOption) {
-                                                    event.preventDefault();
-                                                    lastOption.focus();
-                                                } else if (!event.shiftKey && document.activeElement === lastOption) {
-                                                    event.preventDefault();
-                                                    firstOption.focus();
-                                                }
-                                            }}
                                         >
                                             <div className="grid grid-cols-5 gap-2.5">
                                                 {FLIGHT_TAG_OPTIONS.map(tag => {
@@ -469,7 +459,7 @@ export const FlightDetailPanel: React.FC<FlightDetailPanelProps> = ({
                                                             aria-label={isAdded ? `${tag}标记已添加` : `添加${tag}标记`}
                                                             title={isAdded ? '已添加' : `添加标记：${tag}`}
                                                             onClick={() => handleAddFlightTag(tag)}
-                                                            className={`flex size-9 items-center justify-center rounded-full font-bold text-white shadow-sm transition-[transform,box-shadow,opacity] duration-200 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:translate-y-0 disabled:hover:shadow-sm ${flightDetailTagColorMap[tag]} ${isDualChar ? 'text-[10px] tracking-tighter' : 'text-sm'}`}
+                                                            className={`flex size-9 items-center justify-center rounded-full font-bold text-white shadow-sm transition-[transform,box-shadow,opacity] duration-200 hover:-translate-y-0.5 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:translate-y-0 disabled:hover:shadow-sm ${flightDetailTagColorMap[tag]} ${isDualChar ? 'text-[10px] tracking-tighter' : 'text-sm'}`}
                                                         >
                                                             {tag}
                                                         </button>
@@ -534,7 +524,12 @@ export const FlightDetailPanel: React.FC<FlightDetailPanelProps> = ({
                                                 </span>
                                             </div>
                                             <p className="text-sm text-slate-700 leading-tight break-all font-medium">
-                                                {item.content}
+                                                {splitFlightRemarkLines(item.content).map((line, lineIndex) => (
+                                                    <React.Fragment key={`${item.id}-line-${lineIndex}`}>
+                                                        {lineIndex > 0 && <br />}
+                                                        {line}
+                                                    </React.Fragment>
+                                                ))}
                                             </p>
                                         </div>
                                     ))}
@@ -577,38 +572,28 @@ export const FlightDetailPanel: React.FC<FlightDetailPanelProps> = ({
                                     <textarea
                                         value={tempRemarks}
                                         onChange={(e) => setTempRemarks(e.target.value)}
+                                        onKeyDown={(event) => {
+                                            const action = getFlightRemarkKeyAction(event.key, event.shiftKey);
+                                            if (!action) return;
+
+                                            event.preventDefault();
+                                            event.stopPropagation();
+                                            if (action === 'submit') submitRemark();
+                                            else cancelRemarkEditing();
+                                        }}
                                         className="w-full text-sm p-3 rounded-lg border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none resize-none bg-white text-slate-700 leading-relaxed shadow-inner"
                                         rows={2}
-                                        autoFocus
-                                        placeholder="请输入新备注内容..."
+                                        placeholder="回车发送，Shift+回车换行"
                                     />
                                     <div className="flex justify-end gap-2">
                                         <button
-                                            onClick={() => setIsEditingRemarks(false)}
+                                            onClick={cancelRemarkEditing}
                                             className="px-3 py-1.5 text-xs font-bold text-slate-500 hover:bg-slate-100 hover:text-slate-700 rounded-md transition-all duration-200"
                                         >
                                             取消
                                         </button>
                                         <button
-                                            onClick={() => {
-                                                if (tempRemarks.trim()) {
-                                                    const now = new Date();
-                                                    const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-                                                    const newEntry = {
-                                                        id: Math.random().toString(36).substr(2, 9),
-                                                        content: tempRemarks,
-                                                        timestamp: timeStr,
-                                                        author: 'USER'
-                                                    };
-                                                    const updatedHistory = [newEntry, ...(flight.remarksHistory || [])];
-                                                    onFlightUpdate?.({
-                                                        ...flight,
-                                                        remarks: tempRemarks,
-                                                        remarksHistory: updatedHistory
-                                                    });
-                                                }
-                                                setIsEditingRemarks(false);
-                                            }}
+                                            onClick={submitRemark}
                                             className="px-4 py-1.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 rounded-md shadow-sm transition-all duration-200 hover:scale-105"
                                         >
                                             发送

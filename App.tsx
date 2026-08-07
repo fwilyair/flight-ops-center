@@ -11,6 +11,7 @@ import { START_TIME_HOUR, Flight, TimelineEvent } from './types';
 import { Flip, gsap } from './motion/gsap';
 import { MOTION_DURATION, MOTION_EASE, MOTION_STAGGER } from './motion/tokens';
 import { prefersReducedMotion, REDUCED_MOTION_QUERY } from './motion/preferences';
+import { shouldReturnToCurrentTime } from './components/keyboardPolicy';
 
 // Time markers generation - dynamically calculated based on flight data
 
@@ -500,7 +501,7 @@ const App: React.FC = () => {
         target.isContentEditable
       );
 
-      if ((e.code === 'Space' || e.key === ' ') && !isInput) {
+      if (shouldReturnToCurrentTime(e.key, e.code, isInput)) {
         e.preventDefault(); // 阻止浏览器页面平移等默认行为
         scrollToCurrentTime(true);
       }
@@ -545,9 +546,9 @@ const App: React.FC = () => {
                   aria-pressed={isControlView}
                   aria-label={`当前为${isControlView ? '管控视图' : '穿透视图'}，点击切换为${isControlView ? '穿透视图' : '管控视图'}`}
                   onClick={() => setIsControlView(previous => !previous)}
-                  className={`flex h-8 min-w-0 flex-1 items-center justify-center gap-1 rounded-full border border-white/90 px-2 text-[13px] font-semibold transition-[background-color,background-image,border-color,color,box-shadow] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${isControlView
-                    ? 'bg-teal-50 bg-[radial-gradient(circle_at_center,#ccfbf1_0%,#f0fdfa_68%,#ffffff_100%)] text-teal-800 shadow-[0_2px_8px_rgba(13,148,136,0.14)] hover:bg-[radial-gradient(circle_at_center,#99f6e4_0%,#ccfbf1_68%,#f0fdfa_100%)] focus-visible:ring-teal-500'
-                    : 'bg-violet-50 bg-[radial-gradient(circle_at_center,#ede9fe_0%,#f5f3ff_68%,#ffffff_100%)] text-violet-700 shadow-[0_2px_8px_rgba(124,58,237,0.14)] hover:bg-[radial-gradient(circle_at_center,#ddd6fe_0%,#ede9fe_68%,#f5f3ff_100%)] focus-visible:ring-violet-500'
+                  className={`flex h-8 min-w-0 flex-1 items-center justify-center gap-1 rounded-full border border-white/90 px-2 text-[13px] font-semibold transition-[background-color,background-image,border-color,color,box-shadow] duration-200 ${isControlView
+                    ? 'bg-teal-50 bg-[radial-gradient(circle_at_center,#ccfbf1_0%,#f0fdfa_68%,#ffffff_100%)] text-teal-800 shadow-[0_2px_8px_rgba(13,148,136,0.14)] hover:bg-[radial-gradient(circle_at_center,#99f6e4_0%,#ccfbf1_68%,#f0fdfa_100%)]'
+                    : 'bg-violet-50 bg-[radial-gradient(circle_at_center,#ede9fe_0%,#f5f3ff_68%,#ffffff_100%)] text-violet-700 shadow-[0_2px_8px_rgba(124,58,237,0.14)] hover:bg-[radial-gradient(circle_at_center,#ddd6fe_0%,#ede9fe_68%,#f5f3ff_100%)]'
                     }`}
                 >
                   <span className="material-symbols-outlined text-[18px] leading-none" aria-hidden="true">swap_horiz</span>
@@ -561,9 +562,9 @@ const App: React.FC = () => {
                   aria-label={expandAllRows ? '收起全部航班任务' : '展开全部航班任务'}
                   disabled={filteredFlights.length === 0}
                   onClick={() => setExpandAllRows(previous => !previous)}
-                  className={`flex h-8 min-w-0 flex-1 items-center justify-center gap-1 rounded-full border border-white/90 px-2 text-[13px] font-semibold transition-[background-color,background-image,border-color,color,box-shadow] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40 ${expandAllRows
-                    ? 'bg-white text-slate-700 shadow-[0_2px_8px_rgba(15,23,42,0.12)] hover:bg-slate-50 focus-visible:ring-slate-400'
-                    : 'bg-orange-50 bg-[radial-gradient(circle_at_center,#ffedd5_0%,#fff7ed_68%,#ffffff_100%)] text-orange-800 shadow-[0_2px_8px_rgba(234,88,12,0.14)] hover:bg-[radial-gradient(circle_at_center,#fed7aa_0%,#ffedd5_68%,#fff7ed_100%)] focus-visible:ring-orange-500'
+                  className={`flex h-8 min-w-0 flex-1 items-center justify-center gap-1 rounded-full border border-white/90 px-2 text-[13px] font-semibold transition-[background-color,background-image,border-color,color,box-shadow] duration-200 disabled:cursor-not-allowed disabled:opacity-40 ${expandAllRows
+                    ? 'bg-white text-slate-700 shadow-[0_2px_8px_rgba(15,23,42,0.12)] hover:bg-slate-50'
+                    : 'bg-orange-50 bg-[radial-gradient(circle_at_center,#ffedd5_0%,#fff7ed_68%,#ffffff_100%)] text-orange-800 shadow-[0_2px_8px_rgba(234,88,12,0.14)] hover:bg-[radial-gradient(circle_at_center,#fed7aa_0%,#ffedd5_68%,#fff7ed_100%)]'
                     }`}
                 >
                   <span className="material-symbols-outlined text-[18px] leading-none" aria-hidden="true">

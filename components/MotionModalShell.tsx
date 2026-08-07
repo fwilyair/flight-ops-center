@@ -2,6 +2,8 @@ import React from 'react';
 import { gsap } from '../motion/gsap';
 import { prefersReducedMotion, REDUCED_MOTION_QUERY } from '../motion/preferences';
 import { MOTION_DURATION, MOTION_EASE, MOTION_STAGGER } from '../motion/tokens';
+import { shouldCloseWithEscape } from './keyboardPolicy';
+import type { KeyboardDismissSurface } from './keyboardPolicy';
 
 interface MotionModalShellProps {
   isOpen: boolean;
@@ -10,15 +12,12 @@ interface MotionModalShellProps {
   containerClassName?: string;
   backdropClassName?: string;
   panelClassName: string;
+  keyboardDismissSurface?: KeyboardDismissSurface;
   children: React.ReactNode;
 }
 
 const getModalContent = (panel: HTMLDivElement): HTMLElement[] =>
   Array.from(panel.querySelectorAll<HTMLElement>('[data-motion-modal-content]'));
-
-const restoreFocus = (target: HTMLElement | null) => {
-  if (target?.isConnected) target.focus({ preventScroll: true });
-};
 
 export const MotionModalShell: React.FC<MotionModalShellProps> = ({
   isOpen,
@@ -27,19 +26,17 @@ export const MotionModalShell: React.FC<MotionModalShellProps> = ({
   containerClassName = '',
   backdropClassName = 'bg-black/60 backdrop-blur-sm',
   panelClassName,
+  keyboardDismissSurface,
   children,
 }) => {
   const [mounted, setMounted] = React.useState(false);
   const rootRef = React.useRef<HTMLDivElement>(null);
   const backdropRef = React.useRef<HTMLDivElement>(null);
   const panelRef = React.useRef<HTMLDivElement>(null);
-  const previousFocusRef = React.useRef<HTMLElement | null>(null);
   const timelineRef = React.useRef<gsap.core.Timeline | null>(null);
   const contextRef = React.useRef<gsap.Context | null>(null);
   const initializedPanelRef = React.useRef<HTMLDivElement | null>(null);
   const generationRef = React.useRef(0);
-  const sessionActiveRef = React.useRef(false);
-  const focusRestoredRef = React.useRef(false);
   const closeRequestedRef = React.useRef(false);
   const reducedMotionRef = React.useRef(false);
   const componentMountedRef = React.useRef(true);
@@ -67,33 +64,21 @@ export const MotionModalShell: React.FC<MotionModalShellProps> = ({
 
   React.useLayoutEffect(() => {
     if (isOpen) {
-      if (!sessionActiveRef.current) {
-        previousFocusRef.current = document.activeElement as HTMLElement | null;
-        sessionActiveRef.current = true;
-      }
-
-      focusRestoredRef.current = false;
       closeRequestedRef.current = false;
       if (!mounted) setMounted(true);
-      return;
-    }
-
-    if (mounted && sessionActiveRef.current && !focusRestoredRef.current) {
-      focusRestoredRef.current = true;
-      restoreFocus(previousFocusRef.current);
     }
   }, [isOpen, mounted]);
 
   React.useEffect(() => {
-    if (!mounted) return;
+    if (!mounted || !keyboardDismissSurface) return;
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') requestClose();
+      if (shouldCloseWithEscape(keyboardDismissSurface, event.key)) requestClose();
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [mounted, requestClose]);
+  }, [keyboardDismissSurface, mounted, requestClose]);
 
   React.useLayoutEffect(() => {
     const root = rootRef.current;
@@ -126,7 +111,6 @@ export const MotionModalShell: React.FC<MotionModalShellProps> = ({
           gsap.set(panel, { autoAlpha: 1, y: 0, scale: 1 });
           gsap.set(currentContent, { autoAlpha: 1, y: 0 });
         });
-        panel.focus({ preventScroll: true });
         return;
       }
 
@@ -135,11 +119,6 @@ export const MotionModalShell: React.FC<MotionModalShellProps> = ({
         gsap.set(panel, { autoAlpha: 0, y: 6, scale: 0.98 });
         gsap.set(currentContent, { autoAlpha: 0, y: 6 });
       });
-      if (sessionActiveRef.current && !focusRestoredRef.current) {
-        focusRestoredRef.current = true;
-        restoreFocus(previousFocusRef.current);
-      }
-      sessionActiveRef.current = false;
       if (!disposed && componentMountedRef.current) setMounted(false);
     };
 
@@ -182,20 +161,16 @@ export const MotionModalShell: React.FC<MotionModalShellProps> = ({
           gsap.set(panel, { autoAlpha: 1, y: 0, scale: 1 });
           gsap.set(content, { autoAlpha: 1, y: 0 });
         });
-        panel.focus({ preventScroll: true });
       } else {
         contextRef.current?.add(() => {
           gsap.set(backdrop, { autoAlpha: 0 });
           gsap.set(panel, { autoAlpha: 0, y: 6, scale: 0.98 });
           gsap.set(content, { autoAlpha: 0, y: 6 });
         });
-        sessionActiveRef.current = false;
         if (componentMountedRef.current) setMounted(false);
       }
       return;
     }
-
-    if (isOpen) panel.focus({ preventScroll: true });
 
     let timeline: gsap.core.Timeline | null = null;
     contextRef.current?.add(() => {
@@ -245,7 +220,6 @@ export const MotionModalShell: React.FC<MotionModalShellProps> = ({
             !componentMountedRef.current
           ) return;
 
-          sessionActiveRef.current = false;
           setMounted(false);
         });
     });
@@ -274,7 +248,7 @@ export const MotionModalShell: React.FC<MotionModalShellProps> = ({
         className={`absolute inset-0 ${backdropClassName}`}
         onClick={requestClose}
       />
-      <div ref={panelRef} tabIndex={-1} className={`relative z-[1] ${panelClassName}`}>
+      <div ref={panelRef} className={`relative z-[1] ${panelClassName}`}>
         {children}
       </div>
     </div>

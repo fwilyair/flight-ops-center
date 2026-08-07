@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { assignPriorityTracks, buildFixedRowOverflow, buildOverflowPreviewLayout, getCorrectedTime, getExpandedControlTop, getExpansionTargetEventId, getFlightRowHeight, getTimeDifferenceMinutes } from './flightRowLayout.ts';
+import { assignPriorityTracks, buildFixedRowOverflow, buildOverflowPreviewLayout, getCorrectedTime, getExpandedControlTop, getExpansionTargetEventId, getFlightRowHeight, getStateAfterExpansionChange, getTimeDifferenceMinutes } from './flightRowLayout.ts';
 
 type TestEvent = {
     id: string;
@@ -121,6 +121,17 @@ test('maps the shared expand-all button state to the first hidden task', () => {
     assert.equal(getExpansionTargetEventId(true, groups), 'hidden');
     assert.equal(getExpansionTargetEventId(false, groups), null);
     assert.equal(getExpansionTargetEventId(true, []), null);
+});
+
+test('closes the task context menu whenever the flight row expansion state changes', () => {
+    assert.deepEqual(
+        getStateAfterExpansionChange('hidden-task'),
+        { expandedFromEventId: 'hidden-task', contextMenu: null },
+    );
+    assert.deepEqual(
+        getStateAfterExpansionChange(null),
+        { expandedFromEventId: null, contextMenu: null },
+    );
 });
 
 test('calculates corrected time only when the baseline offset exceeds 15 minutes', () => {

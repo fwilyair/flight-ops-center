@@ -189,6 +189,7 @@ export const CapsuleDetailModal: React.FC<CapsuleDetailModalProps> = ({
             isOpen={isOpen}
             onClose={onClose}
             ariaLabel={`${flightNo} ${event.label}任务详情`}
+            keyboardDismissSurface="capsule-detail"
             panelClassName="relative w-[700px] h-[700px] max-h-[90vh] z-[90] rounded-2xl overflow-hidden shadow-2xl flex flex-col"
         >
                 <div data-motion-modal-content className="relative px-5 py-6 bg-white z-20 border-b border-gray-100 shadow-sm flex-none">
@@ -366,12 +367,6 @@ export const CapsuleDetailModal: React.FC<CapsuleDetailModalProps> = ({
                                     placeholder="输入管控指令..."
                                     className="w-full max-h-[100px] min-h-[44px] py-2.5 px-4 resize-none outline-none text-gray-700 placeholder-gray-400 bg-transparent text-sm leading-relaxed"
                                     rows={1}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter' && !e.shiftKey) {
-                                            e.preventDefault();
-                                            handleSubmitControl('管控');
-                                        }
-                                    }}
                                 ></textarea>
                             </div>
 
