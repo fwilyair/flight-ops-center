@@ -232,10 +232,10 @@ export const FlightCard: React.FC<FlightCardProps> = ({
                 {legPresence.arrival ? (
                     <section aria-label="进港航班" className="flex min-h-0 flex-1 flex-col justify-start gap-1">
                         <div className="grid h-7 min-w-0 grid-cols-[72px_65px_31px_31px_minmax(27px,1fr)] items-end gap-x-[3px] text-emerald-700">
-                            <span className={`min-w-0 overflow-hidden whitespace-nowrap font-mono font-extrabold leading-none tabular-nums ${getFlightNumberSizeClass(arrivalFlightNo)}`} title={arrivalFlightNo}>
+                            <span className={`flex h-5 min-w-0 items-center overflow-hidden whitespace-nowrap font-mono font-extrabold leading-none tabular-nums ${getFlightNumberSizeClass(arrivalFlightNo)}`} title={arrivalFlightNo}>
                                 {arrivalFlightNo}
                             </span>
-                            <span className="min-w-0 whitespace-nowrap text-center font-mono text-[12px] font-extrabold leading-none text-emerald-900 tabular-nums">
+                            <span className="flex h-5 min-w-0 items-center justify-center whitespace-nowrap text-center font-mono text-[12px] font-extrabold leading-none text-emerald-900 tabular-nums">
                                 {formatCardTime(flight.times?.sta)}
                             </span>
                             <span className={`flex h-5 min-w-0 items-center justify-center whitespace-nowrap rounded-[4px] px-[3px] text-center text-[11px] font-bold leading-none ${flight.arrInfo?.status === '延误' ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-800'}`}>
@@ -244,7 +244,7 @@ export const FlightCard: React.FC<FlightCardProps> = ({
                             <span className="flex h-5 min-w-0 items-center justify-center whitespace-nowrap rounded-[4px] bg-emerald-100/75 px-0.5 text-center font-mono text-[11px] font-bold leading-none text-emerald-900">
                                 {flight.arrInfo?.stand || '-'}
                             </span>
-                            <span className="min-w-0 text-right leading-none">
+                            <span className="flex h-5 min-w-0 items-center justify-end leading-none">
                                 <FlightTypeLabel type={arrivalType} visible={typeVisibility.arrival} />
                             </span>
                         </div>
@@ -266,10 +266,10 @@ export const FlightCard: React.FC<FlightCardProps> = ({
                 {legPresence.departure ? (
                     <section aria-label="出港航班" className="flex min-h-0 flex-1 flex-col justify-end gap-1">
                         <div className="grid h-7 min-w-0 grid-cols-[72px_65px_31px_31px_minmax(27px,1fr)] items-start gap-x-[3px] text-blue-700">
-                            <span className={`min-w-0 overflow-hidden whitespace-nowrap font-mono font-extrabold leading-none tabular-nums ${getFlightNumberSizeClass(departureFlightNo)}`} title={departureFlightNo}>
+                            <span className={`flex h-5 min-w-0 items-center overflow-hidden whitespace-nowrap font-mono font-extrabold leading-none tabular-nums ${getFlightNumberSizeClass(departureFlightNo)}`} title={departureFlightNo}>
                                 {departureFlightNo}
                             </span>
-                            <span className="min-w-0 whitespace-nowrap text-center font-mono text-[12px] font-extrabold leading-none text-blue-900 tabular-nums">
+                            <span className="flex h-5 min-w-0 items-center justify-center whitespace-nowrap text-center font-mono text-[12px] font-extrabold leading-none text-blue-900 tabular-nums">
                                 {formatCardTime(flight.times?.std)}
                             </span>
                             <span className={`flex h-5 min-w-0 items-center justify-center whitespace-nowrap rounded-[4px] px-[3px] text-center text-[11px] font-bold leading-none ${flight.depInfo?.status === '延误' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-800'}`}>
@@ -278,7 +278,7 @@ export const FlightCard: React.FC<FlightCardProps> = ({
                             <span className="flex h-5 min-w-0 items-center justify-center whitespace-nowrap rounded-[4px] bg-blue-100/75 px-0.5 text-center font-mono text-[11px] font-bold leading-none text-blue-900">
                                 {flight.depInfo?.gate || '-'}
                             </span>
-                            <span className="min-w-0 text-right leading-none">
+                            <span className="flex h-5 min-w-0 items-center justify-end leading-none">
                                 <FlightTypeLabel type={departureType} visible={typeVisibility.departure} />
                             </span>
                         </div>
