@@ -725,6 +725,7 @@ const App: React.FC = () => {
                     onClick={() => handleFlightClick(flight)}
                     onEventClick={(event) => handleEventClick(event, flight)}
                     onVideoClick={handleVideoClick}
+                    onFlightUpdate={handleFlightUpdate}
                     onEventHover={handleEventHover}
                   />
                 ))}
