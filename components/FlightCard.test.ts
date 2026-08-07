@@ -21,8 +21,9 @@ test('stretches flight card modules with the expanded row height', async () => {
     assert.match(cardSource, /flex h-5 min-w-0 items-center overflow-hidden whitespace-nowrap font-mono/);
     assert.match(cardSource, /flex h-5 min-w-0 items-center justify-center whitespace-nowrap text-center font-mono/);
     assert.match(cardSource, /flex h-5 min-w-0 items-center justify-end/);
-    assert.match(cardSource, /bg-\[rgba\(16,185,129,0\.05\)\]/);
-    assert.match(cardSource, /bg-\[rgba\(37,99,235,0\.05\)\]/);
+    assert.doesNotMatch(cardSource, /railColorClass/);
+    assert.match(cardSource, /flight\.flightNo\.substring\(0, 2\)/);
+    assert.match(cardSource, /text-slate-900\/\[0\.04\]/);
     assert.doesNotMatch(cardSource, /mx-auto flex min-w-0 items-center justify-center/);
     assert.match(rowSource, /<FlightCard[\s\S]*height=\{rowHeight\}/);
 });

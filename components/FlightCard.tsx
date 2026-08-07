@@ -78,12 +78,9 @@ const LegTagRow: React.FC<{
 }> = ({ leg, tags, capacity, triggerRef, isPickerOpen, onAddClick, onVideoClick }) => {
     const { visibleTags, hiddenCount } = getTagDisplay(tags, capacity);
     const isDeparture = leg === 'departure';
-    const railColorClass = isDeparture
-        ? 'bg-[rgba(37,99,235,0.05)]'
-        : 'bg-[rgba(16,185,129,0.05)]';
 
     return (
-        <div className={`flex h-[22px] min-w-0 items-center justify-between rounded-[4px] px-1 ${railColorClass}`}>
+        <div className="flex h-[22px] min-w-0 items-center justify-between px-1">
             <div className="flex min-w-0 items-center gap-1">
                 {visibleTags.map((tag, index) => (
                     <TagDot key={`${leg}-${tag}-${index}`} tag={tag} />
@@ -231,7 +228,19 @@ export const FlightCard: React.FC<FlightCardProps> = ({
                 onClick?.();
             }}
         >
-            <div className="flex h-full min-h-0 flex-col">
+            <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 z-0 flex select-none items-center justify-center overflow-hidden rounded-l-xl rounded-r-2xl"
+            >
+                <div
+                    className="origin-center -rotate-10 scale-125 transform text-[9rem] font-black italic leading-none text-slate-900/[0.04] blur-[1px]"
+                    style={{ fontFamily: 'Impact, "Arial Black", sans-serif' }}
+                >
+                    {flight.flightNo.substring(0, 2)}
+                </div>
+            </div>
+
+            <div className="relative z-10 flex h-full min-h-0 flex-col">
                 {legPresence.arrival ? (
                     <section aria-label="进港航班" className="flex min-h-0 flex-1 flex-col justify-start gap-1">
                         <div className="grid h-7 min-w-0 grid-cols-[72px_65px_31px_31px_minmax(27px,1fr)] items-end gap-x-[3px] text-emerald-700">
