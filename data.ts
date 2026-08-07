@@ -1,4 +1,4 @@
-import { Flight } from './types';
+import type { Flight } from './types.ts';
 
 // Generate 20 mock flights
 export const MOCK_FLIGHTS: Flight[] = [
@@ -153,6 +153,7 @@ export const MOCK_FLIGHTS: Flight[] = [
     tags: ['D'],
     route: 'HGH - CTU - SZX',
     times: {
+      sta: '09:35',
       std: '10:10',
       etd: '11:30',
       cobt: '10:35'
@@ -189,6 +190,7 @@ export const MOCK_FLIGHTS: Flight[] = [
     tags: ['冰', 'C'],
     route: 'CKG - CTU - XIY',
     times: {
+      sta: '09:15',
       std: '10:00',
       atd: '10:18',
       cobt: '10:00'
@@ -230,6 +232,7 @@ export const MOCK_FLIGHTS: Flight[] = [
     tags: ['Q', '互天'],
     route: 'WUH - CTU - KMG',
     times: {
+      sta: '10:05',
       std: '10:50',
       cobt: '10:20'
     },
@@ -258,6 +261,7 @@ export const MOCK_FLIGHTS: Flight[] = [
     route: 'NKG - CTU - TAO',
     times: {
       sta: '11:15',
+      std: '12:00',
       cobt: '--:--'
     },
     events: [
@@ -287,6 +291,7 @@ export const MOCK_FLIGHTS: Flight[] = [
     },
     route: 'TNA - CTU - CSX',
     times: {
+      sta: '10:15',
       std: '11:00',
       cobt: '--:--'
     },

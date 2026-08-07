@@ -3,6 +3,7 @@ import { Flight, TimelineEvent, Annotation, FlightType, ProcessMarker } from '..
 import { timeToPixels, getColorForEventType } from '../utils';
 import { assignPriorityTracks, buildFixedRowOverflow, getExpandedControlTop, getExpansionTargetEventId, getFlightRowHeight } from './flightRowLayout';
 import type { OverflowGroup } from './flightRowLayout';
+import { TimeKindBadge } from './TimeKindBadge';
 
 export interface EventHoverInfo {
     eventId: string;
@@ -205,14 +206,14 @@ const EventCapsuleVisual: React.FC<{
                     {/* 时间部分 - 浅色背景 */}
                     <div className={`flex items-center gap-1.5 px-2 py-[2px] ${colors.lightBg}`}>
                         <div className="flex items-center gap-1 leading-none">
-                            <span className="px-1 py-[1px] rounded bg-blue-600 text-white text-xs font-bold transform scale-95 origin-center">计</span>
+                            <TimeKindBadge kind="scheduled" />
                             <span className="tabular-nums font-mono font-bold text-gray-900 dark:text-gray-100 text-sm leading-none">{event.timeScheduled || '--:--'}</span>
                         </div>
                         {hasActualTime ? (
                             <>
                                 <div className="w-px h-3 bg-gray-300 dark:bg-gray-600 mx-0.5 opacity-50"></div>
                                 <div className="flex items-center gap-1 leading-none">
-                                    <span className="px-1 py-[1px] rounded bg-green-600 text-white text-xs font-bold transform scale-95 origin-center">实</span>
+                                    <TimeKindBadge kind="actual" />
                                     <span className="tabular-nums font-mono font-bold text-gray-900 dark:text-gray-100 text-sm leading-none">{event.timeActual}</span>
                                 </div>
                             </>
@@ -229,7 +230,7 @@ const EventCapsuleVisual: React.FC<{
                             <>
                                 <div className="w-px h-3 bg-gray-300 dark:bg-gray-600 mx-0.5 opacity-50"></div>
                                 <div className="flex items-center gap-1 leading-none">
-                                    <span className="px-1 py-[1px] rounded bg-green-600 text-white text-xs font-bold transform scale-95 origin-center">实</span>
+                                    <TimeKindBadge kind="actual" />
                                     <span className="tabular-nums font-mono font-bold text-gray-900 dark:text-gray-100 text-sm leading-none">--:--</span>
                                 </div>
                             </>
@@ -746,6 +747,9 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
     };
 
     const isDelay = flight.tags?.includes('D') || flight.arrInfo?.status === '延误' || flight.depInfo?.status === '延误';
+    const formatFlightCardTime = (time?: string) => (
+        time && time !== '--:--' ? `${time}(05)` : '--:--'
+    );
 
     // 计算事件的轨道分配
     const eventTracks = React.useMemo(
@@ -958,14 +962,17 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
                         )}
                     </div>
 
-                    {/* Row 3: COBT & Actions */}
+                    {/* Row 3: STA / STD & Actions */}
                     <div className="flex items-center justify-between w-full">
-                        {/* COBT Tag */}
-                        <div className="flex items-baseline gap-2">
-                            <div className="text-base font-bold text-gray-900 dark:text-gray-100 uppercase tracking-wider leading-none italic">COBT</div>
-                            <div className="text-sm font-bold text-gray-700 dark:text-gray-300 tabular-nums font-mono italic leading-none">
-                                {flight.times?.cobt ? `${flight.times.cobt}(05)` : '--:--'}
-                            </div>
+                        {/* 与详情卡保持一致：STA 用绿色，STD 用蓝色。 */}
+                        <div className="flex items-center gap-1.5 font-mono text-sm font-bold italic leading-none tabular-nums">
+                            <span className="text-emerald-600 dark:text-emerald-400">
+                                {formatFlightCardTime(flight.times?.sta)}
+                            </span>
+                            <span className="text-slate-400" aria-hidden="true">/</span>
+                            <span className="text-blue-600 dark:text-blue-400">
+                                {formatFlightCardTime(flight.times?.std)}
+                            </span>
                         </div>
 
                         {/* Flight Type Badge (Moved from Row 2) */}

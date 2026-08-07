@@ -6,6 +6,7 @@ import { MOTION_DURATION, MOTION_EASE, MOTION_STAGGER } from '../motion/tokens';
 import { prefersReducedMotion, REDUCED_MOTION_QUERY } from '../motion/preferences';
 import { addFlightTag, FLIGHT_TAG_OPTIONS, flightDetailTagColorMap, getCenteredTagPickerPosition } from './flightTags';
 import type { FlightTag } from './flightTags';
+import { TimeKindBadge } from './TimeKindBadge';
 
 interface FlightDetailPanelProps {
     flight: Flight | null;
@@ -771,13 +772,13 @@ export const FlightDetailPanel: React.FC<FlightDetailPanelProps> = ({
                                                 </div>
 
                                                 {/* Row 2: Plan + Actual times - Redesigned */}
-                                                <div className="flex items-center gap-6 mt-1">
-                                                    <div className="flex items-baseline gap-1.5">
-                                                        <span className="text-xs text-slate-400 font-medium">计划</span>
+                                                <div className="mt-1 flex items-center gap-6">
+                                                    <div className="flex items-center gap-1.5">
+                                                        <TimeKindBadge kind="scheduled" />
                                                         <span className="font-mono font-bold text-base text-slate-600 tabular-nums tracking-tight">{formatTime(event.timeScheduled)}</span>
                                                     </div>
-                                                    <div className="flex items-baseline gap-1.5">
-                                                        <span className="text-xs text-slate-400 font-medium">实际</span>
+                                                    <div className="flex items-center gap-1.5">
+                                                        <TimeKindBadge kind="actual" />
                                                         <span className="font-mono font-black text-base text-slate-800 tabular-nums tracking-tight">{formatTime(event.timeActual)}</span>
                                                     </div>
                                                 </div>
