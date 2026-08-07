@@ -72,6 +72,46 @@ test('hides types when neither leg type exists', () => {
     });
 });
 
+test('treats arrival info as the source of truth for arrival card presence and type', async () => {
+    const layout = await import('./flightCardLayout.ts');
+    assert.equal(typeof layout.getFlightCardLegPresence, 'function');
+    if (typeof layout.getFlightCardLegPresence !== 'function') return;
+
+    const arrivalOnly: Flight = {
+        ...flight,
+        arrInfo: { status: '到达', stand: '101' },
+        depInfo: undefined,
+    };
+    const presence = layout.getFlightCardLegPresence(arrivalOnly);
+    const visibility = getTypeVisibility(
+        presence.arrival ? getLegFlightType(arrivalOnly, 'arrival') : undefined,
+        presence.departure ? getLegFlightType(arrivalOnly, 'departure') : undefined,
+    );
+
+    assert.deepEqual(presence, { arrival: true, departure: false });
+    assert.deepEqual(visibility, { arrival: true, departure: false });
+});
+
+test('treats departure info as the source of truth for departure card presence and type', async () => {
+    const layout = await import('./flightCardLayout.ts');
+    assert.equal(typeof layout.getFlightCardLegPresence, 'function');
+    if (typeof layout.getFlightCardLegPresence !== 'function') return;
+
+    const departureOnly: Flight = {
+        ...flight,
+        arrInfo: undefined,
+        depInfo: { status: '正常', gate: 'G12' },
+    };
+    const presence = layout.getFlightCardLegPresence(departureOnly);
+    const visibility = getTypeVisibility(
+        presence.arrival ? getLegFlightType(departureOnly, 'arrival') : undefined,
+        presence.departure ? getLegFlightType(departureOnly, 'departure') : undefined,
+    );
+
+    assert.deepEqual(presence, { arrival: false, departure: true });
+    assert.deepEqual(visibility, { arrival: false, departure: true });
+});
+
 test('keeps the add control outside tag overflow capacity', () => {
     assert.deepEqual(getTagDisplay(['冰', 'Q', '控'], 4), { visibleTags: ['冰', 'Q', '控'], hiddenCount: 0 });
     assert.deepEqual(getTagDisplay(['冰', 'Q', '控', 'C', 'I'], 4), { visibleTags: ['冰', 'Q', '控'], hiddenCount: 2 });
@@ -102,7 +142,7 @@ test('centers the card tag picker below its trigger and clamps it inside the vie
     assert.deepEqual(
         layout.getFlightCardTagPickerPosition(
             { left: 4, right: 24, top: 40, bottom: 60, width: 20 },
-            { width: 280, height: 110 },
+            { width: 252, height: 110 },
             { width: 320, height: 600 },
         ),
         { left: 8, top: 68 },
@@ -115,9 +155,9 @@ test('places the card tag picker above its trigger when it would cross the viewp
     assert.deepEqual(
         getFlightCardTagPickerPosition(
             { left: 260, right: 280, top: 540, bottom: 560, width: 20 },
-            { width: 280, height: 110 },
+            { width: 252, height: 110 },
             { width: 320, height: 600 },
         ),
-        { left: 32, top: 422 },
+        { left: 60, top: 422 },
     );
 });

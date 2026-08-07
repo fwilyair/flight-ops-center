@@ -14,6 +14,11 @@ export const getLegTags = (flight: Flight, leg: FlightLeg): string[] =>
 export const getLegFlightType = (flight: Flight, leg: FlightLeg): FlightType | undefined =>
     (leg === 'arrival' ? flight.arrFlightType : flight.depFlightType) ?? flight.flightType;
 
+export const getFlightCardLegPresence = (flight: Flight) => ({
+    arrival: Boolean(flight.arrInfo),
+    departure: Boolean(flight.depInfo),
+});
+
 export const getTypeVisibility = (arrivalType: FlightType | undefined, departureType: FlightType | undefined) => {
     if (!arrivalType && !departureType) return { arrival: false, departure: false };
     if (!arrivalType) return { arrival: false, departure: true };
