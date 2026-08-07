@@ -117,6 +117,80 @@ test('keeps the add control outside tag overflow capacity', () => {
     assert.deepEqual(getTagDisplay(['冰', 'Q', '控', 'C', 'I'], 4), { visibleTags: ['冰', 'Q', '控'], hiddenCount: 2 });
 });
 
+test('adds a detail tag to both existing legs and updates the legacy union immutably', async () => {
+    const layout = await import('./flightCardLayout.ts');
+    assert.equal(typeof layout.addFlightTagToExistingLegs, 'function');
+    if (typeof layout.addFlightTagToExistingLegs !== 'function') return;
+
+    const turnaround: Flight = {
+        ...flight,
+        arrInfo: { status: '到达', stand: '101' },
+        depInfo: { status: '正常', gate: 'G12' },
+    };
+    const original = structuredClone(turnaround);
+    const updated = layout.addFlightTagToExistingLegs(turnaround, '控');
+
+    assert.deepEqual(turnaround, original);
+    assert.deepEqual(updated.arrTags, ['冰', 'Q', '控']);
+    assert.deepEqual(updated.depTags, ['D', '控']);
+    assert.deepEqual(updated.tags, ['冰', 'Q', '控', 'D']);
+});
+
+test('adds a detail tag only to the existing single leg without duplicates', async () => {
+    const layout = await import('./flightCardLayout.ts');
+    assert.equal(typeof layout.addFlightTagToExistingLegs, 'function');
+    if (typeof layout.addFlightTagToExistingLegs !== 'function') return;
+
+    const departureOnly: Flight = {
+        ...flight,
+        arrInfo: undefined,
+        depInfo: { status: '正常', gate: 'G12' },
+        arrTags: undefined,
+        depTags: ['D'],
+        tags: ['D'],
+    };
+    const original = structuredClone(departureOnly);
+    const updated = layout.addFlightTagToExistingLegs(departureOnly, 'D');
+
+    assert.deepEqual(departureOnly, original);
+    assert.equal(updated.arrTags, undefined);
+    assert.deepEqual(updated.depTags, ['D']);
+    assert.deepEqual(updated.tags, ['D']);
+});
+
+test('uses the second combined flight number for a departure without codeshare', async () => {
+    const layout = await import('./flightCardLayout.ts');
+    assert.equal(typeof layout.getLegFlightNumber, 'function');
+    if (typeof layout.getLegFlightNumber !== 'function') return;
+
+    const combined: Flight = {
+        ...flight,
+        flightNo: 'CA1538 / CA1539',
+        codeshare: undefined,
+        arrInfo: undefined,
+        depInfo: { status: '正常' },
+    };
+
+    assert.equal(layout.getLegFlightNumber(combined, 'departure'), 'CA1539');
+});
+
+test('falls back to the single flight number for a departure without codeshare', async () => {
+    const layout = await import('./flightCardLayout.ts');
+    assert.equal(typeof layout.getLegFlightNumber, 'function');
+    if (typeof layout.getLegFlightNumber !== 'function') return;
+
+    const single: Flight = {
+        ...flight,
+        flightNo: 'MU5206',
+        codeshare: undefined,
+        arrInfo: undefined,
+        depInfo: { status: '正常' },
+    };
+
+    assert.equal(layout.getLegFlightNumber(single, 'arrival'), 'MU5206');
+    assert.equal(layout.getLegFlightNumber(single, 'departure'), 'MU5206');
+});
+
 test('uses compact typography at the eight-character boundary', () => {
     assert.equal(getFlightNumberSizeClass('ABC1234'), 'text-[17px]');
     assert.equal(getFlightNumberSizeClass('ABCD1234'), 'text-[12px] tracking-[-0.65px]');

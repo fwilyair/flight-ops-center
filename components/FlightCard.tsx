@@ -6,6 +6,7 @@ import {
     getFlightCardLegPresence,
     getFlightCardTagPickerPosition,
     getFlightNumberSizeClass,
+    getLegFlightNumber,
     getLegFlightType,
     getLegTags,
     getTagDisplay,
@@ -133,8 +134,8 @@ export const FlightCard: React.FC<FlightCardProps> = ({
     const arrivalType = legPresence.arrival ? getLegFlightType(flight, 'arrival') : undefined;
     const departureType = legPresence.departure ? getLegFlightType(flight, 'departure') : undefined;
     const typeVisibility = getTypeVisibility(arrivalType, departureType);
-    const arrivalFlightNo = flight.flightNo.split(' / ')[0];
-    const departureFlightNo = flight.codeshare || '-';
+    const arrivalFlightNo = getLegFlightNumber(flight, 'arrival');
+    const departureFlightNo = getLegFlightNumber(flight, 'departure');
     const isDelayed = flight.arrInfo?.status === '延误' || flight.depInfo?.status === '延误';
 
     const closePicker = React.useCallback(() => {

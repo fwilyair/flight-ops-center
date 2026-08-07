@@ -19,6 +19,15 @@ export const getFlightCardLegPresence = (flight: Flight) => ({
     departure: Boolean(flight.depInfo),
 });
 
+export const getLegFlightNumber = (flight: Flight, leg: FlightLeg): string => {
+    const [arrivalFlightNo, departureFlightNo] = flight.flightNo
+        .split(/\s*\/\s*/)
+        .map(value => value.trim());
+
+    if (leg === 'arrival') return arrivalFlightNo || flight.flightNo;
+    return flight.codeshare?.trim() || departureFlightNo || flight.flightNo;
+};
+
 export const getTypeVisibility = (arrivalType: FlightType | undefined, departureType: FlightType | undefined) => {
     if (!arrivalType && !departureType) return { arrival: false, departure: false };
     if (!arrivalType) return { arrival: false, departure: true };
@@ -54,6 +63,29 @@ export const addFlightTagToLeg = (flight: Flight, leg: FlightLeg, tag: FlightTag
         arrTags,
         depTags,
         tags: Array.from(new Set([...arrTags, ...depTags])),
+    };
+};
+
+export const addFlightTagToExistingLegs = (flight: Flight, tag: FlightTag): Flight => {
+    const presence = getFlightCardLegPresence(flight);
+    const arrTags = presence.arrival
+        ? addFlightTag(getLegTags(flight, 'arrival'), tag)
+        : flight.arrTags;
+    const depTags = presence.departure
+        ? addFlightTag(getLegTags(flight, 'departure'), tag)
+        : flight.depTags;
+    const existingLegTags = [
+        ...(presence.arrival ? arrTags ?? [] : []),
+        ...(presence.departure ? depTags ?? [] : []),
+    ];
+
+    return {
+        ...flight,
+        ...(presence.arrival ? { arrTags } : {}),
+        ...(presence.departure ? { depTags } : {}),
+        tags: presence.arrival || presence.departure
+            ? Array.from(new Set(existingLegTags))
+            : addFlightTag(flight.tags, tag),
     };
 };
 

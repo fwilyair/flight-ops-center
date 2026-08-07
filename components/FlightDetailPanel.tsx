@@ -4,8 +4,9 @@ import { Flight } from '../types';
 import { gsap } from '../motion/gsap';
 import { MOTION_DURATION, MOTION_EASE, MOTION_STAGGER } from '../motion/tokens';
 import { prefersReducedMotion, REDUCED_MOTION_QUERY } from '../motion/preferences';
-import { addFlightTag, FLIGHT_TAG_OPTIONS, flightDetailTagColorMap, getCenteredTagPickerPosition } from './flightTags';
+import { FLIGHT_TAG_OPTIONS, flightDetailTagColorMap, getCenteredTagPickerPosition } from './flightTags';
 import type { FlightTag } from './flightTags';
+import { addFlightTagToExistingLegs } from './flightCardLayout';
 import { TimeKindBadge } from './TimeKindBadge';
 import { getFlightRemarkKeyAction, shouldCloseWithEscape } from './keyboardPolicy';
 import { splitFlightRemarkLines } from './flightRemarks';
@@ -107,10 +108,7 @@ export const FlightDetailPanel: React.FC<FlightDetailPanelProps> = ({
     const handleAddFlightTag = React.useCallback((tag: FlightTag) => {
         if (!flight) return;
 
-        const nextTags = addFlightTag(flight.tags, tag);
-        if (nextTags !== flight.tags) {
-            onFlightUpdate?.({ ...flight, tags: nextTags });
-        }
+        onFlightUpdate?.(addFlightTagToExistingLegs(flight, tag));
         setIsTagPickerOpen(false);
     }, [flight, onFlightUpdate]);
 
