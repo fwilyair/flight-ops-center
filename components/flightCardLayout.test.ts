@@ -112,6 +112,29 @@ test('treats departure info as the source of truth for departure card presence a
     assert.deepEqual(visibility, { arrival: false, departure: true });
 });
 
+test('centers a single flight leg but preserves split alignment for a turnaround', async () => {
+    const layout = await import('./flightCardLayout.ts');
+    assert.equal(typeof layout.getFlightCardLegJustification, 'function');
+    if (typeof layout.getFlightCardLegJustification !== 'function') return;
+
+    assert.equal(
+        layout.getFlightCardLegJustification('arrival', { arrival: true, departure: false }),
+        'justify-center',
+    );
+    assert.equal(
+        layout.getFlightCardLegJustification('departure', { arrival: false, departure: true }),
+        'justify-center',
+    );
+    assert.equal(
+        layout.getFlightCardLegJustification('arrival', { arrival: true, departure: true }),
+        'justify-start',
+    );
+    assert.equal(
+        layout.getFlightCardLegJustification('departure', { arrival: true, departure: true }),
+        'justify-end',
+    );
+});
+
 test('keeps the add control outside tag overflow capacity', () => {
     assert.deepEqual(getTagDisplay(['冰', 'Q', '控'], 4), { visibleTags: ['冰', 'Q', '控'], hiddenCount: 0 });
     assert.deepEqual(getTagDisplay(['冰', 'Q', '控', 'C', 'I'], 4), { visibleTags: ['冰', 'Q', '控'], hiddenCount: 2 });

@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import type { Flight, FlightType } from '../types';
 import {
     addFlightTagToLeg,
+    getFlightCardLegJustification,
     getFlightCardLegPresence,
     getFlightCardTagPickerPosition,
     getFlightNumberSizeClass,
@@ -246,7 +247,7 @@ export const FlightCard: React.FC<FlightCardProps> = ({
 
             <div className="relative z-10 flex h-full min-h-0 flex-col">
                 {legPresence.arrival ? (
-                    <section aria-label="进港航班" className="flex min-h-0 flex-1 flex-col justify-start gap-1">
+                    <section aria-label="进港航班" className={`flex min-h-0 flex-1 flex-col gap-1 ${getFlightCardLegJustification('arrival', legPresence)}`}>
                         <div className="flex h-7 min-w-0 items-end text-emerald-700">
                             <div className="grid w-full min-w-0 grid-cols-[72px_65px_31px_31px_minmax(27px,1fr)] items-baseline gap-x-[3px]">
                             <span className={`min-w-0 overflow-hidden whitespace-nowrap font-mono font-extrabold italic leading-none tabular-nums ${getFlightNumberSizeClass(arrivalFlightNo)}`} title={arrivalFlightNo}>
@@ -278,7 +279,7 @@ export const FlightCard: React.FC<FlightCardProps> = ({
                 ) : null}
 
                 {legPresence.departure ? (
-                    <section aria-label="出港航班" className="flex min-h-0 flex-1 flex-col justify-end gap-1">
+                    <section aria-label="出港航班" className={`flex min-h-0 flex-1 flex-col gap-1 ${getFlightCardLegJustification('departure', legPresence)}`}>
                         <div className="flex h-7 min-w-0 items-start text-blue-700">
                             <div className="grid w-full min-w-0 grid-cols-[72px_65px_31px_31px_minmax(27px,1fr)] items-baseline gap-x-[3px]">
                             <span className={`min-w-0 overflow-hidden whitespace-nowrap font-mono font-extrabold italic leading-none tabular-nums ${getFlightNumberSizeClass(departureFlightNo)}`} title={departureFlightNo}>

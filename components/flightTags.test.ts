@@ -41,10 +41,29 @@ test('centers the tag picker within the flight detail panel', async () => {
 test('shows separate read-only arrival and departure tags in flight details', async () => {
     const source = await readFile(new URL('./FlightDetailPanel.tsx', import.meta.url), 'utf8');
 
-    assert.match(source, /label="进港标记"/);
-    assert.match(source, /label="出港标记"/);
+    assert.match(source, /grid-cols-\[minmax\(0,1fr\)_auto_minmax\(0,1fr\)\]/);
+    assert.match(source, /getTagDisplay\(tags, 5\)/);
+    assert.match(source, /visibleTags\.map/);
+    assert.match(source, /hiddenTags\.map/);
+    assert.match(source, /group-hover\/more:grid/);
+    assert.match(source, /还有 \$\{hiddenCount\} 个\$\{title\}/);
+    assert.match(source, /size-6 shrink-0/);
+    assert.match(source, /title="进港标记"[\s\S]*alignment="end"/);
+    assert.match(source, /title="出港标记"[\s\S]*alignment="start"/);
+    assert.match(source, />｜<\/span>/);
     assert.match(source, /getLegTags\(flight, 'arrival'\)/);
     assert.match(source, /getLegTags\(flight, 'departure'\)/);
     assert.doesNotMatch(source, /aria-label="添加航班标记"/);
     assert.doesNotMatch(source, /flight-tag-picker/);
+});
+
+test('shows flight detail summary fields in operational order', async () => {
+    const source = await readFile(new URL('./FlightDetailPanel.tsx', import.meta.url), 'utf8');
+    const labels = ['机位', '登机口', '行李转盘', '机号', '机型'];
+    const positions = labels.map(label => source.indexOf(`label: '${label}'`));
+
+    assert.ok(positions.every(position => position >= 0));
+    assert.deepEqual(positions, [...positions].sort((a, b) => a - b));
+    assert.match(source, /flight\.arrInfo\?\.baggageCarousel/);
+    assert.doesNotMatch(source, /label: '机类'/);
 });

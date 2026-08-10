@@ -19,6 +19,14 @@ export const getFlightCardLegPresence = (flight: Flight) => ({
     departure: Boolean(flight.depInfo),
 });
 
+export const getFlightCardLegJustification = (
+    leg: FlightLeg,
+    presence: { arrival: boolean; departure: boolean },
+): 'justify-start' | 'justify-center' | 'justify-end' => {
+    if (presence.arrival !== presence.departure) return 'justify-center';
+    return leg === 'arrival' ? 'justify-start' : 'justify-end';
+};
+
 export const getLegFlightNumber = (flight: Flight, leg: FlightLeg): string => {
     const [arrivalFlightNo, departureFlightNo] = flight.flightNo
         .split(/\s*\/\s*/)

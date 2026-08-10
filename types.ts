@@ -78,6 +78,7 @@ export interface Flight {
   arrInfo?: {
     status: '前起' | '到达' | '入位' | '备降' | '延误';
     stand?: string;
+    baggageCarousel?: string; // 行李转盘 e.g. 7
   };
   depInfo?: {
     status: '正常' | '允登' | '登机' | '催登' | '关闭' | '延误';

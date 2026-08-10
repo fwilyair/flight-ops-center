@@ -1,6 +1,6 @@
 import type { Flight } from './types.ts';
 
-// Generate 20 mock flights
+// 核心测试航班，覆盖联程、单进港、单出港和长航班号等场景。
 export const MOCK_FLIGHTS: Flight[] = [
   // 1. 进港已完成 - 2个事件
   {
@@ -20,7 +20,8 @@ export const MOCK_FLIGHTS: Flight[] = [
     depFlightType: 'REG',
     arrInfo: {
       status: '到达',
-      stand: '243'
+      stand: '243',
+      baggageCarousel: '7'
     },
     depInfo: {
       status: '正常',
@@ -105,7 +106,8 @@ export const MOCK_FLIGHTS: Flight[] = [
     // Dual status for Turnaround
     arrInfo: {
       status: '入位',
-      stand: '317L'
+      stand: '317L',
+      baggageCarousel: '3'
     },
     depInfo: {
       status: '登机',
@@ -152,7 +154,8 @@ export const MOCK_FLIGHTS: Flight[] = [
     codeshare: 'CZ6893',
     arrInfo: {
       status: '入位',
-      stand: '243L'
+      stand: '243L',
+      baggageCarousel: '5'
     },
     depInfo: {
       status: '延误',
@@ -193,7 +196,8 @@ export const MOCK_FLIGHTS: Flight[] = [
     codeshare: 'HU7857',
     arrInfo: {
       status: '到达',
-      stand: '318'
+      stand: '318',
+      baggageCarousel: '2'
     },
     depInfo: {
       status: '关闭',
@@ -232,70 +236,70 @@ export const MOCK_FLIGHTS: Flight[] = [
     ]
   },
 
-  // 5. 即将出港
+  // 5. 纯进港航班
   {
     id: '5',
-    flightNo: 'SC4908',
-    codeshare: 'SC4909',
+    flightNo: '3U8888',
+    remarks: '',
+    registration: 'B-324F',
+    aircraftType: 'A320',
     arrInfo: {
-      status: '前起',
-      stand: '266R'
+      status: '到达',
+      stand: '266R',
+      baggageCarousel: '8'
     },
-    depInfo: {
-      status: '正常',
-      gate: '22'
-    },
-    tags: ['Q', '互天'],
-    arrTags: ['Q'],
-    depTags: ['互天'],
+    tags: ['冰', 'Q'],
+    arrTags: ['冰', 'Q'],
+    depTags: [],
     arrFlightType: 'REG',
-    depFlightType: 'REG',
-    route: 'WUH - CTU - KMG',
+    route: 'KMG - CTU',
     times: {
       sta: '10:05',
       std: '10:50',
-      cobt: '10:20'
+      eta: '10:08',
+      ata: '10:09'
     },
     events: [
-      { id: 'e15', label: '登机', type: 'BOARD', timeActual: '--:--', timeScheduled: '10:50', status: 'overtime-incomplete' },
+      { id: 'e15-arr', label: '落地', type: 'LAND', timeActual: '10:09', timeScheduled: '10:05', status: 'overtime-completed' },
+      { id: 'e16-arr', label: '入位', type: 'IN-BLK', timeActual: '--:--', timeScheduled: '10:18', status: 'warning' },
     ],
-    annotations: [
-      { type: 'connector', startTime: '10:50', endTime: '11:50', label: '放行', style: 'solid', color: 'gray' },
-      { type: 'connector', startTime: '11:20', endTime: '12:20', label: '起飞', style: 'solid', color: 'gray' }
-    ]
+    annotations: []
   },
 
-  // 6. 进港准备中
+  // 6. 纯出港航班
   {
     id: '6',
-    flightNo: 'ZH9152',
-    codeshare: 'ZH9153',
-    tags: [],
+    flightNo: 'Y87502',
+    remarks: '',
+    registration: 'B-223D',
+    aircraftType: 'B738',
+    tags: ['控', 'V'],
     arrTags: [],
-    depTags: [],
-    arrFlightType: 'REG',
-    depFlightType: 'REG',
-    arrInfo: {
-      status: '前起',
-      stand: '305'
-    },
+    depTags: ['控', 'V'],
+    depFlightType: 'CARGO',
     depInfo: {
-      status: '正常',
+      status: '登机',
       gate: '06'
     },
-    route: 'NKG - CTU - TAO',
+    route: 'CTU - URC',
     times: {
       sta: '11:15',
       std: '12:00',
-      cobt: '--:--'
+      etd: '12:08',
+      cobt: '11:50'
     },
     events: [
-      { id: 'e16', label: '预计落地', type: 'LAND', timeActual: '--:--', timeScheduled: '11:15', status: 'alert' },
-      { id: 'e17', label: '预计靠桥', type: 'IN-BLK', timeActual: '--:--', timeScheduled: '11:28', status: 'alert' },
+      { id: 'e17-dep', label: '登机', type: 'BOARD', timeActual: '--:--', timeScheduled: '11:35', status: 'warning' },
+      { id: 'e18-dep', label: '推出', type: 'ATD', timeActual: '--:--', timeScheduled: '12:00', status: 'overtime-incomplete' },
     ],
     annotations: [
-      { type: 'connector', startTime: '10:45', endTime: '11:45', label: '放行', style: 'solid', color: 'gray' },
-      { type: 'connector', startTime: '11:15', endTime: '12:15', label: '起飞', style: 'solid', color: 'gray' }
+      {
+        type: 'connector', startTime: '11:30', endTime: '12:30', label: '放行', style: 'solid', color: 'gray', markers: [
+          { id: 'pm6-1', label: '准备好', time: '11:45', phase: 'departure' },
+          { id: 'pm6-2', label: '推出', time: '12:00', phase: 'departure' },
+        ]
+      },
+      { type: 'connector', startTime: '12:00', endTime: '13:00', label: '起飞', style: 'solid', color: 'gray' }
     ]
   },
 
@@ -313,7 +317,8 @@ export const MOCK_FLIGHTS: Flight[] = [
     depFlightType: 'FERRY',
     arrInfo: {
       status: '入位',
-      stand: '318A'
+      stand: '318A',
+      baggageCarousel: '1'
     },
     depInfo: {
       status: '正常',

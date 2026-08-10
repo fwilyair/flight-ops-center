@@ -4,10 +4,11 @@ import { gsap } from '../motion/gsap';
 import { MOTION_DURATION, MOTION_EASE, MOTION_STAGGER } from '../motion/tokens';
 import { prefersReducedMotion, REDUCED_MOTION_QUERY } from '../motion/preferences';
 import { flightDetailTagColorMap } from './flightTags';
-import { getFlightCardLegPresence, getLegTags } from './flightCardLayout';
+import { getFlightCardLegPresence, getLegTags, getTagDisplay } from './flightCardLayout';
 import { TimeKindBadge } from './TimeKindBadge';
 import { getFlightRemarkKeyAction, shouldCloseWithEscape } from './keyboardPolicy';
 import { splitFlightRemarkLines } from './flightRemarks';
+import { getFlightDetailTimeLayout } from './flightDetailLayout';
 
 interface FlightDetailPanelProps {
     flight: Flight | null;
@@ -24,34 +25,52 @@ const formatTime = (time?: string): string => {
     return `${time}(${day})`;
 };
 
-const DetailTagGroup: React.FC<{
-    label: string;
-    labelClassName: string;
+const DetailTagList: React.FC<{
     tags: string[];
-}> = ({ label, labelClassName, tags }) => (
-    <div className="flex min-h-7 items-start gap-2">
-        <span className={`mt-1 w-[52px] shrink-0 text-right text-[11px] font-bold leading-5 ${labelClassName}`}>
-            {label}
-        </span>
-        <div className="flex min-w-0 flex-1 flex-wrap gap-2">
-            {tags.length > 0 ? tags.map((tag, index) => {
-                const colorClass = flightDetailTagColorMap[tag] || 'bg-slate-500';
-                const isDualChar = tag.length > 1;
-                return (
+    alignment: 'start' | 'end';
+    title: string;
+}> = ({ tags, alignment, title }) => {
+    const { visibleTags, hiddenCount } = getTagDisplay(tags, 5);
+    const hiddenTags = hiddenCount > 0 ? tags.slice(visibleTags.length) : [];
+
+    const renderTag = (tag: string, key: string) => {
+        const colorClass = flightDetailTagColorMap[tag] || 'bg-slate-500';
+        const isDualChar = tag.length > 1;
+
+        return (
+            <span
+                key={key}
+                className={`flex size-6 shrink-0 items-center justify-center rounded-full font-bold text-white shadow-sm ${colorClass} ${isDualChar ? 'text-[8px] leading-none tracking-tighter' : 'text-[11px]'}`}
+                title={`${title}: ${tag}`}
+            >
+                {tag}
+            </span>
+        );
+    };
+
+    return (
+        <div className={`flex min-w-0 items-center gap-1 ${alignment === 'end' ? 'justify-end' : 'justify-start'}`}>
+            {visibleTags.map((tag, index) => renderTag(tag, `${title}-${tag}-${index}`))}
+            {hiddenCount > 0 && (
+                <span
+                    className="group/more relative flex size-6 shrink-0 cursor-default items-center justify-center rounded-full bg-slate-300 pb-[2px] text-[13px] font-bold leading-none text-slate-700 shadow-sm"
+                    aria-label={`还有 ${hiddenCount} 个${title}`}
+                >
+                    …
                     <span
-                        key={`${label}-${tag}-${index}`}
-                        className={`flex size-[28px] items-center justify-center rounded-full font-bold text-white shadow-sm ${colorClass} ${isDualChar ? 'text-[10px] leading-none tracking-tighter' : 'text-xs'}`}
-                        title={`${label}: ${tag}`}
+                        role="tooltip"
+                        className={`pointer-events-auto absolute top-full z-50 mt-2 hidden gap-1 rounded-xl border border-slate-200 bg-white p-2 shadow-[0_12px_28px_rgba(15,23,42,0.18)] group-hover/more:grid ${alignment === 'end' ? 'right-0' : 'left-0'}`}
+                        style={{ gridTemplateColumns: `repeat(${Math.min(hiddenTags.length, 4)}, 24px)` }}
                     >
-                        {tag}
+                        <span aria-hidden="true" className="absolute inset-x-0 -top-2 h-2" />
+                        {hiddenTags.map((tag, index) => renderTag(tag, `${title}-hidden-${tag}-${index}`))}
                     </span>
-                );
-            }) : (
-                <span className="flex h-7 items-center text-xs text-slate-400">暂无</span>
+                </span>
             )}
+            {tags.length === 0 && <span className="flex h-6 items-center text-xs text-slate-400">暂无</span>}
         </div>
-    </div>
-);
+    );
+};
 
 export const FlightDetailPanel: React.FC<FlightDetailPanelProps> = ({
     flight,
@@ -234,6 +253,7 @@ export const FlightDetailPanel: React.FC<FlightDetailPanelProps> = ({
     const legPresence = getFlightCardLegPresence(flight);
     const arrivalTags = getLegTags(flight, 'arrival');
     const departureTags = getLegTags(flight, 'departure');
+    const timeLayout = getFlightDetailTimeLayout(flight);
 
     return (
         <>
@@ -366,6 +386,21 @@ export const FlightDetailPanel: React.FC<FlightDetailPanelProps> = ({
                                     </>
                                 )}
                             </div>
+                            {/* 标记紧贴航班号：进港向右、出港向左，中线建立航段对应关系。 */}
+                            <div className="mx-auto mb-3 grid max-w-[360px] grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2">
+                                <DetailTagList
+                                    title="进港标记"
+                                    alignment="end"
+                                    tags={legPresence.arrival ? arrivalTags : []}
+                                />
+                                <span className="flex self-stretch select-none items-center text-base font-light leading-6 text-slate-300" aria-hidden="true">｜</span>
+                                <DetailTagList
+                                    title="出港标记"
+                                    alignment="start"
+                                    tags={legPresence.departure ? departureTags : []}
+                                />
+                            </div>
+
                             {/* Route with elegant separator */}
                             <div className="flex items-center justify-center gap-3">
                                 <div className="h-px w-10 bg-gradient-to-r from-transparent to-slate-300"></div>
@@ -374,34 +409,16 @@ export const FlightDetailPanel: React.FC<FlightDetailPanelProps> = ({
                                 </span>
                                 <div className="h-px w-10 bg-gradient-to-l from-transparent to-slate-300"></div>
                             </div>
-
-                            {/* 详情页只读展示进、出港各自标记；添加入口保留在航班卡。 */}
-                            <div className="mx-auto mt-4 mb-2 max-w-[340px] space-y-2">
-                                {legPresence.arrival && (
-                                    <DetailTagGroup
-                                        label="进港标记"
-                                        labelClassName="text-emerald-700"
-                                        tags={arrivalTags}
-                                    />
-                                )}
-                                {legPresence.departure && (
-                                    <DetailTagGroup
-                                        label="出港标记"
-                                        labelClassName="text-blue-700"
-                                        tags={departureTags}
-                                    />
-                                )}
-                            </div>
                         </div>
 
-                        {/* Aircraft & Gate Info - 5 items in one row */}
+                        {/* 航班保障位置与机务信息按业务读取顺序保持为一行。 */}
                         <div className="grid grid-cols-5 gap-3">
                             {[
                                 { label: '机位', value: flight.arrInfo?.stand || flight.stand || '-' },
                                 { label: '登机口', value: flight.depInfo?.gate || flight.gate || '-' },
+                                { label: '行李转盘', value: flight.arrInfo?.baggageCarousel || '-' },
                                 { label: '机号', value: flight.registration || '-' },
                                 { label: '机型', value: flight.aircraftType || '-' },
-                                { label: '机类', value: flight.aircraftCategory || '-' },
                             ].map((item) => (
                                 <div key={item.label} className="flex flex-col items-center justify-center py-2">
                                     <div className="text-[10px] text-slate-400 mb-1 font-medium uppercase tracking-wide">
@@ -530,58 +547,74 @@ export const FlightDetailPanel: React.FC<FlightDetailPanelProps> = ({
                         {/* Times Table */}
                         <div className="space-y-0">
                             <div className="text-sm">
-                                {/* 前站起飞 */}
-                                <div className="grid grid-cols-[80px_1fr] p-3">
-                                    <div className="text-gray-900 dark:text-gray-100 font-bold">前站起飞</div>
-                                    <div className="font-mono tabular-nums text-gray-700 dark:text-gray-200 font-bold text-center pr-10">
-                                        {formatTime(flight.times?.ptd)}
+                                {/* 前站起飞属于进港链路，纯出港航班不显示。 */}
+                                {timeLayout.showPreviousDeparture && (
+                                    <div className="grid grid-cols-[80px_1fr] p-3">
+                                        <div className="text-gray-900 dark:text-gray-100 font-bold">前站起飞</div>
+                                        <div className="font-mono tabular-nums text-gray-700 dark:text-gray-200 font-bold text-center">
+                                            {formatTime(flight.times?.ptd)}
+                                        </div>
                                     </div>
-                                </div>
+                                )}
                                 {/* 计划时间 */}
-                                <div className="grid grid-cols-[80px_1fr_1fr] p-3">
+                                <div className={`grid ${timeLayout.rowGridClass} p-3`}>
                                     <div className="text-gray-900 dark:text-gray-100 font-bold">计划时间</div>
-                                    <div className="font-mono tabular-nums text-emerald-600 dark:text-emerald-400 font-bold text-center">
-                                        {formatTime(flight.times?.sta)}
-                                    </div>
-                                    <div className="font-mono tabular-nums text-blue-600 dark:text-blue-400 font-bold text-center">
-                                        {formatTime(flight.times?.std)}
-                                    </div>
+                                    {timeLayout.showArrivalTimes && (
+                                        <div className="font-mono tabular-nums text-emerald-600 dark:text-emerald-400 font-bold text-center">
+                                            {formatTime(flight.times?.sta)}
+                                        </div>
+                                    )}
+                                    {timeLayout.showDepartureTimes && (
+                                        <div className="font-mono tabular-nums text-blue-600 dark:text-blue-400 font-bold text-center">
+                                            {formatTime(flight.times?.std)}
+                                        </div>
+                                    )}
                                 </div>
                                 {/* 预计时间 */}
-                                <div className="grid grid-cols-[80px_1fr_1fr] p-3">
+                                <div className={`grid ${timeLayout.rowGridClass} p-3`}>
                                     <div className="text-gray-900 dark:text-gray-100 font-bold">预计时间</div>
-                                    <div className="font-mono tabular-nums text-emerald-600 dark:text-emerald-400 font-bold text-center">
-                                        {formatTime(flight.times?.eta)}
-                                    </div>
-                                    <div className="font-mono tabular-nums text-blue-600 dark:text-blue-400 font-bold text-center">
-                                        {formatTime(flight.times?.etd)}
-                                    </div>
+                                    {timeLayout.showArrivalTimes && (
+                                        <div className="font-mono tabular-nums text-emerald-600 dark:text-emerald-400 font-bold text-center">
+                                            {formatTime(flight.times?.eta)}
+                                        </div>
+                                    )}
+                                    {timeLayout.showDepartureTimes && (
+                                        <div className="font-mono tabular-nums text-blue-600 dark:text-blue-400 font-bold text-center">
+                                            {formatTime(flight.times?.etd)}
+                                        </div>
+                                    )}
                                 </div>
                                 {/* 实际时间 */}
-                                <div className="grid grid-cols-[80px_1fr_1fr] p-3">
+                                <div className={`grid ${timeLayout.rowGridClass} p-3`}>
                                     <div className="text-gray-900 dark:text-gray-100 font-bold">实际时间</div>
-                                    <div className="font-mono tabular-nums text-emerald-600 dark:text-emerald-400 font-bold text-center">
-                                        {formatTime(flight.times?.ata)}
-                                    </div>
-                                    <div className="font-mono tabular-nums text-blue-600 dark:text-blue-400 font-bold text-center">
-                                        {formatTime(flight.times?.atd)}
-                                    </div>
+                                    {timeLayout.showArrivalTimes && (
+                                        <div className="font-mono tabular-nums text-emerald-600 dark:text-emerald-400 font-bold text-center">
+                                            {formatTime(flight.times?.ata)}
+                                        </div>
+                                    )}
+                                    {timeLayout.showDepartureTimes && (
+                                        <div className="font-mono tabular-nums text-blue-600 dark:text-blue-400 font-bold text-center">
+                                            {formatTime(flight.times?.atd)}
+                                        </div>
+                                    )}
                                 </div>
-                                {/* COBT & CTOT & ATOT */}
-                                <div className="grid grid-cols-3">
-                                    <div className="flex flex-col items-center p-3">
-                                        <div className="text-gray-900 dark:text-gray-100 font-bold mb-1 italic">COBT</div>
-                                        <div className="font-mono tabular-nums text-gray-900 dark:text-gray-100 font-bold text-lg italic">{formatTime(flight.times?.cobt)}</div>
+                                {/* COBT、CTOT、ATOT 属于出港链路，纯进港航班不显示。 */}
+                                {timeLayout.showDepartureControlTimes && (
+                                    <div className="grid grid-cols-3">
+                                        <div className="flex flex-col items-center p-3">
+                                            <div className="text-gray-900 dark:text-gray-100 font-bold mb-1 italic">COBT</div>
+                                            <div className="font-mono tabular-nums text-gray-900 dark:text-gray-100 font-bold text-lg italic">{formatTime(flight.times?.cobt)}</div>
+                                        </div>
+                                        <div className="flex flex-col items-center p-3 border-l border-slate-100">
+                                            <div className="text-gray-900 dark:text-gray-100 font-bold mb-1 italic">CTOT</div>
+                                            <div className="font-mono tabular-nums text-gray-900 dark:text-gray-100 font-bold text-lg italic">{formatTime(flight.times?.ctot)}</div>
+                                        </div>
+                                        <div className="flex flex-col items-center p-3 border-l border-slate-100">
+                                            <div className="text-gray-900 dark:text-gray-100 font-bold mb-1 italic">ATOT</div>
+                                            <div className="font-mono tabular-nums text-gray-900 dark:text-gray-100 font-bold text-lg italic">{formatTime(flight.times?.atot)}</div>
+                                        </div>
                                     </div>
-                                    <div className="flex flex-col items-center p-3 border-l border-slate-100">
-                                        <div className="text-gray-900 dark:text-gray-100 font-bold mb-1 italic">CTOT</div>
-                                        <div className="font-mono tabular-nums text-gray-900 dark:text-gray-100 font-bold text-lg italic">{formatTime(flight.times?.ctot)}</div>
-                                    </div>
-                                    <div className="flex flex-col items-center p-3 border-l border-slate-100">
-                                        <div className="text-gray-900 dark:text-gray-100 font-bold mb-1 italic">ATOT</div>
-                                        <div className="font-mono tabular-nums text-gray-900 dark:text-gray-100 font-bold text-lg italic">{formatTime(flight.times?.atot)}</div>
-                                    </div>
-                                </div>
+                                )}
                             </div>
                         </div>
 

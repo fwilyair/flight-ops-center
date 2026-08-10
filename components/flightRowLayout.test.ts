@@ -71,19 +71,41 @@ test('restores the original content-driven height after expanding a flight row',
         hasCalcPoints: false,
         trackCount: 3,
         annotationCount: 2,
-    }), 206);
+    }), 188);
 
     assert.equal(getFlightRowHeight({
         isExpanded: true,
         hasCalcPoints: true,
         trackCount: 3,
         annotationCount: 2,
-    }), 278);
+    }), 242);
 });
 
 test('places the collapse control below every expanded capsule track', () => {
-    assert.equal(getExpandedControlTop({ hasCalcPoints: false, trackCount: 3 }), 98);
-    assert.equal(getExpandedControlTop({ hasCalcPoints: true, trackCount: 3 }), 152);
+    assert.equal(getExpandedControlTop({ hasCalcPoints: false, trackCount: 3 }), 96);
+    assert.equal(getExpandedControlTop({ hasCalcPoints: true, trackCount: 3 }), 150);
+});
+
+test('keeps the same compact clearance between collapse control and annotations', () => {
+    const controlHeight = 20;
+    const annotationHalfHeight = 11;
+    const annotationCount = 2;
+    const topAnnotationBottomOffset = 21 + ((annotationCount - 1) * 34);
+
+    for (const options of [
+        { hasCalcPoints: true, trackCount: 2 },
+        { hasCalcPoints: false, trackCount: 3 },
+    ]) {
+        const rowHeight = getFlightRowHeight({
+            isExpanded: true,
+            annotationCount,
+            ...options,
+        });
+        const controlBottom = getExpandedControlTop(options) + controlHeight;
+        const annotationTop = rowHeight - topAnnotationBottomOffset - annotationHalfHeight;
+
+        assert.equal(annotationTop - controlBottom, 6);
+    }
 });
 
 test('keeps the least collapsible status on the highest visible track', () => {

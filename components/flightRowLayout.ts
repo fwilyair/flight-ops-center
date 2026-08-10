@@ -38,6 +38,14 @@ export interface ExpandedControlTopOptions {
     trackCount: number;
 }
 
+const EVENT_CAPSULE_HEIGHT = 26;
+const EXPANDED_CONTROL_GAP = 6;
+const EXPANDED_CONTROL_HEIGHT = 20;
+const CONTROL_TO_ANNOTATION_GAP = 6;
+const ANNOTATION_HALF_HEIGHT = 11;
+const ANNOTATION_BOTTOM_OFFSET = 21;
+const ANNOTATION_SPACING = 34;
+
 const CRITICAL_STATUSES = new Set(['alert', 'overtime-incomplete', 'delayed']);
 const WARNING_STATUSES = new Set(['warning', 'overtime-completed']);
 const COLLAPSE_PRIORITY: Record<string, number> = {
@@ -62,10 +70,16 @@ export const getFlightRowHeight = ({
 }: FlightRowHeightOptions): number => {
     if (!isExpanded) return 140;
 
-    const trackSpacing = hasCalcPoints ? 48 : 30;
-    const topPadding = hasCalcPoints ? 22 : 4;
-    const contentHeight = topPadding + (trackCount * trackSpacing) + (annotationCount * 34) + 10;
-    return Math.max(130, contentHeight) + 34;
+    const controlBottom = getExpandedControlTop({ hasCalcPoints, trackCount }) + EXPANDED_CONTROL_HEIGHT;
+    if (annotationCount === 0) return Math.max(130, controlBottom + 10);
+
+    const topAnnotationBottomOffset = ANNOTATION_BOTTOM_OFFSET
+        + ((annotationCount - 1) * ANNOTATION_SPACING);
+    const contentHeight = controlBottom
+        + CONTROL_TO_ANNOTATION_GAP
+        + ANNOTATION_HALF_HEIGHT
+        + topAnnotationBottomOffset;
+    return Math.max(130, contentHeight);
 };
 
 export const getExpandedControlTop = ({
@@ -74,11 +88,9 @@ export const getExpandedControlTop = ({
 }: ExpandedControlTopOptions): number => {
     const trackSpacing = hasCalcPoints ? 48 : 30;
     const topPadding = hasCalcPoints ? 22 : 4;
-    const capsuleHeight = 26;
     // 统一从最后一条轨道的胶囊底部起算，避免标签长度导致收起按钮间距不一。
-    const controlGap = 8;
     const lastTrackTop = topPadding + (Math.max(0, trackCount - 1) * trackSpacing);
-    return lastTrackTop + capsuleHeight + controlGap;
+    return lastTrackTop + EVENT_CAPSULE_HEIGHT + EXPANDED_CONTROL_GAP;
 };
 
 export const assignPriorityTracks = <T extends FixedRowEvent>(

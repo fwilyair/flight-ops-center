@@ -29,16 +29,16 @@ const EXPECTED_METADATA_BY_FLIGHT_ID = {
         depFlightType: 'REG',
     },
     '5': {
-        arrTags: ['Q'],
-        depTags: ['互天'],
+        arrTags: ['冰', 'Q'],
+        depTags: [],
         arrFlightType: 'REG',
-        depFlightType: 'REG',
+        depFlightType: undefined,
     },
     '6': {
         arrTags: [],
-        depTags: [],
-        arrFlightType: 'REG',
-        depFlightType: 'REG',
+        depTags: ['控', 'V'],
+        arrFlightType: undefined,
+        depFlightType: 'CARGO',
     },
     '7': {
         arrTags: ['冰', 'Q', '控', 'C', 'I', 'D', 'V', '互天', '机', '重要'],
@@ -70,7 +70,7 @@ test('uses a single normalized flight number for every turnaround flight', () =>
     });
 });
 
-test('provides independent card metadata for every turnaround flight', () => {
+test('provides independent card metadata for every mock flight', () => {
     MOCK_FLIGHTS.forEach((flight) => {
         const expected = EXPECTED_METADATA_BY_FLIGHT_ID[flight.id as keyof typeof EXPECTED_METADATA_BY_FLIGHT_ID];
         assert.ok(expected, `${flight.flightNo} should have expected metadata`);
@@ -84,6 +84,25 @@ test('provides independent card metadata for every turnaround flight', () => {
             `${flight.flightNo} legacy tags should be unique union of card tags`,
         );
     });
+});
+
+test('includes exactly one arrival-only and one departure-only flight', () => {
+    const arrivalOnlyFlights = MOCK_FLIGHTS.filter(flight => flight.arrInfo && !flight.depInfo);
+    const departureOnlyFlights = MOCK_FLIGHTS.filter(flight => !flight.arrInfo && flight.depInfo);
+
+    assert.equal(MOCK_FLIGHTS.length, 7);
+    assert.deepEqual(arrivalOnlyFlights.map(flight => flight.flightNo), ['3U8888']);
+    assert.deepEqual(departureOnlyFlights.map(flight => flight.flightNo), ['Y87502']);
+});
+
+test('uses no baseline for arrival-only flights and both operational baselines for departure-only flights', () => {
+    const arrivalOnlyFlight = MOCK_FLIGHTS.find(flight => flight.arrInfo && !flight.depInfo);
+    const departureOnlyFlight = MOCK_FLIGHTS.find(flight => !flight.arrInfo && flight.depInfo);
+
+    assert.ok(arrivalOnlyFlight);
+    assert.deepEqual(arrivalOnlyFlight.annotations, []);
+    assert.ok(departureOnlyFlight);
+    assert.deepEqual(departureOnlyFlight.annotations?.map(annotation => annotation.label), ['放行', '起飞']);
 });
 
 test('includes the long-flight-number card fixture', () => {

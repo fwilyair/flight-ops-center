@@ -598,7 +598,7 @@ const OverflowPill: React.FC<{
         >
             <button
                 type="button"
-                className="overflow-attention relative flex h-6 min-w-[72px] items-center justify-center gap-1 overflow-hidden rounded-full border border-orange-700 bg-orange-500 px-3 text-xs font-black tracking-tight text-white shadow-[0_4px_14px_rgba(154,52,18,0.34)] transition-colors hover:bg-orange-600"
+                className="overflow-attention relative flex h-5 min-w-[72px] items-center justify-center gap-1 overflow-hidden rounded-full border border-orange-700 bg-orange-500 px-3 text-xs font-black tracking-tight text-white shadow-[0_4px_14px_rgba(154,52,18,0.34)] transition-colors hover:bg-orange-600"
                 style={{ animationDelay: `${-((group.leftPx % 700) / 700) * 2.5}s` }}
                 aria-label={`还有 ${group.events.length} 项任务未在当前行展示，展开当前航班`}
                 onClick={(event) => {
@@ -702,7 +702,7 @@ const CollapsePill: React.FC<{
 }> = ({ flightNo, left, top, onCollapse }) => (
     <button
         type="button"
-        className="absolute z-30 flex h-6 min-w-[72px] items-center justify-center gap-0.5 rounded-full border border-slate-400 bg-white px-3 text-xs font-black tracking-tight text-slate-800 shadow-[0_4px_12px_rgba(15,23,42,0.18)] transition-colors hover:bg-slate-100"
+        className="absolute z-30 flex h-5 min-w-[72px] items-center justify-center gap-0.5 rounded-full border border-slate-400 bg-white px-3 text-xs font-black tracking-tight text-slate-800 shadow-[0_4px_12px_rgba(15,23,42,0.18)] transition-colors hover:bg-slate-100"
         style={{ left: `${left}px`, top: `${top}px` }}
         aria-label={`收起 ${flightNo} 的全部任务`}
         onClick={(event) => {
@@ -711,7 +711,7 @@ const CollapsePill: React.FC<{
         }}
     >
         <span aria-hidden="true">收起</span>
-        <span className="material-symbols-outlined text-[15px] leading-none" aria-hidden="true">expand_less</span>
+        <span className="material-symbols-outlined text-[14px] leading-none" aria-hidden="true">expand_less</span>
     </button>
 );
 

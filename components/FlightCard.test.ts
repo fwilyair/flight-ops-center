@@ -17,8 +17,8 @@ test('stretches flight card modules with the expanded row height', async () => {
     assert.match(cardSource, /style=\{\{ height: `\$\{height\}px` \}\}/);
     assert.match(cardSource, /transition-\[height\] duration-300 ease-\[cubic-bezier\(0\.16,1,0\.3,1\)\]/);
     assert.match(indexSource, /transition: height 300ms cubic-bezier\(0\.16, 1, 0\.3, 1\)/);
-    assert.match(cardSource, /aria-label="进港航班" className="flex min-h-0 flex-1 flex-col justify-start/);
-    assert.match(cardSource, /aria-label="出港航班" className="flex min-h-0 flex-1 flex-col justify-end/);
+    assert.match(cardSource, /getFlightCardLegJustification\('arrival', legPresence\)/);
+    assert.match(cardSource, /getFlightCardLegJustification\('departure', legPresence\)/);
     assert.match(cardSource, /flex h-7[^\"]*items-end[^\"]*text-emerald-700/);
     assert.match(cardSource, /flex h-7[^\"]*items-start[^\"]*text-blue-700/);
     assert.match(cardSource, /grid w-full[^\"]*items-baseline/);
@@ -35,7 +35,7 @@ test('stretches flight card modules with the expanded row height', async () => {
     assert.match(cardSource, /text-slate-900\/\[0\.04\]/);
     assert.doesNotMatch(cardSource, /mx-auto flex min-w-0 items-center justify-center/);
     assert.match(rowSource, /<FlightCard[\s\S]*height=\{rowHeight\}/);
-    assert.equal((rowSource.match(/flex h-6 min-w-\[72px\]/g) || []).length, 2);
+    assert.equal((rowSource.match(/flex h-5 min-w-\[72px\]/g) || []).length, 2);
 });
 
 test('separates each flight card from the transparent timeline row', async () => {
