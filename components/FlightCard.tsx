@@ -245,7 +245,7 @@ export const FlightCard: React.FC<FlightCardProps> = ({
                     <section aria-label="进港航班" className="flex min-h-0 flex-1 flex-col justify-start gap-1">
                         <div className="flex h-7 min-w-0 items-end text-emerald-700">
                             <div className="grid w-full min-w-0 grid-cols-[72px_65px_31px_31px_minmax(27px,1fr)] items-baseline gap-x-[3px]">
-                            <span className={`min-w-0 overflow-hidden whitespace-nowrap font-mono font-extrabold leading-none tabular-nums ${getFlightNumberSizeClass(arrivalFlightNo)}`} title={arrivalFlightNo}>
+                            <span className={`min-w-0 overflow-hidden whitespace-nowrap font-mono font-extrabold italic leading-none tabular-nums ${getFlightNumberSizeClass(arrivalFlightNo)}`} title={arrivalFlightNo}>
                                 {arrivalFlightNo}
                             </span>
                             <span className="min-w-0 whitespace-nowrap text-center font-mono text-[12px] font-extrabold leading-none text-emerald-900 tabular-nums">
@@ -281,7 +281,7 @@ export const FlightCard: React.FC<FlightCardProps> = ({
                     <section aria-label="出港航班" className="flex min-h-0 flex-1 flex-col justify-end gap-1">
                         <div className="flex h-7 min-w-0 items-start text-blue-700">
                             <div className="grid w-full min-w-0 grid-cols-[72px_65px_31px_31px_minmax(27px,1fr)] items-baseline gap-x-[3px]">
-                            <span className={`min-w-0 overflow-hidden whitespace-nowrap font-mono font-extrabold leading-none tabular-nums ${getFlightNumberSizeClass(departureFlightNo)}`} title={departureFlightNo}>
+                            <span className={`min-w-0 overflow-hidden whitespace-nowrap font-mono font-extrabold italic leading-none tabular-nums ${getFlightNumberSizeClass(departureFlightNo)}`} title={departureFlightNo}>
                                 {departureFlightNo}
                             </span>
                             <span className="min-w-0 whitespace-nowrap text-center font-mono text-[12px] font-extrabold leading-none text-blue-900 tabular-nums">
