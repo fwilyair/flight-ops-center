@@ -277,10 +277,6 @@ export const FlightCard: React.FC<FlightCardProps> = ({
                     </section>
                 ) : null}
 
-                {legPresence.arrival && legPresence.departure && (
-                    <div className="h-px shrink-0 bg-slate-200/60" aria-hidden="true" />
-                )}
-
                 {legPresence.departure ? (
                     <section aria-label="出港航班" className="flex min-h-0 flex-1 flex-col justify-end gap-1">
                         <div className="flex h-7 min-w-0 items-start text-blue-700">

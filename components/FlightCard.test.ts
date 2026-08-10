@@ -30,6 +30,7 @@ test('stretches flight card modules with the expanded row height', async () => {
     assert.match(cardSource, /min-w-0 whitespace-nowrap text-center font-mono/);
     assert.match(cardSource, /flex h-5 min-w-0 items-center justify-end/);
     assert.doesNotMatch(cardSource, /railColorClass/);
+    assert.doesNotMatch(cardSource, /bg-slate-200\/60/);
     assert.match(cardSource, /flight\.flightNo\.substring\(0, 2\)/);
     assert.match(cardSource, /text-slate-900\/\[0\.04\]/);
     assert.doesNotMatch(cardSource, /mx-auto flex min-w-0 items-center justify-center/);
