@@ -38,6 +38,10 @@ const formatCardTime = (time?: string) => (
     time && time !== '--:--' ? `${time}(05)` : '--:--'
 );
 
+const META_BADGE_BASE = 'flex h-5 min-w-0 items-center justify-center whitespace-nowrap rounded-[5px] bg-gradient-to-br px-[3px] text-center text-[11px] font-bold leading-none shadow-[inset_0_1px_0_rgba(255,255,255,0.75),0_1px_2px_rgba(15,23,42,0.05)]';
+const ARRIVAL_STAND_SURFACE = 'from-emerald-100 via-emerald-50 to-white/80 text-emerald-900';
+const DEPARTURE_GATE_SURFACE = 'from-blue-100 via-blue-50 to-white/80 text-blue-900';
+
 const FlightTypeLabel: React.FC<{ type?: FlightType; visible: boolean }> = ({ type, visible }) => {
     if (!type || !visible) return null;
     const config = FLIGHT_TYPE_LABELS[type];
@@ -251,10 +255,10 @@ export const FlightCard: React.FC<FlightCardProps> = ({
                             <span className="min-w-0 whitespace-nowrap text-center font-mono text-[12px] font-extrabold leading-none text-emerald-900 tabular-nums">
                                 {formatCardTime(flight.times?.sta)}
                             </span>
-                            <span className={`flex h-5 min-w-0 items-center justify-center whitespace-nowrap rounded-[4px] px-[3px] text-center text-[11px] font-bold leading-none ${flight.arrInfo?.status === '延误' ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-800'}`}>
+                            <span className={`${META_BADGE_BASE} ${flight.arrInfo?.status === '延误' ? 'from-red-200 via-red-100 to-white/80 text-red-700' : 'from-emerald-200 via-emerald-100 to-white/80 text-emerald-800'}`}>
                                 {flight.arrInfo?.status || '-'}
                             </span>
-                            <span className="flex h-5 min-w-0 items-center justify-center whitespace-nowrap rounded-[4px] bg-emerald-100/75 px-0.5 text-center font-mono text-[11px] font-bold leading-none text-emerald-900">
+                            <span className={`${META_BADGE_BASE} ${ARRIVAL_STAND_SURFACE} px-0.5 font-mono`}>
                                 {flight.arrInfo?.stand || '-'}
                             </span>
                             <span className="flex h-5 min-w-0 items-center justify-end leading-none">
@@ -287,10 +291,10 @@ export const FlightCard: React.FC<FlightCardProps> = ({
                             <span className="min-w-0 whitespace-nowrap text-center font-mono text-[12px] font-extrabold leading-none text-blue-900 tabular-nums">
                                 {formatCardTime(flight.times?.std)}
                             </span>
-                            <span className={`flex h-5 min-w-0 items-center justify-center whitespace-nowrap rounded-[4px] px-[3px] text-center text-[11px] font-bold leading-none ${flight.depInfo?.status === '延误' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-800'}`}>
+                            <span className={`${META_BADGE_BASE} ${flight.depInfo?.status === '延误' ? 'from-red-200 via-red-100 to-white/80 text-red-700' : 'from-blue-200 via-blue-100 to-white/80 text-blue-800'}`}>
                                 {flight.depInfo?.status || '-'}
                             </span>
-                            <span className="flex h-5 min-w-0 items-center justify-center whitespace-nowrap rounded-[4px] bg-blue-100/75 px-0.5 text-center font-mono text-[11px] font-bold leading-none text-blue-900">
+                            <span className={`${META_BADGE_BASE} ${DEPARTURE_GATE_SURFACE} px-0.5 font-mono`}>
                                 {flight.depInfo?.gate || '-'}
                             </span>
                             <span className="flex h-5 min-w-0 items-center justify-end leading-none">
