@@ -648,6 +648,15 @@ const App: React.FC = () => {
             {/* Flight Rows Area */}
             <div className="flight-rows-area relative flex flex-1">
 
+              {/* 航班信息区白色遮罩：固定在左侧，阻止横向滚动的时间轴点阵透入卡片间隙。 */}
+              <div
+                data-flight-info-mask
+                aria-hidden="true"
+                className="pointer-events-none sticky left-0 z-20 w-0 self-stretch"
+              >
+                <div className="absolute inset-y-0 left-0 w-[260px] bg-white dark:bg-gray-900" />
+              </div>
+
               {/* Past Time Shade (Left of Current Time) - Tech Dot Pattern */}
               <div
                 className="absolute top-0 bottom-0 z-10 pointer-events-none"

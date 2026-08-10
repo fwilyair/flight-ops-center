@@ -44,5 +44,6 @@ test('separates each flight card from the transparent timeline row', async () =>
     assert.doesNotMatch(rowSource, /className="flight-row[^"]*(?:shadow|border)/);
     assert.match(rowSource, /className="flight-row[^"]*mb-3/);
     assert.match(appSource, /className="flight-rows-area/);
-    assert.match(indexSource, /\.flight-rows-area \{[\s\S]*?#ffffff 0 260px/);
+    assert.match(appSource, /data-flight-info-mask[\s\S]*sticky left-0 z-20 w-0 self-stretch/);
+    assert.match(appSource, /absolute inset-y-0 left-0 w-\[260px\] bg-white/);
 });
