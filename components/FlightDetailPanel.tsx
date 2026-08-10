@@ -1,12 +1,10 @@
 import React from 'react';
-import { createPortal } from 'react-dom';
 import { Flight } from '../types';
 import { gsap } from '../motion/gsap';
 import { MOTION_DURATION, MOTION_EASE, MOTION_STAGGER } from '../motion/tokens';
 import { prefersReducedMotion, REDUCED_MOTION_QUERY } from '../motion/preferences';
-import { FLIGHT_TAG_OPTIONS, flightDetailTagColorMap, getCenteredTagPickerPosition } from './flightTags';
-import type { FlightTag } from './flightTags';
-import { addFlightTagToExistingLegs } from './flightCardLayout';
+import { flightDetailTagColorMap } from './flightTags';
+import { getFlightCardLegPresence, getLegTags } from './flightCardLayout';
 import { TimeKindBadge } from './TimeKindBadge';
 import { getFlightRemarkKeyAction, shouldCloseWithEscape } from './keyboardPolicy';
 import { splitFlightRemarkLines } from './flightRemarks';
@@ -26,6 +24,35 @@ const formatTime = (time?: string): string => {
     return `${time}(${day})`;
 };
 
+const DetailTagGroup: React.FC<{
+    label: string;
+    labelClassName: string;
+    tags: string[];
+}> = ({ label, labelClassName, tags }) => (
+    <div className="flex min-h-7 items-start gap-2">
+        <span className={`mt-1 w-[52px] shrink-0 text-right text-[11px] font-bold leading-5 ${labelClassName}`}>
+            {label}
+        </span>
+        <div className="flex min-w-0 flex-1 flex-wrap gap-2">
+            {tags.length > 0 ? tags.map((tag, index) => {
+                const colorClass = flightDetailTagColorMap[tag] || 'bg-slate-500';
+                const isDualChar = tag.length > 1;
+                return (
+                    <span
+                        key={`${label}-${tag}-${index}`}
+                        className={`flex size-[28px] items-center justify-center rounded-full font-bold text-white shadow-sm ${colorClass} ${isDualChar ? 'text-[10px] leading-none tracking-tighter' : 'text-xs'}`}
+                        title={`${label}: ${tag}`}
+                    >
+                        {tag}
+                    </span>
+                );
+            }) : (
+                <span className="flex h-7 items-center text-xs text-slate-400">暂无</span>
+            )}
+        </div>
+    </div>
+);
+
 export const FlightDetailPanel: React.FC<FlightDetailPanelProps> = ({
     flight,
     isOpen,
@@ -33,14 +60,9 @@ export const FlightDetailPanel: React.FC<FlightDetailPanelProps> = ({
     onFlightUpdate,
 }) => {
     const [isEditingRemarks, setIsEditingRemarks] = React.useState(false);
-    const [isTagPickerOpen, setIsTagPickerOpen] = React.useState(false);
-    const [tagPickerPosition, setTagPickerPosition] = React.useState<{ left: number; top: number } | null>(null);
     const [tempRemarks, setTempRemarks] = React.useState('');
     const backdropRef = React.useRef<HTMLDivElement>(null);
     const panelRef = React.useRef<HTMLDivElement>(null);
-    const tagPickerRef = React.useRef<HTMLDivElement>(null);
-    const tagPickerButtonRef = React.useRef<HTMLButtonElement>(null);
-    const tagPickerPopoverRef = React.useRef<HTMLDivElement>(null);
     const drawerTimelineRef = React.useRef<gsap.core.Timeline | null>(null);
     const initializedPanelRef = React.useRef<HTMLDivElement | null>(null);
     const initializedFlightIdRef = React.useRef<string | null>(null);
@@ -48,39 +70,8 @@ export const FlightDetailPanel: React.FC<FlightDetailPanelProps> = ({
     // Reset editing state when flight changes or panel closes
     React.useEffect(() => {
         setIsEditingRemarks(false);
-        setIsTagPickerOpen(false);
-        setTagPickerPosition(null);
         setTempRemarks('');
     }, [flight?.id, isOpen]);
-
-    const updateTagPickerPosition = React.useCallback(() => {
-        const panel = panelRef.current;
-        const anchor = tagPickerButtonRef.current;
-        if (!panel || !anchor) return;
-
-        setTagPickerPosition(getCenteredTagPickerPosition(
-            panel.getBoundingClientRect(),
-            anchor.getBoundingClientRect(),
-        ));
-    }, []);
-
-    React.useEffect(() => {
-        if (!isTagPickerOpen) return;
-
-        // Portal 不在抽屉 DOM 树内，因此同时检查触发器和浮层来判断外部点击。
-        const handlePointerDown = (event: PointerEvent) => {
-            const target = event.target as Node;
-            const isInsideTrigger = tagPickerRef.current?.contains(target);
-            const isInsidePopover = tagPickerPopoverRef.current?.contains(target);
-            if (!isInsideTrigger && !isInsidePopover) {
-                setIsTagPickerOpen(false);
-            }
-        };
-        document.addEventListener('pointerdown', handlePointerDown);
-        return () => {
-            document.removeEventListener('pointerdown', handlePointerDown);
-        };
-    }, [isTagPickerOpen]);
 
     React.useEffect(() => {
         if (!isOpen) return;
@@ -93,24 +84,6 @@ export const FlightDetailPanel: React.FC<FlightDetailPanelProps> = ({
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [isOpen, onClose]);
 
-    React.useLayoutEffect(() => {
-        if (!isTagPickerOpen) return;
-
-        updateTagPickerPosition();
-        window.addEventListener('resize', updateTagPickerPosition);
-        window.addEventListener('scroll', updateTagPickerPosition, true);
-        return () => {
-            window.removeEventListener('resize', updateTagPickerPosition);
-            window.removeEventListener('scroll', updateTagPickerPosition, true);
-        };
-    }, [isTagPickerOpen, updateTagPickerPosition]);
-
-    const handleAddFlightTag = React.useCallback((tag: FlightTag) => {
-        if (!flight) return;
-
-        onFlightUpdate?.(addFlightTagToExistingLegs(flight, tag));
-        setIsTagPickerOpen(false);
-    }, [flight, onFlightUpdate]);
 
     const cancelRemarkEditing = React.useCallback(() => {
         setIsEditingRemarks(false);
@@ -258,6 +231,9 @@ export const FlightDetailPanel: React.FC<FlightDetailPanelProps> = ({
     }, [flight?.id, isOpen]);
 
     if (!flight) return null;
+    const legPresence = getFlightCardLegPresence(flight);
+    const arrivalTags = getLegTags(flight, 'arrival');
+    const departureTags = getLegTags(flight, 'departure');
 
     return (
         <>
@@ -399,74 +375,21 @@ export const FlightDetailPanel: React.FC<FlightDetailPanelProps> = ({
                                 <div className="h-px w-10 bg-gradient-to-l from-transparent to-slate-300"></div>
                             </div>
 
-                            {/* 航班标记与添加入口：无标记时仍保持入口居中。 */}
-                            <div className="mt-4 mb-2 flex flex-wrap items-center justify-center gap-2">
-                                {flight.tags?.map((tag, idx) => {
-                                    const colorClass = flightDetailTagColorMap[tag] || 'bg-slate-500';
-                                    const isDualChar = tag.length > 1;
-                                    return (
-                                        <div
-                                            key={`${tag}-${idx}`}
-                                            className={`flex items-center justify-center size-[28px] rounded-full text-white font-bold shadow-sm transition-all duration-200 hover:scale-110 hover:shadow-md cursor-default ${colorClass} ${isDualChar ? 'text-[10px] tracking-tighter leading-none' : 'text-xs'}`}
-                                            title={`标记: ${tag}`}
-                                        >
-                                            {tag}
-                                        </div>
-                                    );
-                                })}
-
-                                <div ref={tagPickerRef} className="relative flex shrink-0">
-                                    <button
-                                        ref={tagPickerButtonRef}
-                                        type="button"
-                                        aria-label="添加航班标记"
-                                        aria-haspopup="dialog"
-                                        aria-expanded={isTagPickerOpen}
-                                        aria-controls="flight-tag-picker"
-                                        onClick={() => {
-                                            if (!isTagPickerOpen) updateTagPickerPosition();
-                                            setIsTagPickerOpen(previous => !previous);
-                                        }}
-                                        className="flex size-[28px] items-center justify-center rounded-full border border-dashed border-slate-300 bg-white/85 text-slate-600 shadow-sm transition-[background-color,border-color,color,box-shadow] duration-200 hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 hover:shadow-md"
-                                    >
-                                        <span className="material-symbols-outlined text-[19px] leading-none" aria-hidden="true">add</span>
-                                    </button>
-                                </div>
-
-                                {/* Portal 避免选择器被抽屉滚动容器裁剪，并建立独立的最高层叠层。 */}
-                                {isTagPickerOpen && tagPickerPosition && createPortal(
-                                    (
-                                        <div
-                                            ref={tagPickerPopoverRef}
-                                            id="flight-tag-picker"
-                                            role="dialog"
-                                            aria-modal="true"
-                                            aria-label="选择要添加的航班标记"
-                                            className="fixed z-[200] w-[280px] -translate-x-1/2 rounded-2xl border border-white/90 bg-white p-3.5 shadow-[0_18px_48px_rgba(15,23,42,0.28)]"
-                                            style={{ left: `${tagPickerPosition.left}px`, top: `${tagPickerPosition.top}px` }}
-                                        >
-                                            <div className="grid grid-cols-5 gap-2.5">
-                                                {FLIGHT_TAG_OPTIONS.map(tag => {
-                                                    const isAdded = flight.tags?.includes(tag) ?? false;
-                                                    const isDualChar = tag.length > 1;
-                                                    return (
-                                                        <button
-                                                            key={tag}
-                                                            type="button"
-                                                            disabled={isAdded}
-                                                            aria-label={isAdded ? `${tag}标记已添加` : `添加${tag}标记`}
-                                                            title={isAdded ? '已添加' : `添加标记：${tag}`}
-                                                            onClick={() => handleAddFlightTag(tag)}
-                                                            className={`flex size-9 items-center justify-center rounded-full font-bold text-white shadow-sm transition-[transform,box-shadow,opacity] duration-200 hover:-translate-y-0.5 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:translate-y-0 disabled:hover:shadow-sm ${flightDetailTagColorMap[tag]} ${isDualChar ? 'text-[10px] tracking-tighter' : 'text-sm'}`}
-                                                        >
-                                                            {tag}
-                                                        </button>
-                                                    );
-                                                })}
-                                            </div>
-                                        </div>
-                                    ),
-                                    document.body,
+                            {/* 详情页只读展示进、出港各自标记；添加入口保留在航班卡。 */}
+                            <div className="mx-auto mt-4 mb-2 max-w-[340px] space-y-2">
+                                {legPresence.arrival && (
+                                    <DetailTagGroup
+                                        label="进港标记"
+                                        labelClassName="text-emerald-700"
+                                        tags={arrivalTags}
+                                    />
+                                )}
+                                {legPresence.departure && (
+                                    <DetailTagGroup
+                                        label="出港标记"
+                                        labelClassName="text-blue-700"
+                                        tags={departureTags}
+                                    />
                                 )}
                             </div>
                         </div>

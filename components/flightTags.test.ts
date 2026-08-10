@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
 test('adds a selected flight tag without duplicating an existing tag', async () => {
@@ -35,4 +36,15 @@ test('centers the tag picker within the flight detail panel', async () => {
         ),
         { left: 620, top: 368 },
     );
+});
+
+test('shows separate read-only arrival and departure tags in flight details', async () => {
+    const source = await readFile(new URL('./FlightDetailPanel.tsx', import.meta.url), 'utf8');
+
+    assert.match(source, /label="进港标记"/);
+    assert.match(source, /label="出港标记"/);
+    assert.match(source, /getLegTags\(flight, 'arrival'\)/);
+    assert.match(source, /getLegTags\(flight, 'departure'\)/);
+    assert.doesNotMatch(source, /aria-label="添加航班标记"/);
+    assert.doesNotMatch(source, /flight-tag-picker/);
 });
