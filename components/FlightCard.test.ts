@@ -16,10 +16,11 @@ test('stretches flight card modules with the expanded row height', async () => {
     assert.match(cardSource, /style=\{\{ height: `\$\{height\}px` \}\}/);
     assert.match(cardSource, /aria-label="进港航班" className="flex min-h-0 flex-1 flex-col justify-start/);
     assert.match(cardSource, /aria-label="出港航班" className="flex min-h-0 flex-1 flex-col justify-end/);
-    assert.match(cardSource, /grid h-7[^\"]*items-end[^\"]*text-emerald-700/);
-    assert.match(cardSource, /grid h-7[^\"]*items-start[^\"]*text-blue-700/);
-    assert.match(cardSource, /flex h-5 min-w-0 items-center overflow-hidden whitespace-nowrap font-mono/);
-    assert.match(cardSource, /flex h-5 min-w-0 items-center justify-center whitespace-nowrap text-center font-mono/);
+    assert.match(cardSource, /flex h-7[^\"]*items-end[^\"]*text-emerald-700/);
+    assert.match(cardSource, /flex h-7[^\"]*items-start[^\"]*text-blue-700/);
+    assert.match(cardSource, /grid w-full[^\"]*items-baseline/);
+    assert.match(cardSource, /min-w-0 overflow-hidden whitespace-nowrap font-mono/);
+    assert.match(cardSource, /min-w-0 whitespace-nowrap text-center font-mono/);
     assert.match(cardSource, /flex h-5 min-w-0 items-center justify-end/);
     assert.doesNotMatch(cardSource, /railColorClass/);
     assert.match(cardSource, /flight\.flightNo\.substring\(0, 2\)/);
