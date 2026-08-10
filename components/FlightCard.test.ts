@@ -35,6 +35,7 @@ test('stretches flight card modules with the expanded row height', async () => {
     assert.match(cardSource, /text-slate-900\/\[0\.04\]/);
     assert.doesNotMatch(cardSource, /mx-auto flex min-w-0 items-center justify-center/);
     assert.match(rowSource, /<FlightCard[\s\S]*height=\{rowHeight\}/);
+    assert.equal((rowSource.match(/flex h-6 min-w-\[72px\]/g) || []).length, 2);
 });
 
 test('separates each flight card from the transparent timeline row', async () => {
