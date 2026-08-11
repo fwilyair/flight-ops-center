@@ -231,34 +231,36 @@ export const FlightCard: React.FC<FlightCardProps> = ({
     // 超长航班号（如 ZZMZT6343 / ZZMZT6344 达 18 字）时自动阶梯缩小字号，防止右侧时间被裁切截断
     if (isControlView) {
         const hasBoth = legPresence.arrival && legPresence.departure;
+        const flightNumSize = 'text-[19px]';
+        const timeSize = 'text-[12px]';
 
         return (
             <div
                 data-motion-layout
-                className={`sticky left-0 z-40 mr-2 box-border w-[260px] min-w-[260px] flex-none shrink-0 self-start rounded-l-xl rounded-r-2xl border-y border-r border-slate-300/80 px-3 py-2 flex flex-col justify-center shadow-[4px_0_12px_-2px_rgba(0,0,0,0.08)] transition-[background-color,border-color,box-shadow,opacity] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${isDelayed ? 'bg-rose-50' : 'bg-slate-100'} ${onClick ? 'cursor-pointer hover:bg-slate-200' : ''}`}
+                className={`sticky left-0 z-40 mr-2 box-border w-[260px] min-w-[260px] flex-none shrink-0 self-start rounded-l-xl rounded-r-2xl border-y border-r border-slate-300/80 px-3 flex flex-col shadow-[4px_0_12px_-2px_rgba(0,0,0,0.08)] transition-[background-color,border-color,box-shadow,opacity] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${isDelayed ? 'bg-rose-50' : 'bg-slate-100'} ${onClick ? 'cursor-pointer hover:bg-slate-200' : ''}`}
                 style={{ height: `${height}px` }}
                 onClick={(event) => {
                     event.stopPropagation();
                     onClick?.();
                 }}
             >
-                <div className="flex flex-col w-full gap-1.5 justify-center">
+                <div className={`flex flex-col w-full h-full ${hasBoth ? 'justify-between py-1.5' : 'justify-center'}`}>
                     {legPresence.arrival && (
                         <div className="flex items-baseline justify-start gap-[6px] text-emerald-700">
-                            <span className={`min-w-0 whitespace-nowrap pr-[3px] font-mono font-extrabold italic leading-none tabular-nums ${getFlightNumberSizeClass(arrivalFlightNo)}`} title={arrivalFlightNo}>
+                            <span className={`min-w-0 whitespace-nowrap pr-[3px] font-mono font-extrabold italic leading-none tabular-nums ${flightNumSize}`} title={arrivalFlightNo}>
                                 {arrivalFlightNo}
                             </span>
-                            <span className="min-w-0 whitespace-nowrap text-center font-mono text-[12px] font-extrabold leading-none text-emerald-900 tabular-nums">
+                            <span className={`min-w-0 whitespace-nowrap text-center font-mono ${timeSize} font-extrabold leading-none text-emerald-900 tabular-nums`}>
                                 {formatCardTime(flight.times?.sta)}
                             </span>
                         </div>
                     )}
                     {legPresence.departure && (
                         <div className={`flex items-baseline gap-[6px] text-blue-700 ${hasBoth ? 'justify-end' : 'justify-start'}`}>
-                            <span className={`min-w-0 whitespace-nowrap pr-[3px] font-mono font-extrabold italic leading-none tabular-nums ${getFlightNumberSizeClass(departureFlightNo)}`} title={departureFlightNo}>
+                            <span className={`min-w-0 whitespace-nowrap pr-[3px] font-mono font-extrabold italic leading-none tabular-nums ${flightNumSize}`} title={departureFlightNo}>
                                 {departureFlightNo}
                             </span>
-                            <span className="min-w-0 whitespace-nowrap text-center font-mono text-[12px] font-extrabold leading-none text-blue-900 tabular-nums">
+                            <span className={`min-w-0 whitespace-nowrap text-center font-mono ${timeSize} font-extrabold leading-none text-blue-900 tabular-nums`}>
                                 {formatCardTime(flight.times?.std)}
                             </span>
                         </div>
