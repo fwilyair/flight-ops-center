@@ -231,8 +231,6 @@ export const FlightCard: React.FC<FlightCardProps> = ({
     // 超长航班号（如 ZZMZT6343 / ZZMZT6344 达 18 字）时自动阶梯缩小字号，防止右侧时间被裁切截断
     if (isControlView) {
         const hasBoth = legPresence.arrival && legPresence.departure;
-        const flightNumSize = 'text-[19px]';
-        const timeSize = 'text-[13px]';
 
         return (
             <div
@@ -246,21 +244,21 @@ export const FlightCard: React.FC<FlightCardProps> = ({
             >
                 <div className="flex flex-col w-full gap-1.5 justify-center">
                     {legPresence.arrival && (
-                        <div className="flex items-baseline justify-start gap-1.5">
-                            <span className={`text-emerald-700 italic font-mono font-extrabold ${flightNumSize} leading-none`}>
+                        <div className="flex items-baseline justify-start gap-[6px] text-emerald-700">
+                            <span className={`min-w-0 overflow-hidden whitespace-nowrap font-mono font-extrabold italic leading-none tabular-nums ${getFlightNumberSizeClass(arrivalFlightNo)}`} title={arrivalFlightNo}>
                                 {arrivalFlightNo}
                             </span>
-                            <span className={`text-emerald-900 font-bold tabular-nums not-italic ${timeSize} leading-none`}>
+                            <span className="min-w-0 whitespace-nowrap text-center font-mono text-[12px] font-extrabold leading-none text-emerald-900 tabular-nums">
                                 {formatCardTime(flight.times?.sta)}
                             </span>
                         </div>
                     )}
                     {legPresence.departure && (
-                        <div className={`flex items-baseline gap-1.5 ${hasBoth ? 'justify-end' : 'justify-start'}`}>
-                            <span className={`text-blue-700 italic font-mono font-extrabold ${flightNumSize} leading-none`}>
+                        <div className={`flex items-baseline gap-[6px] text-blue-700 ${hasBoth ? 'justify-end' : 'justify-start'}`}>
+                            <span className={`min-w-0 overflow-hidden whitespace-nowrap font-mono font-extrabold italic leading-none tabular-nums ${getFlightNumberSizeClass(departureFlightNo)}`} title={departureFlightNo}>
                                 {departureFlightNo}
                             </span>
-                            <span className={`text-blue-900 font-bold tabular-nums not-italic ${timeSize} leading-none`}>
+                            <span className="min-w-0 whitespace-nowrap text-center font-mono text-[12px] font-extrabold leading-none text-blue-900 tabular-nums">
                                 {formatCardTime(flight.times?.std)}
                             </span>
                         </div>
