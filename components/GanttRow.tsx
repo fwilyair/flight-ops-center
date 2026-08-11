@@ -1041,6 +1041,15 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
                     });
                 })()}
             </div>
+            {/* White horizontal spacing line below the row to cover background dots/shading */}
+            <div
+                className="absolute left-0 right-0 bg-white dark:bg-gray-900 pointer-events-none transition-[height,bottom] duration-300 ease-out"
+                style={{
+                    bottom: `-${isVisible ? 12 : 0}px`,
+                    height: `${isVisible ? 12 : 0}px`,
+                    zIndex: 15,
+                }}
+            />
         </div >
     );
 };
