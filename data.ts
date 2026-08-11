@@ -82,6 +82,12 @@ export const MOCK_FLIGHTS: Flight[] = [
         ]
       },
     ],
+    inspections: [
+      { id: '1-insp-1', type: '入位', timeScheduled: '09:30', timeActual: '09:32', operator: '张三', status: 'completed', referenceTimes: { '勤务接机到位时间': '09:25', '客运接机到位时间': '09:28', '进港摆渡车到位时间': '--:--', '客梯车到位时间': '09:30' } },
+      { id: '1-insp-2', type: '允登', timeScheduled: '09:55', timeActual: '09:48', operator: '李四', status: 'completed' },
+      { id: '1-insp-3', type: '登控', timeScheduled: '10:15', timeActual: '10:12', operator: '王五', status: 'completed', referenceTimes: { '机上清洁结束时间': '09:45', '允许登机时间': '09:48' } },
+      { id: '1-insp-4', type: '推出', timeScheduled: '10:35', timeActual: '10:30', operator: '赵六', status: 'completed', referenceTimes: { '关客舱门时间': '10:28', '关货舱门时间': '10:25', '撒轮挡到位时间': '10:29', '登机桥到位时间': '10:26', '牵引车到位时间': '10:27', '电子进程单状态': '--:--' } }
+    ],
     annotations: [
       {
         type: 'connector', startTime: '09:00', endTime: '10:15', label: '放行', style: 'solid', color: 'gray', markers: [
@@ -132,6 +138,12 @@ export const MOCK_FLIGHTS: Flight[] = [
       { id: 'e5', label: '开始卸载', type: 'UNLOAD', timeActual: '10:45', timeScheduled: '10:00', status: 'overtime-completed' },
       { id: 'e6', label: '起飞', type: 'DEP', timeActual: '--:--', timeScheduled: '11:00', status: 'warning' },
     ],
+    inspections: [
+      { id: '2-insp-1', type: '入位', timeScheduled: '10:00', timeActual: '10:05', operator: '张三', status: 'completed', referenceTimes: { '勤务接机到位时间': '09:55', '客运接机到位时间': '09:58', '进港摆渡车到位时间': '10:00', '客梯车到位时间': '--:--' } },
+      { id: '2-insp-2', type: '允登', timeScheduled: '10:20', timeActual: '10:18', operator: '李四', status: 'completed' },
+      { id: '2-insp-3', type: '登控', timeScheduled: '10:40', timeActual: '--:--', status: 'pending', referenceTimes: { '机上清洁结束时间': '--:--', '允许登机时间': '10:18' } },
+      { id: '2-insp-4', type: '推出', timeScheduled: '10:55', timeActual: '--:--', status: 'pending', referenceTimes: { '关客舱门时间': '--:--', '关货舱门时间': '--:--', '撒轮挡到位时间': '--:--', '登机桥到位时间': '--:--', '牵引车到位时间': '--:--', '电子进程单状态': '--:--' } }
+    ],
     annotations: [
       {
         type: 'connector', startTime: '09:30', endTime: '10:30', label: '放行', style: 'solid', color: 'gray', markers: [
@@ -178,6 +190,12 @@ export const MOCK_FLIGHTS: Flight[] = [
       { id: 'e8', label: '关舱门', type: 'COBT', timeActual: '--:--', timeScheduled: '10:35', status: 'overtime-incomplete' },
       { id: 'e9', label: '推出', type: 'ATD', timeActual: '--:--', timeScheduled: '10:45', status: 'warning' },
     ],
+    inspections: [
+      { id: '3-insp-1', type: '入位', timeScheduled: '09:55', timeActual: '10:02', operator: '王五', status: 'overtime-completed', referenceTimes: { '勤务接机到位时间': '09:50', '客运接机到位时间': '09:58', '进港摆渡车到位时间': '10:00', '客梯车到位时间': '09:59' } },
+      { id: '3-insp-2', type: '允登', timeScheduled: '10:20', timeActual: '--:--', status: 'pending' },
+      { id: '3-insp-3', type: '登控', timeScheduled: '10:45', timeActual: '--:--', status: 'pending', referenceTimes: { '机上清洁结束时间': '--:--', '允许登机时间': '--:--' } },
+      { id: '3-insp-4', type: '推出', timeScheduled: '11:05', timeActual: '--:--', status: 'pending', referenceTimes: { '关客舱门时间': '--:--', '关货舱门时间': '--:--', '撒轮挡到位时间': '--:--', '登机桥到位时间': '--:--', '牵引车到位时间': '--:--', '电子进程单状态': '--:--' } }
+    ],
     annotations: [
       {
         type: 'connector', startTime: '10:10', endTime: '11:10', label: '放行', style: 'solid', color: 'gray', markers: [
@@ -222,6 +240,12 @@ export const MOCK_FLIGHTS: Flight[] = [
       { id: 'e13', label: '推出', type: 'ATD', timeActual: '10:08', timeScheduled: '10:05', status: 'overtime-completed' },
       { id: 'e14', label: '起飞', type: 'DEP', timeActual: '10:18', timeScheduled: '10:15', status: 'overtime-completed' },
     ],
+    inspections: [
+      { id: '4-insp-1', type: '入位', timeScheduled: '09:30', timeActual: '09:32', operator: '赵六', status: 'completed', referenceTimes: { '勤务接机到位时间': '09:25', '客运接机到位时间': '09:28', '进港摆渡车到位时间': '--:--', '客梯车到位时间': '--:--' } },
+      { id: '4-insp-2', type: '允登', timeScheduled: '09:50', timeActual: '09:48', operator: '张三', status: 'completed' },
+      { id: '4-insp-3', type: '登控', timeScheduled: '10:15', timeActual: '10:12', operator: '李四', status: 'completed', referenceTimes: { '机上清洁结束时间': '09:30', '允许登机时间': '09:40' } },
+      { id: '4-insp-4', type: '推出', timeScheduled: '10:35', timeActual: '10:30', operator: '王五', status: 'completed', referenceTimes: { '关客舱门时间': '09:45', '关货舱门时间': '09:46', '撒轮挡到位时间': '09:47', '登机桥到位时间': '09:42', '牵引车到位时间': '09:45', '电子进程单状态': '--:--' } }
+    ],
     annotations: [
       {
         type: 'connector', startTime: '09:30', endTime: '10:30', label: '放行', style: 'solid', color: 'gray', markers: [
@@ -263,6 +287,9 @@ export const MOCK_FLIGHTS: Flight[] = [
       { id: 'e15-arr', label: '落地', type: 'LAND', timeActual: '10:09', timeScheduled: '10:05', status: 'overtime-completed' },
       { id: 'e16-arr', label: '入位', type: 'IN-BLK', timeActual: '--:--', timeScheduled: '10:18', status: 'warning' },
     ],
+    inspections: [
+      { id: '5-insp-1', type: '入位', timeScheduled: '10:25', timeActual: '--:--', status: 'pending', referenceTimes: { '勤务接机到位时间': '--:--', '客运接机到位时间': '--:--', '进港摆渡车到位时间': '--:--', '客梯车到位时间': '--:--' } }
+    ],
     annotations: []
   },
 
@@ -291,6 +318,11 @@ export const MOCK_FLIGHTS: Flight[] = [
     events: [
       { id: 'e17-dep', label: '登机', type: 'BOARD', timeActual: '--:--', timeScheduled: '11:35', status: 'warning' },
       { id: 'e18-dep', label: '推出', type: 'ATD', timeActual: '--:--', timeScheduled: '12:00', status: 'overtime-incomplete' },
+    ],
+    inspections: [
+      { id: '6-insp-2', type: '允登', timeScheduled: '11:20', timeActual: '--:--', status: 'pending' },
+      { id: '6-insp-3', type: '登控', timeScheduled: '11:40', timeActual: '--:--', status: 'pending', referenceTimes: { '机上清洁结束时间': '--:--', '允许登机时间': '--:--' } },
+      { id: '6-insp-4', type: '推出', timeScheduled: '11:55', timeActual: '--:--', status: 'pending', referenceTimes: { '关客舱门时间': '--:--', '关货舱门时间': '--:--', '撒轮挡到位时间': '--:--', '登机桥到位时间': '--:--', '牵引车到位时间': '--:--', '电子进程单状态': '--:--' } }
     ],
     annotations: [
       {
@@ -334,9 +366,150 @@ export const MOCK_FLIGHTS: Flight[] = [
       { id: 'e18', label: '机组就位', type: 'BOARD', timeActual: '--:--', timeScheduled: '11:00', status: 'warning' },
       { id: 'e19', label: '放行', type: 'COBT', timeActual: '--:--', timeScheduled: '11:30', status: 'warning' },
     ],
+    inspections: [
+      { id: '7-insp-1', type: '入位', timeScheduled: '10:20', timeActual: '--:--', status: 'pending', referenceTimes: { '勤务接机到位时间': '--:--', '客运接机到位时间': '--:--', '进港摆渡车到位时间': '--:--', '客梯车到位时间': '--:--' } },
+      { id: '7-insp-2', type: '允登', timeScheduled: '10:40', timeActual: '--:--', status: 'pending' },
+      { id: '7-insp-3', type: '登控', timeScheduled: '10:55', timeActual: '--:--', status: 'pending', referenceTimes: { '机上清洁结束时间': '--:--', '允许登机时间': '--:--' } },
+      { id: '7-insp-4', type: '推出', timeScheduled: '11:10', timeActual: '--:--', status: 'pending', referenceTimes: { '关客舱门时间': '--:--', '关货舱门时间': '--:--', '撒轮挡到位时间': '--:--', '登机桥到位时间': '--:--', '牵引车到位时间': '--:--', '电子进程单状态': '--:--' } }
+    ],
     annotations: [
       { type: 'connector', startTime: '11:00', endTime: '12:00', label: '放行', style: 'solid', color: 'gray' },
       { type: 'connector', startTime: '11:30', endTime: '12:30', label: '起飞', style: 'solid', color: 'gray' }
+    ]
+  },
+
+  // 8. 厦航正班（全正常）
+  {
+    id: '8',
+    flightNo: 'MF8102 / MF8103',
+    remarks: '',
+    stand: '302',
+    arrFlightType: 'REG',
+    depFlightType: 'REG',
+    arrInfo: { status: '正常', stand: '302', baggageCarousel: '2' },
+    depInfo: { status: '正常', gate: '15' },
+    route: 'XMN - PKX - XMN',
+    times: { sta: '10:30', std: '11:45' },
+    events: [
+      { id: 'e8-1', label: '开门', type: 'STA', timeActual: '10:30', timeScheduled: '10:30', status: 'completed' },
+      { id: 'e8-2', label: '机组就位', type: 'BOARD', timeActual: '11:15', timeScheduled: '11:15', status: 'completed' },
+      { id: 'e8-3', label: '关门', type: 'STD', timeActual: '--:--', timeScheduled: '11:40', status: 'normal' },
+    ],
+    inspections: [
+      { id: '8-insp-1', type: '入位', timeScheduled: '10:35', timeActual: '10:35', operator: '赵六', status: 'completed' },
+      { id: '8-insp-2', type: '允登', timeScheduled: '11:05', timeActual: '11:04', operator: '张三', status: 'completed' },
+      { id: '8-insp-3', type: '登控', timeScheduled: '11:25', timeActual: '--:--', status: 'pending' },
+      { id: '8-insp-4', type: '推出', timeScheduled: '11:40', timeActual: '--:--', status: 'pending' }
+    ]
+  },
+
+  // 9. 山航正班（全正常）
+  {
+    id: '9',
+    flightNo: 'SC4671 / SC4672',
+    remarks: '',
+    stand: '215',
+    arrFlightType: 'REG',
+    depFlightType: 'REG',
+    arrInfo: { status: '正常', stand: '215', baggageCarousel: '3' },
+    depInfo: { status: '正常', gate: '08' },
+    route: 'TNA - CAN - TNA',
+    times: { sta: '11:00', std: '12:15' },
+    events: [
+      { id: 'e9-1', label: '开门', type: 'STA', timeActual: '11:00', timeScheduled: '11:00', status: 'completed' },
+      { id: 'e9-2', label: '关门', type: 'STD', timeActual: '--:--', timeScheduled: '12:10', status: 'normal' },
+    ],
+    inspections: [
+      { id: '9-insp-1', type: '入位', timeScheduled: '11:05', timeActual: '11:05', operator: '孙七', status: 'completed' },
+      { id: '9-insp-2', type: '允登', timeScheduled: '11:35', timeActual: '--:--', status: 'pending' },
+      { id: '9-insp-3', type: '登控', timeScheduled: '11:55', timeActual: '--:--', status: 'pending' },
+      { id: '9-insp-4', type: '推出', timeScheduled: '12:10', timeActual: '--:--', status: 'pending' }
+    ]
+  },
+
+  // 10. 东上航单进（全正常）
+  {
+    id: '10',
+    flightNo: 'FM9311',
+    remarks: '',
+    stand: '108',
+    arrFlightType: 'REG',
+    arrInfo: { status: '正常', stand: '108', baggageCarousel: '5' },
+    route: 'SHA - CTU',
+    times: { sta: '11:30', std: '--:--' },
+    events: [
+      { id: 'e10-1', label: '开门', type: 'STA', timeActual: '--:--', timeScheduled: '11:30', status: 'normal' },
+    ],
+    inspections: [
+      { id: '10-insp-1', type: '入位', timeScheduled: '11:35', timeActual: '--:--', status: 'pending' }
+    ]
+  },
+
+  // 11. 深航正班（全正常）
+  {
+    id: '11',
+    flightNo: 'ZH9825 / ZH9826',
+    remarks: '',
+    stand: '504',
+    arrFlightType: 'REG',
+    depFlightType: 'REG',
+    arrInfo: { status: '正常', stand: '504', baggageCarousel: '4' },
+    depInfo: { status: '正常', gate: '22' },
+    route: 'SZX - PEK - SZX',
+    times: { sta: '09:15', std: '10:20' },
+    events: [
+      { id: 'e11-1', label: '开门', type: 'STA', timeActual: '09:15', timeScheduled: '09:15', status: 'completed' },
+      { id: 'e11-2', label: '关门', type: 'STD', timeActual: '10:18', timeScheduled: '10:20', status: 'completed' },
+    ],
+    inspections: [
+      { id: '11-insp-1', type: '入位', timeScheduled: '09:20', timeActual: '09:20', operator: '周八', status: 'completed' },
+      { id: '11-insp-2', type: '允登', timeScheduled: '09:45', timeActual: '09:43', operator: '李四', status: 'completed' },
+      { id: '11-insp-3', type: '登控', timeScheduled: '10:00', timeActual: '09:58', operator: '王五', status: 'completed' },
+      { id: '11-insp-4', type: '推出', timeScheduled: '10:15', timeActual: '10:14', operator: '张三', status: 'completed' }
+    ]
+  },
+
+  // 12. 吉祥正班（全正常）
+  {
+    id: '12',
+    flightNo: 'HO1251 / HO1252',
+    remarks: '',
+    stand: '310',
+    arrFlightType: 'REG',
+    depFlightType: 'REG',
+    arrInfo: { status: '正常', stand: '310', baggageCarousel: '6' },
+    depInfo: { status: '正常', gate: '19' },
+    route: 'PVG - CKG - PVG',
+    times: { sta: '10:50', std: '12:00' },
+    events: [
+      { id: 'e12-1', label: '开门', type: 'STA', timeActual: '10:50', timeScheduled: '10:50', status: 'completed' },
+      { id: 'e12-2', label: '关门', type: 'STD', timeActual: '--:--', timeScheduled: '11:55', status: 'normal' },
+    ],
+    inspections: [
+      { id: '12-insp-1', type: '入位', timeScheduled: '10:55', timeActual: '10:55', operator: '吴九', status: 'completed' },
+      { id: '12-insp-2', type: '允登', timeScheduled: '11:20', timeActual: '--:--', status: 'pending' },
+      { id: '12-insp-3', type: '登控', timeScheduled: '11:40', timeActual: '--:--', status: 'pending' },
+      { id: '12-insp-4', type: '推出', timeScheduled: '11:55', timeActual: '--:--', status: 'pending' }
+    ]
+  },
+
+  // 13. 首都单出（全正常）
+  {
+    id: '13',
+    flightNo: 'JD5321',
+    remarks: '',
+    stand: '220',
+    depFlightType: 'REG',
+    depInfo: { status: '正常', gate: '05' },
+    route: 'PKX - HAK',
+    times: { sta: '--:--', std: '11:40' },
+    events: [
+      { id: 'e13-1', label: '关门', type: 'STD', timeActual: '--:--', timeScheduled: '11:35', status: 'normal' },
+    ],
+    inspections: [
+      { id: '13-insp-2', type: '允登', timeScheduled: '11:00', timeActual: '10:58', operator: '郑十', status: 'completed' },
+      { id: '13-insp-3', type: '登控', timeScheduled: '11:20', timeActual: '--:--', status: 'pending' },
+      { id: '13-insp-4', type: '推出', timeScheduled: '11:35', timeActual: '--:--', status: 'pending' }
     ]
   }
 ];

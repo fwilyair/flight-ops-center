@@ -2,6 +2,7 @@ import React from 'react';
 
 interface TimeKindBadgeProps {
     kind: 'scheduled' | 'actual';
+    colorClass?: string;
 }
 
 const BADGE_CONFIG = {
@@ -10,14 +11,15 @@ const BADGE_CONFIG = {
 } as const;
 
 // 详情与时间轴共用标记，避免同一时间语义出现两套视觉规则。
-export const TimeKindBadge: React.FC<TimeKindBadgeProps> = ({ kind }) => {
+export const TimeKindBadge: React.FC<TimeKindBadgeProps> = ({ kind, colorClass }) => {
     const config = BADGE_CONFIG[kind];
+    const bgClass = colorClass || config.colorClass;
 
     return (
         <span
             aria-label={config.label}
             title={config.label}
-            className={`origin-center scale-95 rounded px-1 py-[1px] text-xs font-bold text-white ${config.colorClass}`}
+            className={`origin-center scale-95 rounded px-1 py-[1px] text-xs font-bold text-white ${bgClass}`}
         >
             {config.symbol}
         </span>

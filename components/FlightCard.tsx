@@ -20,6 +20,7 @@ import type { FlightTag } from './flightTags';
 export interface FlightCardProps {
     flight: Flight;
     height?: number;
+    isControlView?: boolean;
     onClick?: () => void;
     onVideoClick?: () => void;
     onFlightUpdate?: (flight: Flight) => void;
@@ -137,6 +138,7 @@ const LegTagRow: React.FC<{
 export const FlightCard: React.FC<FlightCardProps> = ({
     flight,
     height = 140,
+    isControlView = false,
     onClick,
     onVideoClick,
     onFlightUpdate,
@@ -224,9 +226,74 @@ export const FlightCard: React.FC<FlightCardProps> = ({
 
     const selectedTags = selectedLeg ? getLegTags(flight, selectedLeg) : [];
 
+    // 管控视图：只保留 进出港航班号及计划时间 [HH:MM(05)] 单行展示
+    // 配色与穿透视图保持一致 (text-emerald-900 / text-blue-900)
+    // 超长航班号（如 ZZMZT6343 / ZZMZT6344 达 18 字）时自动阶梯缩小字号，防止右侧时间被裁切截断
+    if (isControlView) {
+        const hasBoth = legPresence.arrival && legPresence.departure;
+        const totalLen = (arrivalFlightNo?.length || 0) + (departureFlightNo?.length || 0);
+
+        let flightNumSize = 'text-[18px]';
+        let timeSize = 'text-[13px]';
+        let gapSize = 'gap-1';
+
+        if (hasBoth) {
+            if (totalLen >= 16) {
+                // 超长航班号 (如 9位+9位 = 18位)
+                flightNumSize = 'text-[11px]';
+                timeSize = 'text-[10px]';
+                gapSize = 'gap-0.5';
+            } else if (totalLen >= 14) {
+                flightNumSize = 'text-[12px]';
+                timeSize = 'text-[10.5px]';
+                gapSize = 'gap-0.5';
+            } else {
+                // 标准 6位+6位 航班号 (如 CA1538/CA1539)
+                flightNumSize = 'text-[13px]';
+                timeSize = 'text-[11px]';
+                gapSize = 'gap-1';
+            }
+        }
+
+        return (
+            <div
+                data-motion-layout
+                className={`sticky left-0 z-40 mr-2 box-border w-[260px] min-w-[260px] flex-none shrink-0 self-start rounded-l-xl rounded-r-2xl border-y border-r border-slate-300/80 px-2 flex items-center justify-start shadow-[4px_0_12px_-2px_rgba(0,0,0,0.08)] transition-[background-color,border-color,box-shadow,opacity] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${isDelayed ? 'bg-rose-50' : 'bg-slate-100'} ${onClick ? 'cursor-pointer hover:bg-slate-200' : ''}`}
+                style={{ height: `${height}px` }}
+                onClick={(event) => {
+                    event.stopPropagation();
+                    onClick?.();
+                }}
+            >
+                <div className={`flex items-center ${gapSize} font-mono font-extrabold tracking-tight whitespace-nowrap overflow-hidden transition-opacity duration-300`}>
+                    {legPresence.arrival && (
+                        <div className="flex items-baseline gap-0.5">
+                            <span className={`text-emerald-700 italic ${flightNumSize}`}>{arrivalFlightNo}</span>
+                            <span className={`text-emerald-900 font-extrabold tabular-nums not-italic ${timeSize}`}>
+                                {formatCardTime(flight.times?.sta)}
+                            </span>
+                        </div>
+                    )}
+                    {hasBoth && (
+                        <span className="text-slate-400 font-bold not-italic px-0.5 text-[10px]">/</span>
+                    )}
+                    {legPresence.departure && (
+                        <div className="flex items-baseline gap-0.5">
+                            <span className={`text-blue-700 italic ${flightNumSize}`}>{departureFlightNo}</span>
+                            <span className={`text-blue-900 font-extrabold tabular-nums not-italic ${timeSize}`}>
+                                {formatCardTime(flight.times?.std)}
+                            </span>
+                        </div>
+                    )}
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div
-            className={`sticky left-0 z-40 mr-2 box-border min-h-[140px] w-[260px] min-w-[260px] flex-none shrink-0 self-start rounded-l-xl rounded-r-2xl border-y border-r border-slate-300/80 px-2.5 py-2 shadow-[4px_0_12px_-2px_rgba(0,0,0,0.08)] transition-[height] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${isDelayed ? 'bg-rose-50' : 'bg-slate-100'} ${onClick ? 'cursor-pointer' : ''}`}
+            data-motion-layout
+            className={`sticky left-0 z-40 mr-2 box-border min-h-[140px] w-[260px] min-w-[260px] flex-none shrink-0 self-start rounded-l-xl rounded-r-2xl border-y border-r border-slate-300/80 px-2.5 py-2 shadow-[4px_0_12px_-2px_rgba(0,0,0,0.08)] transition-[background-color,border-color,box-shadow,opacity] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${isDelayed ? 'bg-rose-50' : 'bg-slate-100'} ${onClick ? 'cursor-pointer' : ''}`}
             style={{ height: `${height}px` }}
             onClick={(event) => {
                 event.stopPropagation();
