@@ -246,34 +246,22 @@ export const FlightCard: React.FC<FlightCardProps> = ({
             >
                 <div className={`flex flex-col w-full h-full ${hasBoth ? 'justify-between py-1.5' : 'justify-center'}`}>
                     {legPresence.arrival && (
-                        <div className="flex items-center justify-start gap-[6px] text-emerald-700">
+                        <div className="flex items-baseline justify-start gap-[6px] text-emerald-700">
                             <span className={`min-w-0 whitespace-nowrap pr-[3px] font-mono font-extrabold italic leading-none tabular-nums ${flightNumSize}`} title={arrivalFlightNo}>
                                 {arrivalFlightNo}
                             </span>
                             <span className={`min-w-0 whitespace-nowrap text-center font-mono ${timeSize} font-extrabold leading-none text-emerald-900 tabular-nums`}>
                                 {formatCardTime(flight.times?.sta)}
                             </span>
-                            <span className={`${META_BADGE_BASE} ${flight.arrInfo?.status === '延误' ? 'from-red-200 via-red-100 to-white/80 text-red-700' : 'from-emerald-200 via-emerald-100 to-white/80 text-emerald-800'} px-[4px]`}>
-                                {flight.arrInfo?.status || '-'}
-                            </span>
-                            <span className={`${META_BADGE_BASE} ${ARRIVAL_STAND_SURFACE} px-[4px] font-mono`}>
-                                {flight.arrInfo?.stand || '-'}
-                            </span>
                         </div>
                     )}
                     {legPresence.departure && (
-                        <div className={`flex items-center gap-[6px] text-blue-700 ${hasBoth ? 'justify-end' : 'justify-start'}`}>
+                        <div className={`flex items-baseline gap-[6px] text-blue-700 ${hasBoth ? 'justify-end' : 'justify-start'}`}>
                             <span className={`min-w-0 whitespace-nowrap pr-[3px] font-mono font-extrabold italic leading-none tabular-nums ${flightNumSize}`} title={departureFlightNo}>
                                 {departureFlightNo}
                             </span>
                             <span className={`min-w-0 whitespace-nowrap text-center font-mono ${timeSize} font-extrabold leading-none text-blue-900 tabular-nums`}>
                                 {formatCardTime(flight.times?.std)}
-                            </span>
-                            <span className={`${META_BADGE_BASE} ${flight.depInfo?.status === '延误' ? 'from-red-200 via-red-100 to-white/80 text-red-700' : 'from-blue-200 via-blue-100 to-white/80 text-blue-800'} px-[4px]`}>
-                                {flight.depInfo?.status || '-'}
-                            </span>
-                            <span className={`${META_BADGE_BASE} ${DEPARTURE_GATE_SURFACE} px-[4px] font-mono`}>
-                                {flight.depInfo?.gate || '-'}
                             </span>
                         </div>
                     )}
