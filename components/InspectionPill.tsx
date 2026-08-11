@@ -30,8 +30,7 @@ export const InspectionPill: React.FC<InspectionPillProps> = ({
   const { status, type, timeScheduled, timeActual, operator } = inspection;
   const leftPos = timeToPixels(timeScheduled, timeScale);
   
-  // 搭配 GanttRow 管控视图的极致压缩高度 (8 + trackCount * 30)，每轨 topPos 为 5 + t * 30
-  // 使得 28px 胶囊顶部保留 5px 边距，底部同样留有 5px 边距，极其紧凑且保留极佳美感
+  // 管控视图固定为两条胶囊轨道高度；每轨 topPos 为 5 + t * 30。
   const getTrackTopPos = (t: number) => {
     return 5 + t * 30;
   };
@@ -178,4 +177,3 @@ export const InspectionPill: React.FC<InspectionPillProps> = ({
     </div>
   );
 };
-

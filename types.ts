@@ -15,8 +15,8 @@ export interface TimelineEvent {
   label: string;
   timeActual: string; // HH:MM
   timeScheduled?: string; // HH:MM
-  type: 'LAND' | 'IN-BLK' | 'UNLOAD' | 'ATD' | 'BOARD' | 'ARR' | 'DEP' | 'COBT';
-  status: 'completed' | 'active' | 'pending' | 'delayed' | 'scheduled' | 'overtime-completed' | 'overtime-incomplete' | 'alert' | 'warning';
+  type: 'LAND' | 'IN-BLK' | 'UNLOAD' | 'ATD' | 'BOARD' | 'ARR' | 'DEP' | 'COBT' | 'STA' | 'STD';
+  status: 'completed' | 'active' | 'pending' | 'delayed' | 'scheduled' | 'normal' | 'overtime-completed' | 'overtime-incomplete' | 'alert' | 'warning';
   // Extended fields for capsule modal
   taskStatus?: TaskStatus;
   department?: string;
@@ -90,7 +90,7 @@ export interface Flight {
   depFlightType?: FlightType;
   // Dual status support
   arrInfo?: {
-    status: '前起' | '到达' | '入位' | '备降' | '延误';
+    status: '正常' | '前起' | '到达' | '入位' | '备降' | '延误';
     stand?: string;
     baggageCarousel?: string; // 行李转盘 e.g. 7
   };
@@ -117,11 +117,10 @@ export interface Flight {
     atot?: string; // ATOT
   };
   events: TimelineEvent[];
-  annotations: Annotation[];
+  annotations?: Annotation[];
   inspections?: InspectionEvent[]; // 检查胶囊（管控视图）
 }
 
 export const PIXELS_PER_MINUTE = 8;
 export const START_TIME_HOUR = 8; // 8:00
 export const START_TIME_MIN = 0;
-

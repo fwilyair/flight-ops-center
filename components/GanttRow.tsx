@@ -1,7 +1,7 @@
 import React from 'react';
 import { Flight, TimelineEvent, Annotation, ProcessMarker, InspectionEvent } from '../types';
 import { timeToPixels, getColorForEventType } from '../utils';
-import { assignPriorityTracks, buildFixedRowOverflow, buildOverflowPreviewLayout, getCorrectedTime, getExpandedControlTop, getExpansionTargetEventId, getFlightRowHeight, getStateAfterExpansionChange, getTimeDifferenceMinutes } from './flightRowLayout';
+import { assignPriorityTracks, buildFixedRowOverflow, buildOverflowPreviewLayout, getControlViewRowHeight, getCorrectedTime, getExpandedControlTop, getExpansionTargetEventId, getFlightRowHeight, getStateAfterExpansionChange, getTimeDifferenceMinutes } from './flightRowLayout';
 import type { OverflowGroup } from './flightRowLayout';
 import { FlightCard } from './FlightCard';
 import { TimeKindBadge } from './TimeKindBadge';
@@ -826,7 +826,7 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
 
     // 计算检查胶囊的轨道分配（包含 ml-4 偏移 16px、已完成/动态超时 +N 徽章宽幅、以及防止绿点连击重叠的 10px 安全尾距）
     const inspectionTracks = React.useMemo(
-        () => assignPriorityTracks(
+        () => assignPriorityTracks<InspectionEvent>(
             flight.inspections || [],
             insp => timeToPixels(insp.timeScheduled, timeScale),
             insp => {
@@ -899,7 +899,7 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
         ?? (expandedControlEvent ? timeToPixels(expandedControlEvent.timeScheduled || expandedControlEvent.timeActual || '', timeScale) : 0);
     const annotationCount = isControlView ? 0 : (flight.annotations?.length || 0);
     const rowHeight = isControlView
-        ? (8 + trackCount * 30)
+        ? getControlViewRowHeight(trackCount)
         : getFlightRowHeight({ isExpanded, hasCalcPoints, trackCount, annotationCount });
     const expandedControlTop = getExpandedControlTop({ hasCalcPoints, trackCount });
     const renderedEvents = isExpanded ? flight.events : fixedRowLayout.visibleEvents;

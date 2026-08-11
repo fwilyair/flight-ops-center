@@ -15,7 +15,7 @@ test('stretches flight card modules with the expanded row height', async () => {
 
     assert.match(cardSource, /height\?: number/);
     assert.match(cardSource, /style=\{\{ height: `\$\{height\}px` \}\}/);
-    assert.match(cardSource, /transition-\[height\] duration-300 ease-\[cubic-bezier\(0\.16,1,0\.3,1\)\]/);
+    assert.match(cardSource, /data-motion-layout/);
     assert.match(indexSource, /transition: height 300ms cubic-bezier\(0\.16, 1, 0\.3, 1\)/);
     assert.match(cardSource, /getFlightCardLegJustification\('arrival', legPresence\)/);
     assert.match(cardSource, /getFlightCardLegJustification\('departure', legPresence\)/);
@@ -47,7 +47,8 @@ test('separates each flight card from the transparent timeline row', async () =>
     assert.match(cardSource, /border-y border-r border-slate-300\/80/);
     assert.match(indexSource, /\.flight-row \{[\s\S]*?background-color: transparent;/);
     assert.doesNotMatch(rowSource, /className="flight-row[^"]*(?:shadow|border)/);
-    assert.match(rowSource, /className="flight-row[^"]*mb-3/);
+    assert.match(rowSource, /className="flight-row[^"]*transition-\[height,margin-bottom,opacity\]/);
+    assert.match(rowSource, /marginBottom: `\$\{isVisible \? 12 : 0\}px`/);
     assert.match(appSource, /className="flight-rows-area/);
     assert.match(appSource, /data-flight-info-mask[\s\S]*sticky left-0 z-20 w-0 self-stretch/);
     assert.match(appSource, /absolute inset-y-0 left-0 w-\[260px\] bg-white/);
