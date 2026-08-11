@@ -23,6 +23,7 @@ export interface GanttRowProps {
     currentTime?: string;
     expandAllRows?: boolean;
     isControlView?: boolean;
+    isVisible?: boolean;
     onClick?: () => void;
     onEventClick?: (event: TimelineEvent) => void;
     onInspectionClick?: (inspection: InspectionEvent) => void;
@@ -729,7 +730,7 @@ const CollapsePill: React.FC<{
     </button>
 );
 
-const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime, expandAllRows = false, isControlView = false, onClick, onEventClick, onInspectionClick, onInspectionComplete, onVideoClick, onFlightUpdate, onEventHover }) => {
+const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime, expandAllRows = false, isControlView = false, isVisible = true, onClick, onEventClick, onInspectionClick, onInspectionComplete, onVideoClick, onFlightUpdate, onEventHover }) => {
     const [expandedFromEventId, setExpandedFromEventId] = React.useState<string | null>(null);
     const [dimmedEventIds, setDimmedEventIds] = React.useState<Set<string>>(new Set());
     const [contextMenu, setContextMenu] = React.useState<{ x: number, y: number, eventId: string } | null>(null);
@@ -954,9 +955,13 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
             ref={rowRef}
             data-motion-flight-row
             data-flight-id={flight.id}
-            className="flight-row group relative mb-3 flex transition-[height,opacity] duration-300 ease-out"
+            className="flight-row group relative flex transition-[height,margin-bottom,opacity] duration-300 ease-out"
             style={{
-                height: `${rowHeight}px`,
+                height: `${isVisible ? rowHeight : 0}px`,
+                marginBottom: `${isVisible ? 12 : 0}px`,
+                opacity: isVisible ? 1 : 0,
+                overflow: isVisible ? 'visible' : 'hidden',
+                pointerEvents: isVisible ? 'auto' : 'none',
             }}
         >
 
@@ -1129,6 +1134,7 @@ export const GanttRow = React.memo(GanttRowInner, (prevProps, nextProps) => {
         prevProps.currentTime === nextProps.currentTime &&
         prevProps.expandAllRows === nextProps.expandAllRows &&
         prevProps.isControlView === nextProps.isControlView &&
+        prevProps.isVisible === nextProps.isVisible &&
         prevProps.onClick === nextProps.onClick &&
         prevProps.onEventClick === nextProps.onEventClick &&
         prevProps.onInspectionClick === nextProps.onInspectionClick &&

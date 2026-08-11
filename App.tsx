@@ -309,25 +309,20 @@ const App: React.FC = () => {
   const filteredFlights = useMemo(() => {
     return flights.filter(flight => {
       // 航班号过滤（不区分大小写）
-      const matchesSearch = deferredSearchQuery === '' ||
+      return deferredSearchQuery === '' ||
         flight.flightNo.toLowerCase().includes(deferredSearchQuery.toLowerCase()) ||
         (flight.codeshare?.toLowerCase().includes(deferredSearchQuery.toLowerCase()));
-
-      if (!matchesSearch) return false;
-
-      // 视图过滤：管控视图展示全量航班 (全航班)；穿透视图只展示存在问题节点的异常航班
-      if (!isControlView) {
-        return hasProblematicTasks(flight);
-      }
-
-      return true;
     });
-  }, [flights, deferredSearchQuery, isControlView, hasProblematicTasks]);
+  }, [flights, deferredSearchQuery]);
 
   const filteredFlightKey = useMemo(
-    () => `${deferredSearchQuery}|${selectedDate}|${filteredFlights.map(flight => flight.id).join(',')}`,
-    [deferredSearchQuery, selectedDate, filteredFlights]
+    () => `${deferredSearchQuery}|${selectedDate}|${isControlView}|${filteredFlights.map(flight => flight.id).join(',')}`,
+    [deferredSearchQuery, selectedDate, isControlView, filteredFlights]
   );
+
+  const visibleFlightsCount = useMemo(() => {
+    return filteredFlights.filter(f => isControlView || hasProblematicTasks(f)).length;
+  }, [filteredFlights, isControlView, hasProblematicTasks]);
 
   // 计算所有航班事件的最大时间，确保时间轴足够长
   const calculateMaxTime = () => {
@@ -671,7 +666,7 @@ const App: React.FC = () => {
                   type="button"
                   aria-pressed={expandAllRows}
                   aria-label={expandAllRows ? '收起全部航班任务' : '展开全部航班任务'}
-                  disabled={filteredFlights.length === 0 || isControlView}
+                  disabled={visibleFlightsCount === 0 || isControlView}
                   onClick={() => setExpandAllRows(previous => !previous)}
                   className={`flex h-8 min-w-0 flex-1 items-center justify-center gap-1 rounded-full border border-white/90 px-2 text-[13px] font-semibold transition-[background-color,background-image,border-color,color,box-shadow] duration-200 disabled:cursor-not-allowed disabled:opacity-40 ${expandAllRows
                     ? 'bg-white text-slate-700 shadow-[0_2px_8px_rgba(15,23,42,0.12)] hover:bg-slate-50'
@@ -835,23 +830,27 @@ const App: React.FC = () => {
               ></div>
 
               <div className="flex flex-col w-full min-w-max">
-                {filteredFlights.map((flight) => (
-                  <GanttRow
-                    key={flight.id}
-                    flight={flight}
-                    timeScale={timeScale}
-                    currentTime={currentTime}
-                    expandAllRows={expandAllRows}
-                    isControlView={isControlView}
-                    onClick={() => handleFlightClick(flight)}
-                    onEventClick={(event) => handleEventClick(event, flight)}
-                    onInspectionClick={(inspection) => handleInspectionClick(inspection, flight)}
-                    onInspectionComplete={(inspectionId) => handleInspectionComplete(inspectionId, flight.id)}
-                    onVideoClick={handleVideoClick}
-                    onFlightUpdate={handleFlightUpdate}
-                    onEventHover={handleEventHover}
-                  />
-                ))}
+                {filteredFlights.map((flight) => {
+                  const isVisible = isControlView || hasProblematicTasks(flight);
+                  return (
+                    <GanttRow
+                      key={flight.id}
+                      flight={flight}
+                      timeScale={timeScale}
+                      currentTime={currentTime}
+                      expandAllRows={expandAllRows}
+                      isControlView={isControlView}
+                      isVisible={isVisible}
+                      onClick={() => handleFlightClick(flight)}
+                      onEventClick={(event) => handleEventClick(event, flight)}
+                      onInspectionClick={(inspection) => handleInspectionClick(inspection, flight)}
+                      onInspectionComplete={(inspectionId) => handleInspectionComplete(inspectionId, flight.id)}
+                      onVideoClick={handleVideoClick}
+                      onFlightUpdate={handleFlightUpdate}
+                      onEventHover={handleEventHover}
+                    />
+                  );
+                })}
 
                 {/* Fill remaining space with empty rows for aesthetics */}
 
