@@ -245,7 +245,7 @@ export const FlightCard: React.FC<FlightCardProps> = ({
                 <div className="flex flex-col w-full gap-1.5 justify-center">
                     {legPresence.arrival && (
                         <div className="flex items-baseline justify-start gap-[6px] text-emerald-700">
-                            <span className={`min-w-0 overflow-hidden whitespace-nowrap font-mono font-extrabold italic leading-none tabular-nums ${getFlightNumberSizeClass(arrivalFlightNo)}`} title={arrivalFlightNo}>
+                            <span className={`min-w-0 whitespace-nowrap pr-[3px] font-mono font-extrabold italic leading-none tabular-nums ${getFlightNumberSizeClass(arrivalFlightNo)}`} title={arrivalFlightNo}>
                                 {arrivalFlightNo}
                             </span>
                             <span className="min-w-0 whitespace-nowrap text-center font-mono text-[12px] font-extrabold leading-none text-emerald-900 tabular-nums">
@@ -255,7 +255,7 @@ export const FlightCard: React.FC<FlightCardProps> = ({
                     )}
                     {legPresence.departure && (
                         <div className={`flex items-baseline gap-[6px] text-blue-700 ${hasBoth ? 'justify-end' : 'justify-start'}`}>
-                            <span className={`min-w-0 overflow-hidden whitespace-nowrap font-mono font-extrabold italic leading-none tabular-nums ${getFlightNumberSizeClass(departureFlightNo)}`} title={departureFlightNo}>
+                            <span className={`min-w-0 whitespace-nowrap pr-[3px] font-mono font-extrabold italic leading-none tabular-nums ${getFlightNumberSizeClass(departureFlightNo)}`} title={departureFlightNo}>
                                 {departureFlightNo}
                             </span>
                             <span className="min-w-0 whitespace-nowrap text-center font-mono text-[12px] font-extrabold leading-none text-blue-900 tabular-nums">
