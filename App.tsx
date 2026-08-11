@@ -531,7 +531,7 @@ const App: React.FC = () => {
           onWheel={handleUserGesture}
           onTouchMove={handleUserGesture}
           onMouseDown={handleUserGesture}
-          className="flex-1 overflow-x-auto overflow-y-auto relative"
+          className="flex-1 overflow-x-auto overflow-y-auto relative bg-white dark:bg-gray-900"
         >
 
           <div ref={timelineLayoutRef} className="min-w-max h-full flex flex-col relative">
@@ -646,7 +646,7 @@ const App: React.FC = () => {
             </div>
 
             {/* Flight Rows Area */}
-            <div className="flight-rows-area relative flex flex-1">
+            <div className="flight-rows-area relative flex w-full min-w-max">
 
               {/* 航班信息区白色遮罩：固定在左侧，阻止横向滚动的时间轴点阵透入卡片间隙。 */}
               <div
