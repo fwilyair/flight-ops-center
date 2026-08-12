@@ -317,7 +317,7 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
                       <span>开始卸载</span>
                       <span>计 10:30 | 实 10:29</span>
                     </div>
-                    <p className="text-xs text-emerald-700 dark:text-emerald-400">已回执确认完成。</p>
+                    <p className="text-xs text-emerald-700 dark:text-emerald-400">已管控已回执。</p>
                   </div>
                 </div>
               </section>
