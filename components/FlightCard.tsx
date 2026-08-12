@@ -228,7 +228,7 @@ export const FlightCard: React.FC<FlightCardProps> = ({
 
     return (
         <div
-            className={`sticky left-0 z-40 box-border min-h-[140px] w-[260px] min-w-[260px] flex-none shrink-0 self-start rounded-xl border border-slate-300/80 px-2.5 py-2 shadow-[4px_0_12px_-2px_rgba(0,0,0,0.08)] transition-[height] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${isDelayed ? 'bg-rose-50' : 'bg-slate-100'} ${onClick ? 'cursor-pointer' : ''}`}
+            className={`relative z-20 box-border min-h-[140px] w-[260px] min-w-[260px] flex-none shrink-0 self-start rounded-xl border border-slate-300/80 px-2.5 py-2 shadow-[4px_0_12px_-2px_rgba(0,0,0,0.08)] transition-[height] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${isDelayed ? 'bg-rose-50' : 'bg-slate-100'} ${onClick ? 'cursor-pointer' : ''}`}
             style={{ height: `${height}px` }}
             onClick={(event) => {
                 event.stopPropagation();

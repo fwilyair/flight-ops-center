@@ -602,7 +602,7 @@ const App: React.FC = () => {
             {/* Sticky Timeline Header */}
             <div className="sticky top-0 z-[60] flex h-8 shrink-0 border-b bg-white dark:bg-gray-900" style={{ borderColor: 'var(--border-color)', boxShadow: 'var(--shadow-sm)' }}>
               {/* Corner Box (Intersection of sticky headers) */}
-              <div className="sticky left-0 z-[70] flex w-[260px] min-w-[260px] items-center justify-center border-r bg-white px-4 dark:bg-gray-900" style={{ borderColor: 'var(--border-color)', boxShadow: 'var(--shadow-sm)' }}>
+              <div className="sticky left-0 z-[70] flex w-[296px] min-w-[296px] items-center justify-center border-r bg-white px-4 dark:bg-gray-900" style={{ borderColor: 'var(--border-color)', boxShadow: 'var(--shadow-sm)' }}>
                 <button
                   type="button"
                   aria-pressed={expandAllRows}
