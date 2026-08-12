@@ -80,9 +80,11 @@ const LegTagRow: React.FC<{
     isPickerOpen: boolean;
     onAddClick: (event: React.MouseEvent<HTMLButtonElement>, leg: FlightLeg) => void;
     onVideoClick?: () => void;
-}> = ({ leg, tags, capacity, triggerRef, isPickerOpen, onAddClick, onVideoClick }) => {
+    showVideoBtn?: boolean;
+}> = ({ leg, tags, capacity, triggerRef, isPickerOpen, onAddClick, onVideoClick, showVideoBtn }) => {
     const { visibleTags, hiddenCount } = getTagDisplay(tags, capacity);
     const isDeparture = leg === 'departure';
+    const shouldShowVideo = showVideoBtn ?? isDeparture;
 
     return (
         <div className="flex h-[22px] min-w-0 items-center justify-between px-1">
@@ -104,7 +106,7 @@ const LegTagRow: React.FC<{
                 </button>
             </div>
 
-            {isDeparture && (
+            {shouldShowVideo && (
                 <button
                     type="button"
                     title="播放监控视频"
@@ -274,6 +276,8 @@ export const FlightCard: React.FC<FlightCardProps> = ({
                             triggerRef={arrivalTriggerRef}
                             isPickerOpen={selectedLeg === 'arrival'}
                             onAddClick={handleAddClick}
+                            onVideoClick={onVideoClick}
+                            showVideoBtn={!legPresence.departure}
                         />
                     </section>
                 ) : null}
