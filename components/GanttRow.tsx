@@ -925,10 +925,10 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
 
                 return (
                     <div
-                        className={`sticky left-[240px] z-[35] mr-2 flex w-[56px] min-w-[56px] -ml-5 flex-none flex-col items-end self-start rounded-r-2xl border-y border-r border-slate-300/80 pt-2.5 pb-2.5 pr-[5px] shadow-[4px_0_10px_-1px_rgba(0,0,0,0.08)] ${flight.arrInfo?.status === '延误' || flight.depInfo?.status === '延误' ? 'bg-rose-50' : 'bg-slate-100'}`}
-                        style={{ height: `${rowHeight}px` }}
+                        className={`sticky left-[242px] z-[35] mr-2 flex w-[50px] min-w-[50px] -ml-5 flex-none flex-col items-end self-center rounded-r-xl border border-slate-300/80 pt-2 pb-2 pr-[3px] shadow-[3px_0_8px_-1px_rgba(0,0,0,0.08)] ${flight.arrInfo?.status === '延误' || flight.depInfo?.status === '延误' ? 'bg-rose-50' : 'bg-slate-100'}`}
+                        style={{ height: `${rowHeight - 16}px` }}
                     >
-                        <div className={`flex w-[31px] flex-1 flex-col items-center ${buttons.length === 1 ? 'justify-center' : 'justify-between'}`}>
+                        <div className={`flex w-[32px] flex-1 flex-col items-center ${buttons.length === 1 ? 'justify-center' : 'justify-between'}`}>
                             {buttons.map(({ label, fullType, shortType }) => {
                                 const insp = flight.inspections?.find(i => i.type === fullType || i.type === shortType);
                                 const status = insp?.status || 'pending';
@@ -947,7 +947,7 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
                                         key={label}
                                         type="button"
                                         title={`${fullType} (${status === 'completed' ? '已完成' : status === 'overtime-completed' ? '超时完成' : status === 'overtime-incomplete' ? '超时未完成' : '未操作'})`}
-                                        className={`flex size-[24px] items-center justify-center rounded-full text-[12px] font-normal transition-all duration-150 hover:scale-105 active:scale-95 ${btnStyle}`}
+                                        className={`flex size-[22px] items-center justify-center rounded-full text-[11px] font-normal transition-all duration-150 hover:scale-105 active:scale-95 ${btnStyle}`}
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             const targetInsp = insp || {
