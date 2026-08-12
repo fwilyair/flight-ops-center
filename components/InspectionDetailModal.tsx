@@ -1,0 +1,210 @@
+import React, { useState, useEffect } from 'react';
+import { InspectionEvent } from '../types';
+import { MotionModalShell } from './MotionModalShell';
+
+interface InspectionDetailModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  inspection: InspectionEvent | null;
+  flightNo: string;
+  codeshare?: string;
+  onComplete: (inspectionId: string) => void;
+  onUpdate?: (inspectionId: string, timeActual: string) => void;
+}
+
+// 入位、登机、推出3种检查项的标准参考节点定义
+const STANDARD_REFERENCE_NODES: Record<string, string[]> = {
+  '入位检查': ['勤务接机到位时间', '客运接机到位时间', '进港摆渡车到位时间', '客梯车到位时间'],
+  '入位': ['勤务接机到位时间', '客运接机到位时间', '进港摆渡车到位时间', '客梯车到位时间'],
+  '登机检查': ['机上清洁结束时间', '允许登机时间'],
+  '登控': ['机上清洁结束时间', '允许登机时间'],
+  '推出检查': ['关客舱门时间', '关货舱门时间', '撒轮挡到位时间', '登机桥到位时间', '牵引车到位时间', '电子进程单状态'],
+  '推出': ['关客舱门时间', '关货舱门时间', '撒轮挡到位时间', '登机桥到位时间', '牵引车到位时间', '电子进程单状态'],
+};
+
+export const InspectionDetailModal: React.FC<InspectionDetailModalProps> = ({
+  isOpen,
+  onClose,
+  inspection,
+  flightNo,
+  codeshare,
+  onComplete,
+  onUpdate,
+}) => {
+  const [editTime, setEditTime] = useState('');
+
+  const isYunDeng = inspection ? (inspection.type === '允登' || inspection.type === '允许登机') : false;
+
+  useEffect(() => {
+    if (inspection) {
+      if (inspection.timeActual && inspection.timeActual !== '--:--') {
+        setEditTime(inspection.timeActual);
+      } else if (isYunDeng) {
+        // 允登未操作时，默认带出当前系统时间
+        const now = new Date();
+        const currentStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+        setEditTime(currentStr);
+      } else {
+        setEditTime('');
+      }
+    }
+  }, [inspection, isYunDeng]);
+
+  if (!inspection) return null;
+
+  const isCompleted = 
+    inspection.status === 'completed' || 
+    inspection.status === 'overtime-completed';
+
+  const handleComplete = () => {
+    onComplete(inspection.id);
+    onClose();
+  };
+
+  const handleSubmitEdit = () => {
+    onUpdate?.(inspection.id, editTime);
+    onClose();
+  };
+
+  // 针对非允登的3个检查项，获取标准参考节点
+  const standardNodes = STANDARD_REFERENCE_NODES[inspection.type] || [];
+  const existingRefs = inspection.referenceTimes || {};
+  
+  const referenceList = standardNodes.length > 0 
+    ? standardNodes.map(label => ({
+        label,
+        time: existingRefs[label] || '--:--',
+      }))
+    : Object.entries(existingRefs).map(([label, time]) => ({ label, time }));
+
+  return (
+    <MotionModalShell
+      isOpen={isOpen}
+      onClose={onClose}
+      ariaLabel={`${flightNo} ${inspection.type}详情`}
+      keyboardDismissSurface="capsule-detail"
+      panelClassName="relative w-[440px] max-h-[75vh] z-[90] rounded-2xl overflow-hidden shadow-2xl flex flex-col bg-white"
+    >
+      {/* Header */}
+      <div data-motion-modal-content className="relative px-6 py-5 bg-white z-20 border-b border-gray-100 shadow-sm flex-none">
+        <div className="flex flex-col items-center gap-2">
+          {/* Flight numbers */}
+          <div className="flex items-center gap-3">
+            <span className="text-3xl font-black text-emerald-600 font-mono tracking-tight tabular-nums">
+              {flightNo}
+            </span>
+            {codeshare && (
+              <>
+                <span className="text-gray-300 text-2xl font-light">/</span>
+                <span className="text-3xl font-black text-blue-600 font-mono tracking-tight tabular-nums">
+                  {codeshare}
+                </span>
+              </>
+            )}
+          </div>
+          
+          {/* Inspection type & status */}
+          <div className="flex items-center gap-3 mt-1 text-base font-bold">
+            <span className="text-gray-800">{inspection.type}</span>
+            <span className="w-px h-4 bg-gray-300"></span>
+            {inspection.timeActual && inspection.timeActual !== '--:--' ? (
+              <span className="font-mono text-emerald-600 tabular-nums">
+                {inspection.timeActual}
+              </span>
+            ) : (
+              <span className="font-mono text-gray-400 tabular-nums">
+                未操作
+              </span>
+            )}
+            {inspection.operator && (
+              <>
+                <span className="w-px h-4 bg-gray-300"></span>
+                <span className="text-gray-700">{inspection.operator}</span>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Body */}
+      <div data-motion-modal-content className="flex-1 overflow-y-auto relative bg-slate-50 p-6 flex flex-col justify-center gap-4">
+        {/* 允登独有：单一时间选择组件 */}
+        {isYunDeng ? (
+          <div className="w-full max-w-[260px] mx-auto flex flex-col items-center gap-2 py-4">
+            <label className="text-sm font-semibold text-gray-500">允许登机时间</label>
+            <div className="w-full relative flex items-center">
+              <input
+                type="time"
+                value={editTime}
+                onChange={(e) => setEditTime(e.target.value)}
+                className="w-full pl-6 pr-10 py-3 border border-gray-300 bg-white rounded-2xl text-2xl font-mono font-bold text-center text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 shadow-sm transition-all [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
+              />
+              {editTime ? (
+                <button
+                  type="button"
+                  onClick={() => setEditTime('')}
+                  className="absolute right-3.5 p-1 text-gray-400 hover:text-red-500 rounded-full hover:bg-gray-100 transition-colors flex items-center justify-center"
+                  title="清空时间"
+                >
+                  <span className="material-symbols-outlined text-xl leading-none">close</span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    const inputElem = e.currentTarget.previousElementSibling as HTMLInputElement;
+                    inputElem?.showPicker?.();
+                  }}
+                  className="absolute right-3.5 p-1 text-gray-400 hover:text-gray-600 transition-colors flex items-center justify-center"
+                  title="选择时间"
+                >
+                  <span className="material-symbols-outlined text-xl leading-none">schedule</span>
+                </button>
+              )}
+            </div>
+          </div>
+        ) : (
+          /* 其他3个检查项：纯参考节点列表 */
+          referenceList.length > 0 && (
+            <div className="w-full bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+              {referenceList.map(({ label, time }, index) => (
+                <div 
+                  key={label}
+                  className={`flex justify-between items-center px-4 py-3 ${
+                    index < referenceList.length - 1 ? 'border-b border-gray-50' : ''
+                  }`}
+                >
+                  <span className="text-sm text-gray-700 font-medium">{label}</span>
+                  <span className="text-sm font-mono tabular-nums text-gray-900">{time || '--:--'}</span>
+                </div>
+              ))}
+            </div>
+          )
+        )}
+      </div>
+
+      {/* Footer */}
+      {(isYunDeng || !isCompleted) && (
+        <div data-motion-modal-content className="p-4 bg-white border-t border-gray-100 flex items-center flex-none z-20">
+          {isYunDeng ? (
+            <button
+              type="button"
+              onClick={handleSubmitEdit}
+              className="h-12 w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-base flex items-center justify-center gap-2 transition-all shadow-md active:scale-[0.98]"
+            >
+              <span>提交</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={handleComplete}
+              className="h-12 w-full rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-base flex items-center justify-center gap-2 transition-all shadow-md active:scale-[0.98]"
+            >
+              <span>完成检查</span>
+            </button>
+          )}
+        </div>
+      )}
+    </MotionModalShell>
+  );
+};

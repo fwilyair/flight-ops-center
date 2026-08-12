@@ -80,9 +80,11 @@ const LegTagRow: React.FC<{
     isPickerOpen: boolean;
     onAddClick: (event: React.MouseEvent<HTMLButtonElement>, leg: FlightLeg) => void;
     onVideoClick?: () => void;
-}> = ({ leg, tags, capacity, triggerRef, isPickerOpen, onAddClick, onVideoClick }) => {
+    showVideoBtn?: boolean;
+}> = ({ leg, tags, capacity, triggerRef, isPickerOpen, onAddClick, onVideoClick, showVideoBtn }) => {
     const { visibleTags, hiddenCount } = getTagDisplay(tags, capacity);
     const isDeparture = leg === 'departure';
+    const shouldShowVideo = showVideoBtn ?? isDeparture;
 
     return (
         <div className="flex h-[22px] min-w-0 items-center justify-between px-1">
@@ -104,7 +106,7 @@ const LegTagRow: React.FC<{
                 </button>
             </div>
 
-            {isDeparture && (
+            {shouldShowVideo && (
                 <button
                     type="button"
                     title="播放监控视频"
@@ -226,7 +228,7 @@ export const FlightCard: React.FC<FlightCardProps> = ({
 
     return (
         <div
-            className={`sticky left-0 z-40 mr-2 box-border min-h-[140px] w-[260px] min-w-[260px] flex-none shrink-0 self-start rounded-l-xl rounded-r-2xl border-y border-r border-slate-300/80 px-2.5 py-2 shadow-[4px_0_12px_-2px_rgba(0,0,0,0.08)] transition-[height] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${isDelayed ? 'bg-rose-50' : 'bg-slate-100'} ${onClick ? 'cursor-pointer' : ''}`}
+            className={`relative z-20 box-border min-h-[140px] w-[260px] min-w-[260px] flex-none shrink-0 self-start rounded-xl border border-slate-300/80 px-2.5 py-2 shadow-[4px_0_12px_-2px_rgba(0,0,0,0.08)] transition-[height] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${isDelayed ? 'bg-rose-50' : 'bg-slate-100'} ${onClick ? 'cursor-pointer' : ''}`}
             style={{ height: `${height}px` }}
             onClick={(event) => {
                 event.stopPropagation();
@@ -274,6 +276,8 @@ export const FlightCard: React.FC<FlightCardProps> = ({
                             triggerRef={arrivalTriggerRef}
                             isPickerOpen={selectedLeg === 'arrival'}
                             onAddClick={handleAddClick}
+                            onVideoClick={onVideoClick}
+                            showVideoBtn={!legPresence.departure}
                         />
                     </section>
                 ) : null}

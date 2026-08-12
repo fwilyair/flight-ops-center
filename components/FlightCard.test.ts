@@ -44,7 +44,7 @@ test('separates each flight card from the transparent timeline row', async () =>
     const indexSource = await readFile(new URL('../index.html', import.meta.url), 'utf8');
     const appSource = await readFile(new URL('../App.tsx', import.meta.url), 'utf8');
 
-    assert.match(cardSource, /border-y border-r border-slate-300\/80/);
+    assert.match(cardSource, /border border-slate-300\/80/);
     assert.match(indexSource, /\.flight-row \{[\s\S]*?background-color: transparent;/);
     assert.doesNotMatch(rowSource, /className="flight-row[^"]*(?:shadow|border)/);
     assert.match(rowSource, /className="flight-row[^"]*mb-3/);

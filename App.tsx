@@ -4,10 +4,11 @@ import { GanttRow, EventHoverInfo } from './components/GanttRow';
 import { FlightDetailPanel } from './components/FlightDetailPanel';
 import { CapsuleDetailModal } from './components/CapsuleDetailModal';
 import { HelpManualModal } from './components/HelpManualModal';
+import { InspectionDetailModal } from './components/InspectionDetailModal';
 import { MotionModalShell } from './components/MotionModalShell';
 import { MOCK_FLIGHTS } from './data';
 import { timeToPixels } from './utils';
-import { START_TIME_HOUR, Flight, TimelineEvent } from './types';
+import { START_TIME_HOUR, Flight, TimelineEvent, InspectionEvent } from './types';
 import { Flip, gsap } from './motion/gsap';
 import { MOTION_DURATION, MOTION_EASE, MOTION_STAGGER } from './motion/tokens';
 import { prefersReducedMotion, REDUCED_MOTION_QUERY } from './motion/preferences';
@@ -191,6 +192,68 @@ const App: React.FC = () => {
 
   const handleCapsuleModalClose = useCallback(() => {
     setIsCapsuleModalOpen(false);
+  }, []);
+
+  // 检查项弹窗状态与操作
+  const [selectedInspection, setSelectedInspection] = useState<InspectionEvent | null>(null);
+  const [inspectionFlightNo, setInspectionFlightNo] = useState('');
+  const [inspectionCodeshare, setInspectionCodeshare] = useState<string | undefined>(undefined);
+  const [isInspectionModalOpen, setIsInspectionModalOpen] = useState(false);
+
+  const handleInspectionComplete = useCallback((flightId: string, inspectionId: string) => {
+    setFlights(prevFlights => prevFlights.map(flight => {
+      if (flight.id !== flightId) return flight;
+      const updatedInspections = flight.inspections?.map(insp => {
+        if (insp.id !== inspectionId) return insp;
+        return {
+          ...insp,
+          status: 'completed' as const,
+          timeActual: currentTime,
+          operator: '操作员',
+        };
+      });
+      return { ...flight, inspections: updatedInspections };
+    }));
+  }, [currentTime]);
+
+  const handleInspectionUpdate = useCallback((flightId: string, inspectionId: string, newTime: string) => {
+    setFlights(prevFlights => prevFlights.map(flight => {
+      if (flight.id !== flightId) return flight;
+      const updatedInspections = flight.inspections?.map(insp => {
+        if (insp.id !== inspectionId) return insp;
+
+        // 删除/清空时间 -> 退回到未操作状态 (pending)
+        if (!newTime || newTime === '--:--') {
+          return {
+            ...insp,
+            status: 'pending' as const,
+            timeActual: '--:--',
+            operator: undefined,
+          };
+        }
+
+        // 修改/提交合法时间
+        const isOvertime = insp.timeScheduled && newTime > insp.timeScheduled;
+        return {
+          ...insp,
+          status: (isOvertime ? 'overtime-completed' : 'completed') as const,
+          timeActual: newTime,
+          operator: insp.operator || '操作员',
+        };
+      });
+      return { ...flight, inspections: updatedInspections };
+    }));
+  }, []);
+
+  const handleInspectionClick = useCallback((flight: Flight, inspection: InspectionEvent) => {
+    setSelectedInspection(inspection);
+    setInspectionFlightNo(flight.flightNo);
+    setInspectionCodeshare(flight.codeshare);
+    setIsInspectionModalOpen(true);
+  }, []);
+
+  const handleInspectionModalClose = useCallback(() => {
+    setIsInspectionModalOpen(false);
   }, []);
 
   // 视频监控弹窗状态
@@ -531,7 +594,7 @@ const App: React.FC = () => {
           onWheel={handleUserGesture}
           onTouchMove={handleUserGesture}
           onMouseDown={handleUserGesture}
-          className="flex-1 overflow-x-auto overflow-y-auto relative"
+          className="flex-1 overflow-x-auto overflow-y-auto relative bg-white dark:bg-gray-900"
         >
 
           <div ref={timelineLayoutRef} className="min-w-max h-full flex flex-col relative">
@@ -539,30 +602,14 @@ const App: React.FC = () => {
             {/* Sticky Timeline Header */}
             <div className="sticky top-0 z-[60] flex h-8 shrink-0 border-b bg-white dark:bg-gray-900" style={{ borderColor: 'var(--border-color)', boxShadow: 'var(--shadow-sm)' }}>
               {/* Corner Box (Intersection of sticky headers) */}
-              <div className="sticky left-0 z-[70] flex w-[260px] min-w-[260px] items-center gap-1.5 border-r bg-white px-4 dark:bg-gray-900" style={{ borderColor: 'var(--border-color)', boxShadow: 'var(--shadow-sm)' }}>
-                {/* 保留左侧半宽作为视图模式入口，并用独立色相区分穿透/管控状态。 */}
-                <button
-                  type="button"
-                  aria-pressed={isControlView}
-                  aria-label={`当前为${isControlView ? '管控视图' : '穿透视图'}，点击切换为${isControlView ? '穿透视图' : '管控视图'}`}
-                  onClick={() => setIsControlView(previous => !previous)}
-                  className={`flex h-8 min-w-0 flex-1 items-center justify-center gap-1 rounded-full border border-white/90 px-2 text-[13px] font-semibold transition-[background-color,background-image,border-color,color,box-shadow] duration-200 ${isControlView
-                    ? 'bg-teal-50 bg-[radial-gradient(circle_at_center,#ccfbf1_0%,#f0fdfa_68%,#ffffff_100%)] text-teal-800 shadow-[0_2px_8px_rgba(13,148,136,0.14)] hover:bg-[radial-gradient(circle_at_center,#99f6e4_0%,#ccfbf1_68%,#f0fdfa_100%)]'
-                    : 'bg-violet-50 bg-[radial-gradient(circle_at_center,#ede9fe_0%,#f5f3ff_68%,#ffffff_100%)] text-violet-700 shadow-[0_2px_8px_rgba(124,58,237,0.14)] hover:bg-[radial-gradient(circle_at_center,#ddd6fe_0%,#ede9fe_68%,#f5f3ff_100%)]'
-                    }`}
-                >
-                  <span className="material-symbols-outlined text-[18px] leading-none" aria-hidden="true">swap_horiz</span>
-                  <span className="truncate">{isControlView ? '管控视图' : '穿透视图'}</span>
-                </button>
-
-                {/* 同一按钮复用展开/收起操作，避免占用额外顶部空间。 */}
+              <div className="sticky left-0 z-[70] flex w-[296px] min-w-[296px] items-center justify-center border-r bg-white px-4 dark:bg-gray-900" style={{ borderColor: 'var(--border-color)', boxShadow: 'var(--shadow-sm)' }}>
                 <button
                   type="button"
                   aria-pressed={expandAllRows}
                   aria-label={expandAllRows ? '收起全部航班任务' : '展开全部航班任务'}
                   disabled={filteredFlights.length === 0}
                   onClick={() => setExpandAllRows(previous => !previous)}
-                  className={`flex h-8 min-w-0 flex-1 items-center justify-center gap-1 rounded-full border border-white/90 px-2 text-[13px] font-semibold transition-[background-color,background-image,border-color,color,box-shadow] duration-200 disabled:cursor-not-allowed disabled:opacity-40 ${expandAllRows
+                  className={`flex h-8 min-w-0 items-center justify-center gap-1 rounded-full border border-white/90 px-4 text-[13px] font-semibold transition-[background-color,background-image,border-color,color,box-shadow] duration-200 disabled:cursor-not-allowed disabled:opacity-40 ${expandAllRows
                     ? 'bg-white text-slate-700 shadow-[0_2px_8px_rgba(15,23,42,0.12)] hover:bg-slate-50'
                     : 'bg-orange-50 bg-[radial-gradient(circle_at_center,#ffedd5_0%,#fff7ed_68%,#ffffff_100%)] text-orange-800 shadow-[0_2px_8px_rgba(234,88,12,0.14)] hover:bg-[radial-gradient(circle_at_center,#fed7aa_0%,#ffedd5_68%,#fff7ed_100%)]'
                     }`}
@@ -646,7 +693,7 @@ const App: React.FC = () => {
             </div>
 
             {/* Flight Rows Area */}
-            <div className="flight-rows-area relative flex flex-1">
+            <div className="flight-rows-area relative flex w-full min-w-max">
 
               {/* 航班信息区白色遮罩：固定在左侧，阻止横向滚动的时间轴点阵透入卡片间隙。 */}
               <div
@@ -733,6 +780,8 @@ const App: React.FC = () => {
                     expandAllRows={expandAllRows}
                     onClick={() => handleFlightClick(flight)}
                     onEventClick={(event) => handleEventClick(event, flight)}
+                    onInspectionClick={(inspection) => handleInspectionClick(flight, inspection)}
+                    onInspectionComplete={(inspectionId) => handleInspectionComplete(flight.id, inspectionId)}
                     onVideoClick={handleVideoClick}
                     onFlightUpdate={handleFlightUpdate}
                     onEventHover={handleEventHover}
@@ -776,6 +825,27 @@ const App: React.FC = () => {
         codeshare={capsuleCodeshare}
         currentTime={currentTime}
         onControl={() => console.log('Control clicked for event:', selectedEvent?.label)}
+      />
+
+      {/* Inspection Detail Modal */}
+      <InspectionDetailModal
+        isOpen={isInspectionModalOpen}
+        onClose={handleInspectionModalClose}
+        inspection={selectedInspection}
+        flightNo={inspectionFlightNo}
+        codeshare={inspectionCodeshare}
+        onComplete={(inspectionId) => {
+          const targetFlight = flights.find(f => f.inspections?.some(i => i.id === inspectionId));
+          if (targetFlight) {
+            handleInspectionComplete(targetFlight.id, inspectionId);
+          }
+        }}
+        onUpdate={(inspectionId, newTime) => {
+          const targetFlight = flights.find(f => f.inspections?.some(i => i.id === inspectionId));
+          if (targetFlight) {
+            handleInspectionUpdate(targetFlight.id, inspectionId, newTime);
+          }
+        }}
       />
 
       {/* Video Monitor Modal - Under Construction */}
