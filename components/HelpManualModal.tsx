@@ -382,35 +382,70 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
                 </h3>
 
                 <div className="grid grid-cols-1 gap-2.5">
-                  <div className="rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-800/80 p-3 flex items-center gap-3">
-                    <span className="flex size-6 shrink-0 items-center justify-center rounded bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-mono font-bold text-xs">1</span>
-                    <div>
-                      <h4 className="text-xs font-bold text-slate-900 dark:text-white">一键批量展开 / 收起航班</h4>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">点击表头“全部展开 / 全部收起”按钮，一次性控制所有航班行的折叠轨道。</p>
+                  <div className="rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-800/80 p-3 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <span className="flex size-6 shrink-0 items-center justify-center rounded bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-mono font-bold text-xs">1</span>
+                      <div>
+                        <h4 className="text-xs font-bold text-slate-900 dark:text-white">一键批量展开 / 收起航班</h4>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">点击表头“全部展开 / 全部收起”按钮，一次性控制所有航班行的折叠轨道。</p>
+                      </div>
+                    </div>
+                    <div className="shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 shadow-xs">
+                      <span className="material-symbols-outlined text-sm text-indigo-600 dark:text-indigo-400">unfold_more</span>
+                      <span>全部展开</span>
                     </div>
                   </div>
 
-                  <div className="rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-800/80 p-3 flex items-center gap-3">
-                    <span className="flex size-6 shrink-0 items-center justify-center rounded bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-mono font-bold text-xs">2</span>
-                    <div>
-                      <h4 className="text-xs font-bold text-slate-900 dark:text-white">快捷键 Space 时间归中</h4>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">按空格键 <kbd className="px-1 py-0.2 rounded border border-slate-300 font-mono text-[11px] font-bold">Space</kbd> 瞬间平滑滚动会合系统当前时间红线。</p>
+                  <div className="rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-800/80 p-3 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <span className="flex size-6 shrink-0 items-center justify-center rounded bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-mono font-bold text-xs">2</span>
+                      <div>
+                        <h4 className="text-xs font-bold text-slate-900 dark:text-white">快捷键 Space 时间归中</h4>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">按空格键 <kbd className="px-1 py-0.2 rounded border border-slate-300 font-mono text-[11px] font-bold">Space</kbd> 瞬间平滑滚动会合系统当前时间红线。</p>
+                      </div>
+                    </div>
+                    <div className="shrink-0 flex items-center gap-2 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 shadow-xs">
+                      <kbd className="px-1.5 py-0.5 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 font-mono text-[11px] font-bold text-slate-700 dark:text-slate-200">Space</kbd>
+                      <div className="flex items-center gap-1">
+                        <span className="w-3.5 h-0.5 bg-rose-500 rounded-full"></span>
+                        <span className="size-2 rounded-full bg-rose-600"></span>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-800/80 p-3 flex items-center gap-3">
-                    <span className="flex size-6 shrink-0 items-center justify-center rounded bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-mono font-bold text-xs">3</span>
-                    <div>
-                      <h4 className="text-xs font-bold text-slate-900 dark:text-white">右键胶囊可控 / 可消除</h4>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">右键任务胶囊选择“可控/可消除”将其置灰弱化，再次右键可恢复。</p>
+                  <div className="rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-800/80 p-3 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <span className="flex size-6 shrink-0 items-center justify-center rounded bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-mono font-bold text-xs">3</span>
+                      <div>
+                        <h4 className="text-xs font-bold text-slate-900 dark:text-white">右键胶囊可控 / 可消除</h4>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">右键任务胶囊选择“可控/可消除”将其置灰弱化，再次右键可恢复。</p>
+                      </div>
+                    </div>
+                    <div className="shrink-0 flex flex-col gap-0.5 p-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-[10px] shadow-xs">
+                      <div className="flex items-center gap-1 text-slate-700 dark:text-slate-200 font-bold px-1.5 py-0.5">
+                        <span className="material-symbols-outlined text-[12px] text-indigo-500">tune</span>
+                        <span>可控</span>
+                      </div>
+                      <div className="flex items-center gap-1 text-slate-400 dark:text-slate-500 font-medium px-1.5 py-0.5 border-t border-slate-200 dark:border-slate-700">
+                        <span className="material-symbols-outlined text-[12px]">block</span>
+                        <span>可消除</span>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-800/80 p-3 flex items-center gap-3">
-                    <span className="flex size-6 shrink-0 items-center justify-center rounded bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-mono font-bold text-xs">4</span>
-                    <div>
-                      <h4 className="text-xs font-bold text-slate-900 dark:text-white">航班标记加选与监控视频</h4>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">点击卡片“+”选择标记，点击蓝色播放按钮弹出现场监控视频。</p>
+                  <div className="rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-800/80 p-3 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <span className="flex size-6 shrink-0 items-center justify-center rounded bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-mono font-bold text-xs">4</span>
+                      <div>
+                        <h4 className="text-xs font-bold text-slate-900 dark:text-white">航班标记加选与监控视频</h4>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">点击卡片“+”选择标记，点击蓝色播放按钮弹出现场监控视频。</p>
+                      </div>
+                    </div>
+                    <div className="shrink-0 flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 shadow-xs">
+                      <span className="flex size-5 items-center justify-center rounded-full bg-blue-600 text-white">
+                        <span className="material-symbols-outlined text-[13px]">play_arrow</span>
+                      </span>
+                      <span className="flex size-5 items-center justify-center rounded-full border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold text-xs">+</span>
                     </div>
                   </div>
                 </div>
