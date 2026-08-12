@@ -23,18 +23,22 @@ export const InspectionDetailModal: React.FC<InspectionDetailModalProps> = ({
 }) => {
   const [editTime, setEditTime] = useState('');
 
+  const isYunDeng = inspection ? (inspection.type === '允登' || inspection.type === '允许登机') : false;
+
   useEffect(() => {
     if (inspection) {
       if (inspection.timeActual && inspection.timeActual !== '--:--') {
         setEditTime(inspection.timeActual);
-      } else {
-        // 未操作时，默认带出当前系统时间
+      } else if (isYunDeng) {
+        // 允登未操作时，默认带出当前系统时间
         const now = new Date();
         const currentStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
         setEditTime(currentStr);
+      } else {
+        setEditTime('');
       }
     }
-  }, [inspection]);
+  }, [inspection, isYunDeng]);
 
   if (!inspection) return null;
 
@@ -42,7 +46,12 @@ export const InspectionDetailModal: React.FC<InspectionDetailModalProps> = ({
     inspection.status === 'completed' || 
     inspection.status === 'overtime-completed';
 
-  const handleSave = () => {
+  const handleComplete = () => {
+    onComplete(inspection.id);
+    onClose();
+  };
+
+  const handleSubmitEdit = () => {
     onUpdate?.(inspection.id, editTime);
     onClose();
   };
@@ -103,40 +112,42 @@ export const InspectionDetailModal: React.FC<InspectionDetailModalProps> = ({
 
       {/* Body */}
       <div data-motion-modal-content className="flex-1 overflow-y-auto relative bg-slate-50 p-6 flex flex-col gap-4">
-        {/* 时间选择与编辑区 */}
-        <div className="w-full max-w-[260px] mx-auto flex flex-col items-center gap-1.5">
-          <label className="text-xs font-semibold text-gray-500">操作时间</label>
-          <div className="w-full relative flex items-center">
-            <input
-              type="time"
-              value={editTime}
-              onChange={(e) => setEditTime(e.target.value)}
-              className="w-full pl-6 pr-10 py-2.5 border border-gray-300 bg-white rounded-xl text-2xl font-mono font-bold text-center text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 shadow-sm transition-all [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
-            />
-            {editTime ? (
-              <button
-                type="button"
-                onClick={() => setEditTime('')}
-                className="absolute right-3 p-1 text-gray-400 hover:text-red-500 rounded-full hover:bg-gray-100 transition-colors flex items-center justify-center"
-                title="清空时间"
-              >
-                <span className="material-symbols-outlined text-xl leading-none">close</span>
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={(e) => {
-                  const inputElem = e.currentTarget.previousElementSibling as HTMLInputElement;
-                  inputElem?.showPicker?.();
-                }}
-                className="absolute right-3 p-1 text-gray-400 hover:text-gray-600 transition-colors flex items-center justify-center"
-                title="选择时间"
-              >
-                <span className="material-symbols-outlined text-xl leading-none">schedule</span>
-              </button>
-            )}
+        {/* 允登独有：时间选择与编辑区 */}
+        {isYunDeng && (
+          <div className="w-full max-w-[260px] mx-auto flex flex-col items-center gap-1.5">
+            <label className="text-xs font-semibold text-gray-500">允许登机时间</label>
+            <div className="w-full relative flex items-center">
+              <input
+                type="time"
+                value={editTime}
+                onChange={(e) => setEditTime(e.target.value)}
+                className="w-full pl-6 pr-10 py-2.5 border border-gray-300 bg-white rounded-xl text-2xl font-mono font-bold text-center text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 shadow-sm transition-all [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
+              />
+              {editTime ? (
+                <button
+                  type="button"
+                  onClick={() => setEditTime('')}
+                  className="absolute right-3 p-1 text-gray-400 hover:text-red-500 rounded-full hover:bg-gray-100 transition-colors flex items-center justify-center"
+                  title="清空时间"
+                >
+                  <span className="material-symbols-outlined text-xl leading-none">close</span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    const inputElem = e.currentTarget.previousElementSibling as HTMLInputElement;
+                    inputElem?.showPicker?.();
+                  }}
+                  className="absolute right-3 p-1 text-gray-400 hover:text-gray-600 transition-colors flex items-center justify-center"
+                  title="选择时间"
+                >
+                  <span className="material-symbols-outlined text-xl leading-none">schedule</span>
+                </button>
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* 参考时间列表 */}
         {inspection.referenceTimes && Object.keys(inspection.referenceTimes).length > 0 && (
@@ -157,25 +168,39 @@ export const InspectionDetailModal: React.FC<InspectionDetailModalProps> = ({
       </div>
 
       {/* Footer */}
-      <div data-motion-modal-content className="p-4 bg-white border-t border-gray-100 flex items-center gap-3 flex-none z-20">
-        {isCompleted && (
-          <button
-            type="button"
-            onClick={handleClearAndReset}
-            className="h-11 px-4 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-600 font-semibold text-sm transition-all active:scale-[0.98]"
-            title="清空时间并还原为未操作状态"
-          >
-            撤销操作
-          </button>
-        )}
-        <button
-          type="button"
-          onClick={handleSave}
-          className="h-11 flex-1 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-base flex items-center justify-center gap-2 transition-all shadow-md active:scale-[0.98]"
-        >
-          <span>确定</span>
-        </button>
-      </div>
+      {(isYunDeng || !isCompleted) && (
+        <div data-motion-modal-content className="p-4 bg-white border-t border-gray-100 flex items-center gap-3 flex-none z-20">
+          {isYunDeng ? (
+            <>
+              {isCompleted && (
+                <button
+                  type="button"
+                  onClick={handleClearAndReset}
+                  className="h-11 px-4 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-600 font-semibold text-sm transition-all active:scale-[0.98]"
+                  title="清空时间并还原为未操作状态"
+                >
+                  撤销操作
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={handleSubmitEdit}
+                className="h-11 flex-1 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-base flex items-center justify-center gap-2 transition-all shadow-md active:scale-[0.98]"
+              >
+                <span>提交</span>
+              </button>
+            </>
+          ) : (
+            <button
+              type="button"
+              onClick={handleComplete}
+              className="h-11 w-full rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-base flex items-center justify-center gap-2 transition-all shadow-md active:scale-[0.98]"
+            >
+              <span>完成检查</span>
+            </button>
+          )}
+        </div>
+      )}
     </MotionModalShell>
   );
 };

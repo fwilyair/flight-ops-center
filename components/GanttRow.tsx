@@ -914,7 +914,7 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
 
             {/* Action drawer tab tucked under main flight card */}
             <div
-                className={`sticky left-[240px] z-30 mr-2 flex w-[52px] min-w-[52px] -ml-4 flex-none flex-col items-center justify-between self-start rounded-r-2xl border-y border-r border-slate-300/80 pt-2.5 pb-2.5 pl-5 pr-2.5 shadow-[4px_0_10px_-1px_rgba(0,0,0,0.08)] ${flight.arrInfo?.status === '延误' || flight.depInfo?.status === '延误' ? 'bg-rose-50' : 'bg-slate-100'}`}
+                className={`sticky left-[240px] z-[35] mr-2 flex w-[52px] min-w-[52px] -ml-4 flex-none flex-col items-center justify-between self-start rounded-r-2xl border-y border-r border-slate-300/80 pt-2.5 pb-2.5 pl-5 pr-2.5 shadow-[4px_0_10px_-1px_rgba(0,0,0,0.08)] ${flight.arrInfo?.status === '延误' || flight.depInfo?.status === '延误' ? 'bg-rose-50' : 'bg-slate-100'}`}
                 style={{ height: `${rowHeight}px` }}
             >
                 {[
