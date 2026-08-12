@@ -12,6 +12,18 @@ interface InspectionDetailModalProps {
   onUpdate?: (inspectionId: string, timeActual: string) => void;
 }
 
+// 4种检查项标准的参考节点定义
+const STANDARD_REFERENCE_NODES: Record<string, string[]> = {
+  '入位检查': ['勤务接机到位时间', '客运接机到位时间', '进港摆渡车到位时间', '客梯车到位时间'],
+  '入位': ['勤务接机到位时间', '客运接机到位时间', '进港摆渡车到位时间', '客梯车到位时间'],
+  '登机检查': ['机上清洁结束时间', '允许登机时间'],
+  '登控': ['机上清洁结束时间', '允许登机时间'],
+  '推出检查': ['关客舱门时间', '关货舱门时间', '撒轮挡到位时间', '登机桥到位时间', '牵引车到位时间', '电子进程单状态'],
+  '推出': ['关客舱门时间', '关货舱门时间', '撒轮挡到位时间', '登机桥到位时间', '牵引车到位时间', '电子进程单状态'],
+  '允许登机': ['机上清洁结束时间', '客运接机到位时间'],
+  '允登': ['机上清洁结束时间', '客运接机到位时间'],
+};
+
 export const InspectionDetailModal: React.FC<InspectionDetailModalProps> = ({
   isOpen,
   onClose,
@@ -61,13 +73,25 @@ export const InspectionDetailModal: React.FC<InspectionDetailModalProps> = ({
     onClose();
   };
 
+  // 标准参考节点与现有数据合并
+  const standardNodes = STANDARD_REFERENCE_NODES[inspection.type] || [];
+  const existingRefs = inspection.referenceTimes || {};
+  
+  // 生成完整的参考节点展示列表
+  const referenceList = standardNodes.length > 0 
+    ? standardNodes.map(label => ({
+        label,
+        time: existingRefs[label] || '--:--',
+      }))
+    : Object.entries(existingRefs).map(([label, time]) => ({ label, time }));
+
   return (
     <MotionModalShell
       isOpen={isOpen}
       onClose={onClose}
       ariaLabel={`${flightNo} ${inspection.type}详情`}
       keyboardDismissSurface="capsule-detail"
-      panelClassName="relative w-[440px] max-h-[75vh] z-[90] rounded-2xl overflow-hidden shadow-2xl flex flex-col bg-white"
+      panelClassName="relative w-[440px] max-h-[80vh] z-[90] rounded-2xl overflow-hidden shadow-2xl flex flex-col bg-white"
     >
       {/* Header */}
       <div data-motion-modal-content className="relative px-6 py-5 bg-white z-20 border-b border-gray-100 shadow-sm flex-none">
@@ -149,14 +173,14 @@ export const InspectionDetailModal: React.FC<InspectionDetailModalProps> = ({
           </div>
         )}
 
-        {/* 参考时间列表 */}
-        {inspection.referenceTimes && Object.keys(inspection.referenceTimes).length > 0 && (
+        {/* 参考节点列表 */}
+        {referenceList.length > 0 && (
           <div className="w-full bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-            {Object.entries(inspection.referenceTimes).map(([label, time], index, arr) => (
+            {referenceList.map(({ label, time }, index) => (
               <div 
                 key={label}
-                className={`flex justify-between items-center px-4 py-2.5 ${
-                  index < arr.length - 1 ? 'border-b border-gray-50' : ''
+                className={`flex justify-between items-center px-4 py-3 ${
+                  index < referenceList.length - 1 ? 'border-b border-gray-50' : ''
                 }`}
               >
                 <span className="text-sm text-gray-700 font-medium">{label}</span>
