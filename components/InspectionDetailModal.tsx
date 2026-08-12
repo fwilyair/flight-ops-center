@@ -12,7 +12,7 @@ interface InspectionDetailModalProps {
   onUpdate?: (inspectionId: string, timeActual: string) => void;
 }
 
-// 4种检查项标准的参考节点定义
+// 入位、登机、推出3种检查项的标准参考节点定义
 const STANDARD_REFERENCE_NODES: Record<string, string[]> = {
   '入位检查': ['勤务接机到位时间', '客运接机到位时间', '进港摆渡车到位时间', '客梯车到位时间'],
   '入位': ['勤务接机到位时间', '客运接机到位时间', '进港摆渡车到位时间', '客梯车到位时间'],
@@ -20,8 +20,6 @@ const STANDARD_REFERENCE_NODES: Record<string, string[]> = {
   '登控': ['机上清洁结束时间', '允许登机时间'],
   '推出检查': ['关客舱门时间', '关货舱门时间', '撒轮挡到位时间', '登机桥到位时间', '牵引车到位时间', '电子进程单状态'],
   '推出': ['关客舱门时间', '关货舱门时间', '撒轮挡到位时间', '登机桥到位时间', '牵引车到位时间', '电子进程单状态'],
-  '允许登机': ['机上清洁结束时间', '客运接机到位时间'],
-  '允登': ['机上清洁结束时间', '客运接机到位时间'],
 };
 
 export const InspectionDetailModal: React.FC<InspectionDetailModalProps> = ({
@@ -68,16 +66,10 @@ export const InspectionDetailModal: React.FC<InspectionDetailModalProps> = ({
     onClose();
   };
 
-  const handleClearAndReset = () => {
-    onUpdate?.(inspection.id, '');
-    onClose();
-  };
-
-  // 标准参考节点与现有数据合并
+  // 针对非允登的3个检查项，获取标准参考节点
   const standardNodes = STANDARD_REFERENCE_NODES[inspection.type] || [];
   const existingRefs = inspection.referenceTimes || {};
   
-  // 生成完整的参考节点展示列表
   const referenceList = standardNodes.length > 0 
     ? standardNodes.map(label => ({
         label,
@@ -91,7 +83,7 @@ export const InspectionDetailModal: React.FC<InspectionDetailModalProps> = ({
       onClose={onClose}
       ariaLabel={`${flightNo} ${inspection.type}详情`}
       keyboardDismissSurface="capsule-detail"
-      panelClassName="relative w-[440px] max-h-[80vh] z-[90] rounded-2xl overflow-hidden shadow-2xl flex flex-col bg-white"
+      panelClassName="relative w-[440px] max-h-[75vh] z-[90] rounded-2xl overflow-hidden shadow-2xl flex flex-col bg-white"
     >
       {/* Header */}
       <div data-motion-modal-content className="relative px-6 py-5 bg-white z-20 border-b border-gray-100 shadow-sm flex-none">
@@ -135,23 +127,23 @@ export const InspectionDetailModal: React.FC<InspectionDetailModalProps> = ({
       </div>
 
       {/* Body */}
-      <div data-motion-modal-content className="flex-1 overflow-y-auto relative bg-slate-50 p-6 flex flex-col gap-4">
-        {/* 允登独有：时间选择与编辑区 */}
-        {isYunDeng && (
-          <div className="w-full max-w-[260px] mx-auto flex flex-col items-center gap-1.5">
-            <label className="text-xs font-semibold text-gray-500">允许登机时间</label>
+      <div data-motion-modal-content className="flex-1 overflow-y-auto relative bg-slate-50 p-6 flex flex-col justify-center gap-4">
+        {/* 允登独有：单一时间选择组件 */}
+        {isYunDeng ? (
+          <div className="w-full max-w-[260px] mx-auto flex flex-col items-center gap-2 py-4">
+            <label className="text-sm font-semibold text-gray-500">允许登机时间</label>
             <div className="w-full relative flex items-center">
               <input
                 type="time"
                 value={editTime}
                 onChange={(e) => setEditTime(e.target.value)}
-                className="w-full pl-6 pr-10 py-2.5 border border-gray-300 bg-white rounded-xl text-2xl font-mono font-bold text-center text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 shadow-sm transition-all [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
+                className="w-full pl-6 pr-10 py-3 border border-gray-300 bg-white rounded-2xl text-2xl font-mono font-bold text-center text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 shadow-sm transition-all [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
               />
               {editTime ? (
                 <button
                   type="button"
                   onClick={() => setEditTime('')}
-                  className="absolute right-3 p-1 text-gray-400 hover:text-red-500 rounded-full hover:bg-gray-100 transition-colors flex items-center justify-center"
+                  className="absolute right-3.5 p-1 text-gray-400 hover:text-red-500 rounded-full hover:bg-gray-100 transition-colors flex items-center justify-center"
                   title="清空时间"
                 >
                   <span className="material-symbols-outlined text-xl leading-none">close</span>
@@ -163,7 +155,7 @@ export const InspectionDetailModal: React.FC<InspectionDetailModalProps> = ({
                     const inputElem = e.currentTarget.previousElementSibling as HTMLInputElement;
                     inputElem?.showPicker?.();
                   }}
-                  className="absolute right-3 p-1 text-gray-400 hover:text-gray-600 transition-colors flex items-center justify-center"
+                  className="absolute right-3.5 p-1 text-gray-400 hover:text-gray-600 transition-colors flex items-center justify-center"
                   title="选择时间"
                 >
                   <span className="material-symbols-outlined text-xl leading-none">schedule</span>
@@ -171,54 +163,42 @@ export const InspectionDetailModal: React.FC<InspectionDetailModalProps> = ({
               )}
             </div>
           </div>
-        )}
-
-        {/* 参考节点列表 */}
-        {referenceList.length > 0 && (
-          <div className="w-full bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-            {referenceList.map(({ label, time }, index) => (
-              <div 
-                key={label}
-                className={`flex justify-between items-center px-4 py-3 ${
-                  index < referenceList.length - 1 ? 'border-b border-gray-50' : ''
-                }`}
-              >
-                <span className="text-sm text-gray-700 font-medium">{label}</span>
-                <span className="text-sm font-mono tabular-nums text-gray-900">{time || '--:--'}</span>
-              </div>
-            ))}
-          </div>
+        ) : (
+          /* 其他3个检查项：纯参考节点列表 */
+          referenceList.length > 0 && (
+            <div className="w-full bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+              {referenceList.map(({ label, time }, index) => (
+                <div 
+                  key={label}
+                  className={`flex justify-between items-center px-4 py-3 ${
+                    index < referenceList.length - 1 ? 'border-b border-gray-50' : ''
+                  }`}
+                >
+                  <span className="text-sm text-gray-700 font-medium">{label}</span>
+                  <span className="text-sm font-mono tabular-nums text-gray-900">{time || '--:--'}</span>
+                </div>
+              ))}
+            </div>
+          )
         )}
       </div>
 
       {/* Footer */}
       {(isYunDeng || !isCompleted) && (
-        <div data-motion-modal-content className="p-4 bg-white border-t border-gray-100 flex items-center gap-3 flex-none z-20">
+        <div data-motion-modal-content className="p-4 bg-white border-t border-gray-100 flex items-center flex-none z-20">
           {isYunDeng ? (
-            <>
-              {isCompleted && (
-                <button
-                  type="button"
-                  onClick={handleClearAndReset}
-                  className="h-11 px-4 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-600 font-semibold text-sm transition-all active:scale-[0.98]"
-                  title="清空时间并还原为未操作状态"
-                >
-                  撤销操作
-                </button>
-              )}
-              <button
-                type="button"
-                onClick={handleSubmitEdit}
-                className="h-11 flex-1 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-base flex items-center justify-center gap-2 transition-all shadow-md active:scale-[0.98]"
-              >
-                <span>提交</span>
-              </button>
-            </>
+            <button
+              type="button"
+              onClick={handleSubmitEdit}
+              className="h-12 w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-base flex items-center justify-center gap-2 transition-all shadow-md active:scale-[0.98]"
+            >
+              <span>提交</span>
+            </button>
           ) : (
             <button
               type="button"
               onClick={handleComplete}
-              className="h-11 w-full rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-base flex items-center justify-center gap-2 transition-all shadow-md active:scale-[0.98]"
+              className="h-12 w-full rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-base flex items-center justify-center gap-2 transition-all shadow-md active:scale-[0.98]"
             >
               <span>完成检查</span>
             </button>
