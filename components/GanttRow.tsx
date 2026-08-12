@@ -397,6 +397,7 @@ const AnnotationLine: React.FC<{ annotation: Annotation; flightId: string; index
     // 统一的基线样式 - 所有基线使用完全相同的颜色
     const lineColor = '#9CA3AF'; // Tailwind gray-400
 
+    // TODO(后端对接): 起飞和放行这两条基线的开始时间（startTime）均为 EIBT（预计入位时间），后续对接后端真实接口数据。
     // 参考示例效果：胶囊形 (rounded-full) 显眼底色
     // 放行 (14:01 示例): 深青绿/Teal (#007B88)
     // 起飞 (14:31 示例): 深海军蓝/Navy (#1E4267)

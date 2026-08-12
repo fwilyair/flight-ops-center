@@ -37,6 +37,7 @@ export interface Annotation {
   type: 'connector' | 'label';
   startEventId?: string; // if connecting from an event
   endEventId?: string;   // if connecting to an event, or strictly time based
+  // TODO(后端对接): 起飞和放行这两条基线的开始时间（startTime）均为 EIBT（预计入位时间），后续对接后端真实接口数据
   startTime?: string;
   endTime?: string;
   label?: string;

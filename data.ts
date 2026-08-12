@@ -88,6 +88,7 @@ export const MOCK_FLIGHTS: Flight[] = [
       { id: '1-insp-3', type: '登机检查', timeScheduled: '10:15', timeActual: '10:12', operator: '王五', status: 'completed', referenceTimes: { '机上清洁结束时间': '09:45', '允许登机时间': '09:48' } },
       { id: '1-insp-4', type: '推出检查', timeScheduled: '10:35', timeActual: '10:30', operator: '赵六', status: 'completed', referenceTimes: { '关客舱门时间': '10:28', '关货舱门时间': '10:25', '撒轮挡到位时间': '10:29', '登机桥到位时间': '10:26', '牵引车到位时间': '10:27', '电子进程单状态': '--:--' } }
     ],
+    // TODO(后端对接): 起飞和放行这两条基线的开始时间（startTime）均为 EIBT（预计入位时间），后续对接后端真实接口数据。
     annotations: [
       {
         type: 'connector', startTime: '09:00', endTime: '10:15', label: '放行', style: 'solid', color: 'gray', markers: [
