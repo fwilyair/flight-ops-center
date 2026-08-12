@@ -203,7 +203,7 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
                         <span className="flex size-6 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-700 font-bold text-xs">入</span>
                         <h4 className="text-xs font-bold text-slate-900 dark:text-white">入位检查</h4>
                       </div>
-                      <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded">进港 / 连班</span>
+                      <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded">单进 / 连班</span>
                     </div>
                     <p className="text-xs text-slate-500 dark:text-slate-400">勤务/客运接机、摆渡车/客梯车到位等节点。</p>
                   </div>
@@ -214,7 +214,7 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
                         <span className="flex size-6 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-700 font-bold text-xs">登</span>
                         <h4 className="text-xs font-bold text-slate-900 dark:text-white">登机检查</h4>
                       </div>
-                      <span className="text-[11px] font-bold text-blue-600 bg-blue-50 dark:bg-blue-950/40 px-2 py-0.5 rounded">出港 / 连班</span>
+                      <span className="text-[11px] font-bold text-blue-600 bg-blue-50 dark:bg-blue-950/40 px-2 py-0.5 rounded">单出 / 连班</span>
                     </div>
                     <p className="text-xs text-slate-500 dark:text-slate-400">客舱清洁完成、允许登机等参考时间。</p>
                   </div>
@@ -225,7 +225,7 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
                         <span className="flex size-6 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-700 font-bold text-xs">推</span>
                         <h4 className="text-xs font-bold text-slate-900 dark:text-white">推出检查</h4>
                       </div>
-                      <span className="text-[11px] font-bold text-blue-600 bg-blue-50 dark:bg-blue-950/40 px-2 py-0.5 rounded">出港 / 连班</span>
+                      <span className="text-[11px] font-bold text-blue-600 bg-blue-50 dark:bg-blue-950/40 px-2 py-0.5 rounded">单出 / 连班</span>
                     </div>
                     <p className="text-xs text-slate-500 dark:text-slate-400">关舱门、关货门、撒轮挡、登机桥、牵引车到位。</p>
                   </div>
@@ -236,7 +236,7 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
                         <span className="flex size-6 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-700 font-bold text-xs">允</span>
                         <h4 className="text-xs font-bold text-slate-900 dark:text-white">允许登机</h4>
                       </div>
-                      <span className="text-[11px] font-bold text-purple-600 bg-purple-50 dark:bg-purple-950/40 px-2 py-0.5 rounded">独立时间录入</span>
+                      <span className="text-[11px] font-bold text-purple-600 bg-purple-50 dark:bg-purple-950/40 px-2 py-0.5 rounded">单出 / 连班</span>
                     </div>
                     <p className="text-xs text-slate-500 dark:text-slate-400">修改/提交允登时间；清空提交可退回未操作状态。</p>
                   </div>
@@ -272,48 +272,6 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
                     <span className="flex size-6 items-center justify-center rounded-full border border-emerald-600 bg-emerald-600 text-white text-xs font-normal shadow-sm">允</span>
                     <span className="text-xs font-bold text-emerald-900 dark:text-emerald-300">4. 正常完成</span>
                     <span className="text-[11px] text-emerald-600 dark:text-emerald-400">绿色实心</span>
-                  </div>
-                </div>
-              </section>
-
-              <section className="space-y-3">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-2">
-                  <span className="size-2 rounded-full bg-indigo-600" />
-                  航班腿类型自动适配
-                </h3>
-
-                <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-800/80 p-3.5 space-y-2.5">
-                  <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-700/60 pb-2">
-                    <span className="text-xs font-bold text-slate-800 dark:text-slate-200">单进航班（到达）</span>
-                    <div className="flex items-center gap-2">
-                      <span className="flex size-5 items-center justify-center rounded-full border border-slate-300 text-[10px]">入</span>
-                      <span className="text-xs text-slate-400">仅显示 1 个入位按钮</span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-700/60 pb-2">
-                    <span className="text-xs font-bold text-slate-800 dark:text-slate-200">单出航班（出发）</span>
-                    <div className="flex items-center gap-2">
-                      <div className="flex gap-1">
-                        <span className="flex size-5 items-center justify-center rounded-full border border-slate-300 text-[10px]">登</span>
-                        <span className="flex size-5 items-center justify-center rounded-full border border-slate-300 text-[10px]">推</span>
-                        <span className="flex size-5 items-center justify-center rounded-full border border-slate-300 text-[10px]">允</span>
-                      </div>
-                      <span className="text-xs text-slate-400">显示 3 个出港按钮</span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-800 dark:text-slate-200">连班航班（过站）</span>
-                    <div className="flex items-center gap-2">
-                      <div className="flex gap-1">
-                        <span className="flex size-5 items-center justify-center rounded-full border border-slate-300 text-[10px]">入</span>
-                        <span className="flex size-5 items-center justify-center rounded-full border border-slate-300 text-[10px]">登</span>
-                        <span className="flex size-5 items-center justify-center rounded-full border border-slate-300 text-[10px]">推</span>
-                        <span className="flex size-5 items-center justify-center rounded-full border border-slate-300 text-[10px]">允</span>
-                      </div>
-                      <span className="text-xs text-slate-400">完整展示 4 个按钮</span>
-                    </div>
                   </div>
                 </div>
               </section>
