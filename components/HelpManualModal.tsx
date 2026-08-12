@@ -296,7 +296,7 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
                       <span>靠桥</span>
                       <span>计 10:15 | 实 10:18</span>
                     </div>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">默认保障状态。</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">未管控。</p>
                   </div>
 
                   <div className="relative rounded-xl border border-amber-200 dark:border-amber-900 bg-amber-50/40 dark:bg-amber-950/20 p-3 space-y-1.5">
