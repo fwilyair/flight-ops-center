@@ -17,7 +17,7 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
       onClose={onClose}
       ariaLabel="穿透视图使用手册"
       containerClassName="p-3 sm:p-6 overflow-hidden"
-      panelClassName="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-4xl h-auto max-h-[82vh] flex flex-col overflow-hidden border border-slate-200/80 dark:border-slate-800"
+      panelClassName="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-4xl h-[540px] max-h-[calc(100vh-2rem)] flex flex-col overflow-hidden border border-slate-200/80 dark:border-slate-800"
     >
         {/* Modal Header */}
         <div data-motion-modal-content className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/90 dark:bg-slate-900/90 backdrop-blur-md shrink-0">
