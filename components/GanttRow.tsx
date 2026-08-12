@@ -925,7 +925,7 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
 
                 return (
                     <div
-                        className={`sticky left-[240px] z-[35] mr-2 flex w-[56px] min-w-[56px] flex-none flex-col items-end self-start rounded-r-2xl border-y border-r border-slate-300/80 pt-2.5 pb-2.5 shadow-[4px_0_10px_-1px_rgba(0,0,0,0.08)] ${flight.arrInfo?.status === '延误' || flight.depInfo?.status === '延误' ? 'bg-rose-50' : 'bg-slate-100'}`}
+                        className={`sticky left-[240px] z-[35] mr-2 flex w-[56px] min-w-[56px] flex-none flex-col items-end self-start rounded-r-2xl border-y border-r border-slate-300/80 pt-2.5 pb-2.5 shadow-[4px_0_10px_-1px_rgba(0,0,0,0.08)] transition-[height] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${flight.arrInfo?.status === '延误' || flight.depInfo?.status === '延误' ? 'bg-rose-50' : 'bg-slate-100'}`}
                         style={{ height: `${rowHeight}px` }}
                     >
                         <div className={`flex w-[36px] flex-1 flex-col items-center ${buttons.length === 1 ? 'justify-center' : 'justify-between'}`}>
