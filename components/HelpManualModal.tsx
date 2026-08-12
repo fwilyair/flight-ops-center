@@ -17,7 +17,7 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
       onClose={onClose}
       ariaLabel="穿透视图使用手册"
       containerClassName="p-3 sm:p-6 overflow-hidden"
-      panelClassName="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-4xl h-[540px] max-h-[calc(100vh-2rem)] flex flex-col overflow-hidden border border-slate-200/80 dark:border-slate-800"
+      panelClassName="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-4xl h-[590px] max-h-[calc(100vh-2rem)] flex flex-col overflow-hidden border border-slate-200/80 dark:border-slate-800"
     >
         {/* Modal Header */}
         <div data-motion-modal-content className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/90 dark:bg-slate-900/90 backdrop-blur-md shrink-0">
@@ -281,29 +281,29 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
 
           {/* TAB 3: EVENTS & CAPSULES (Content preserved, style synchronized) */}
           {activeTab === 'events' && (
-            <div className="space-y-6 animate-in fade-in duration-200">
+            <div className="space-y-4 animate-in fade-in duration-200">
               
-              <section className="space-y-3">
+              <section className="space-y-2.5">
                 <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-2">
                   <span className="size-2 rounded-full bg-indigo-600" />
                   任务胶囊框线规则
                 </h3>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-                  <div className="rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-800/80 p-3.5 space-y-2">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-800/80 p-3 space-y-1.5">
                     <h4 className="text-xs font-bold text-slate-900 dark:text-white">1. 无框线</h4>
-                    <div className="h-9 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-between px-3 text-xs font-bold text-slate-700 dark:text-slate-200 shadow-inner">
+                    <div className="h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-between px-3 text-xs font-bold text-slate-700 dark:text-slate-200 shadow-inner">
                       <span>靠桥</span>
                       <span>计 10:15 | 实 10:18</span>
                     </div>
                     <p className="text-xs text-slate-500 dark:text-slate-400">默认保障状态。</p>
                   </div>
 
-                  <div className="relative rounded-xl border border-amber-200 dark:border-amber-900 bg-amber-50/40 dark:bg-amber-950/20 p-3.5 space-y-2">
+                  <div className="relative rounded-xl border border-amber-200 dark:border-amber-900 bg-amber-50/40 dark:bg-amber-950/20 p-3 space-y-1.5">
                     <h4 className="text-xs font-bold text-amber-900 dark:text-amber-300">2. 橙黄虚线旋转框</h4>
-                    <div className="relative h-9 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-between px-3 text-xs font-bold text-amber-900 dark:text-amber-200 shadow-inner">
+                    <div className="relative h-8 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-between px-3 text-xs font-bold text-amber-900 dark:text-amber-200 shadow-inner">
                       <svg className="absolute inset-0 w-full h-full pointer-events-none rounded-full overflow-visible">
-                        <rect x="1" y="1" width="calc(100% - 2px)" height="calc(100% - 2px)" rx="18" ry="18" fill="none" stroke="#F59E0B" strokeWidth="2" strokeDasharray="5 3" style={{ animation: 'dashMarch 2s linear infinite' }} />
+                        <rect x="1" y="1" width="calc(100% - 2px)" height="calc(100% - 2px)" rx="16" ry="16" fill="none" stroke="#F59E0B" strokeWidth="2" strokeDasharray="5 3" style={{ animation: 'dashMarch 2s linear infinite' }} />
                       </svg>
                       <span>推出开车</span>
                       <span>计 14:20 | 实 --:--</span>
@@ -311,9 +311,9 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
                     <p className="text-xs text-amber-700 dark:text-amber-400">任务预警 / 处理中。</p>
                   </div>
 
-                  <div className="rounded-xl border border-emerald-200 dark:border-emerald-900 bg-emerald-50/40 dark:bg-emerald-950/20 p-3.5 space-y-2">
+                  <div className="rounded-xl border border-emerald-200 dark:border-emerald-900 bg-emerald-50/40 dark:bg-emerald-950/20 p-3 space-y-1.5">
                     <h4 className="text-xs font-bold text-emerald-900 dark:text-emerald-300">3. 渐变实线框</h4>
-                    <div className="h-9 rounded-full bg-emerald-100 dark:bg-emerald-900/40 border-2 border-emerald-500 flex items-center justify-between px-3 text-xs font-bold text-emerald-900 dark:text-emerald-200 shadow-inner">
+                    <div className="h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/40 border-2 border-emerald-500 flex items-center justify-between px-3 text-xs font-bold text-emerald-900 dark:text-emerald-200 shadow-inner">
                       <span>开始卸载</span>
                       <span>计 10:30 | 实 10:29</span>
                     </div>
@@ -322,46 +322,46 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
                 </div>
               </section>
 
-              <section className="space-y-3">
+              <section className="space-y-2.5">
                 <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-2">
                   <span className="size-2 rounded-full bg-indigo-600" />
                   时间刻度点规则
                 </h3>
 
-                <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 p-3.5 space-y-2">
+                <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 p-3 space-y-2">
                   <div className="flex items-center gap-3">
-                    <span className="size-3.5 rounded-full bg-emerald-500 ring-2 ring-white shrink-0" />
+                    <span className="size-3 rounded-full bg-emerald-500 ring-2 ring-white shrink-0" />
                     <span className="text-xs font-bold text-slate-900 dark:text-white">绿色圆点：计划时间节点</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="size-3.5 rounded-full bg-purple-500 ring-2 ring-white shrink-0 animate-pulse" />
+                    <span className="size-3 rounded-full bg-purple-500 ring-2 ring-white shrink-0 animate-pulse" />
                     <span className="text-xs font-bold text-slate-900 dark:text-white">紫色圆点：修正计划时间点（放行推迟 15 分钟及以上计算）</span>
                   </div>
                 </div>
               </section>
 
-              <section className="space-y-3">
+              <section className="space-y-2.5">
                 <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-2">
                   <span className="size-2 rounded-full bg-indigo-600" />
                   固定行高与折叠任务
                 </h3>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div className="rounded-xl border border-orange-200 dark:border-orange-950 bg-orange-50/60 dark:bg-orange-950/20 p-3 space-y-1.5">
-                    <span className="inline-flex h-6 items-center gap-1 rounded-full bg-orange-500 px-2.5 text-[11px] font-bold text-white shadow-sm">
+                  <div className="rounded-xl border border-orange-200 dark:border-orange-950 bg-orange-50/60 dark:bg-orange-950/20 p-3 space-y-1">
+                    <span className="inline-flex h-5 items-center gap-1 rounded-full bg-orange-500 px-2.5 text-[11px] font-bold text-white shadow-sm">
                       +N 项 <span className="material-symbols-outlined text-xs">expand_more</span>
                     </span>
                     <p className="text-xs text-slate-600 dark:text-slate-300">悬停预览折叠任务；点击展开。</p>
                   </div>
 
-                  <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800 p-3 space-y-1.5">
-                    <span className="inline-flex h-6 items-center gap-1 rounded-full border border-slate-300 bg-white px-2.5 text-[11px] font-bold text-slate-700 shadow-sm">
+                  <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800 p-3 space-y-1">
+                    <span className="inline-flex h-5 items-center gap-1 rounded-full border border-slate-300 bg-white px-2.5 text-[11px] font-bold text-slate-700 shadow-sm">
                       收起 <span className="material-symbols-outlined text-xs">expand_less</span>
                     </span>
                     <p className="text-xs text-slate-600 dark:text-slate-300">点击按钮收起任务轨道。</p>
                   </div>
 
-                  <div className="rounded-xl border border-blue-200 dark:border-blue-950 bg-blue-50/60 dark:bg-blue-950/20 p-3 space-y-1.5">
+                  <div className="rounded-xl border border-blue-200 dark:border-blue-950 bg-blue-50/60 dark:bg-blue-950/20 p-3 space-y-1">
                     <span className="text-xs font-bold text-blue-900 dark:text-blue-300">折叠优先级顺序</span>
                     <p className="text-xs text-slate-600 dark:text-slate-300">依次折叠超时完成、临期预警、关联告警、超时未完成。</p>
                   </div>
