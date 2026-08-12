@@ -925,44 +925,46 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
 
                 return (
                     <div
-                        className={`sticky left-[240px] z-[35] mr-2 flex w-[52px] min-w-[52px] -ml-4 flex-none flex-col items-center ${buttons.length === 1 ? 'justify-center' : 'justify-between'} self-start rounded-r-2xl border-y border-r border-slate-300/80 pt-2.5 pb-2.5 pl-5 pr-2.5 shadow-[4px_0_10px_-1px_rgba(0,0,0,0.08)] ${flight.arrInfo?.status === '延误' || flight.depInfo?.status === '延误' ? 'bg-rose-50' : 'bg-slate-100'}`}
+                        className={`sticky left-[240px] z-[35] mr-2 flex w-[56px] min-w-[56px] -ml-5 flex-none flex-col items-end self-start rounded-r-2xl border-y border-r border-slate-300/80 pt-2.5 pb-2.5 pr-[5px] shadow-[4px_0_10px_-1px_rgba(0,0,0,0.08)] ${flight.arrInfo?.status === '延误' || flight.depInfo?.status === '延误' ? 'bg-rose-50' : 'bg-slate-100'}`}
                         style={{ height: `${rowHeight}px` }}
                     >
-                        {buttons.map(({ label, fullType, shortType }) => {
-                            const insp = flight.inspections?.find(i => i.type === fullType || i.type === shortType);
-                            const status = insp?.status || 'pending';
+                        <div className={`flex w-[31px] flex-1 flex-col items-center ${buttons.length === 1 ? 'justify-center' : 'justify-between'}`}>
+                            {buttons.map(({ label, fullType, shortType }) => {
+                                const insp = flight.inspections?.find(i => i.type === fullType || i.type === shortType);
+                                const status = insp?.status || 'pending';
 
-                            let btnStyle = 'border border-slate-300 bg-white text-slate-600 hover:border-indigo-500 hover:text-indigo-600 shadow-[0_1px_2px_rgba(0,0,0,0.04)]'; // 状态1: 未点击过（白色空心）
-                            if (status === 'overtime-incomplete') {
-                                btnStyle = 'border border-rose-500 bg-rose-500 text-white font-medium hover:bg-rose-600 shadow-sm'; // 状态2: 超时未完成（红色实心）
-                            } else if (status === 'overtime-completed') {
-                                btnStyle = 'border border-amber-500 bg-amber-500 text-white font-medium hover:bg-amber-600 shadow-sm'; // 状态3: 超时完成（黄色实心）
-                            } else if (status === 'completed') {
-                                btnStyle = 'border border-emerald-600 bg-emerald-600 text-white font-medium hover:bg-emerald-700 shadow-sm'; // 状态4: 正常完成（绿色实心）
-                            }
+                                let btnStyle = 'border border-slate-300 bg-white text-slate-600 hover:border-indigo-500 hover:text-indigo-600 shadow-[0_1px_2px_rgba(0,0,0,0.04)]'; // 状态1: 未点击过（白色空心）
+                                if (status === 'overtime-incomplete') {
+                                    btnStyle = 'border border-rose-500 bg-rose-500 text-white font-medium hover:bg-rose-600 shadow-sm'; // 状态2: 超时未完成（红色实心）
+                                } else if (status === 'overtime-completed') {
+                                    btnStyle = 'border border-amber-500 bg-amber-500 text-white font-medium hover:bg-amber-600 shadow-sm'; // 状态3: 超时完成（黄色实心）
+                                } else if (status === 'completed') {
+                                    btnStyle = 'border border-emerald-600 bg-emerald-600 text-white font-medium hover:bg-emerald-700 shadow-sm'; // 状态4: 正常完成（绿色实心）
+                                }
 
-                            return (
-                                <button
-                                    key={label}
-                                    type="button"
-                                    title={`${fullType} (${status === 'completed' ? '已完成' : status === 'overtime-completed' ? '超时完成' : status === 'overtime-incomplete' ? '超时未完成' : '未操作'})`}
-                                    className={`flex size-[24px] items-center justify-center rounded-full text-[12px] font-normal transition-all duration-150 hover:scale-105 active:scale-95 ${btnStyle}`}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        const targetInsp = insp || {
-                                            id: `insp-${flight.id}-${label}`,
-                                            type: fullType as any,
-                                            timeScheduled: flight.times.sta || flight.times.std || '10:00',
-                                            timeActual: '--:--',
-                                            status: 'pending' as const,
-                                        };
-                                        onInspectionClick?.(targetInsp);
-                                    }}
-                                >
-                                    {label}
-                                </button>
-                            );
-                        })}
+                                return (
+                                    <button
+                                        key={label}
+                                        type="button"
+                                        title={`${fullType} (${status === 'completed' ? '已完成' : status === 'overtime-completed' ? '超时完成' : status === 'overtime-incomplete' ? '超时未完成' : '未操作'})`}
+                                        className={`flex size-[24px] items-center justify-center rounded-full text-[12px] font-normal transition-all duration-150 hover:scale-105 active:scale-95 ${btnStyle}`}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            const targetInsp = insp || {
+                                                id: `insp-${flight.id}-${label}`,
+                                                type: fullType as any,
+                                                timeScheduled: flight.times.sta || flight.times.std || '10:00',
+                                                timeActual: '--:--',
+                                                status: 'pending' as const,
+                                            };
+                                            onInspectionClick?.(targetInsp);
+                                        }}
+                                    >
+                                        {label}
+                                    </button>
+                                );
+                            })}
+                        </div>
                     </div>
                 );
             })()}
