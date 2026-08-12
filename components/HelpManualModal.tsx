@@ -390,8 +390,8 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
                         <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">点击表头“全部展开 / 全部收起”按钮，一次性控制所有航班行的折叠轨道。</p>
                       </div>
                     </div>
-                    <div className="shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 shadow-xs">
-                      <span className="material-symbols-outlined text-sm text-indigo-600 dark:text-indigo-400">unfold_more</span>
+                    <div className="shrink-0 flex h-7 min-w-0 items-center justify-center gap-1 rounded-full border border-orange-200/80 bg-orange-50 bg-[radial-gradient(circle_at_center,#ffedd5_0%,#fff7ed_68%,#ffffff_100%)] px-3 text-xs font-semibold text-orange-800 shadow-[0_2px_6px_rgba(234,88,12,0.12)]">
+                      <span className="material-symbols-outlined text-base leading-none" aria-hidden="true">unfold_more</span>
                       <span>全部展开</span>
                     </div>
                   </div>
@@ -421,15 +421,9 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
                         <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">右键任务胶囊选择“可控/可消除”将其置灰弱化，再次右键可恢复。</p>
                       </div>
                     </div>
-                    <div className="shrink-0 flex flex-col gap-0.5 p-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-[10px] shadow-xs">
-                      <div className="flex items-center gap-1 text-slate-700 dark:text-slate-200 font-bold px-1.5 py-0.5">
-                        <span className="material-symbols-outlined text-[12px] text-indigo-500">tune</span>
-                        <span>可控</span>
-                      </div>
-                      <div className="flex items-center gap-1 text-slate-400 dark:text-slate-500 font-medium px-1.5 py-0.5 border-t border-slate-200 dark:border-slate-700">
-                        <span className="material-symbols-outlined text-[12px]">block</span>
-                        <span>可消除</span>
-                      </div>
+                    <div className="shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 shadow-xs">
+                      <span className="material-symbols-outlined text-base text-slate-500">visibility_off</span>
+                      <span>可控/可消除</span>
                     </div>
                   </div>
 
@@ -442,10 +436,13 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
                       </div>
                     </div>
                     <div className="shrink-0 flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 shadow-xs">
-                      <span className="flex size-5 items-center justify-center rounded-full bg-blue-600 text-white">
-                        <span className="material-symbols-outlined text-[13px]">play_arrow</span>
-                      </span>
-                      <span className="flex size-5 items-center justify-center rounded-full border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold text-xs">+</span>
+                      <div className="flex size-[18px] shrink-0 items-center justify-center rounded-full border border-dashed border-slate-400 bg-white/80 text-blue-600 font-semibold text-[14px] leading-none">+</div>
+                      <div className="flex size-[20px] shrink-0 items-center justify-center rounded-full text-blue-600">
+                        <svg className="size-[19px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="12" cy="12" r="9" />
+                          <path d="m10 8.5 5 3.5-5 3.5Z" />
+                        </svg>
+                      </div>
                     </div>
                   </div>
                 </div>
