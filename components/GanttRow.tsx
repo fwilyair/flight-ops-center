@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { Flight, TimelineEvent, Annotation, ProcessMarker, InspectionEvent } from '../types';
 import { timeToPixels, getColorForEventType } from '../utils';
 import { assignPriorityTracks, buildFixedRowOverflow, buildOverflowPreviewLayout, getControlViewRowHeight, getCorrectedTime, getExpandedControlTop, getExpansionTargetEventId, getFlightRowHeight, getStateAfterExpansionChange, getTimeDifferenceMinutes } from './flightRowLayout';
@@ -608,6 +609,7 @@ const OverflowPill: React.FC<{
     return (
         // 预览浮层复用真实胶囊视觉，确保折叠前后的状态识别一致。
         <div
+            data-overflow-preview-anchor
             className="absolute z-30 group/overflow"
             style={{ left: `${group.leftPx}px`, top: `${top}px` }}
         >
@@ -910,6 +912,11 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
 
     // 当鼠标悬浮在胶囊或点上时，报告绿点/紫点的位置与时间信息
     React.useEffect(() => {
+        if (isControlView) {
+            onEventHover?.(null);
+            return;
+        }
+
         if (!hoveredEventId) {
             onEventHover?.(null);
             return;
@@ -948,14 +955,14 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
             greenDotY,
             purpleDotY,
         });
-    }, [hoveredEventId, flight, timeScale, trackSpacing, releaseAnno, takeoffAnno, eventTracks, onEventHover]);
+    }, [hoveredEventId, flight, timeScale, trackSpacing, releaseAnno, takeoffAnno, eventTracks, isControlView, onEventHover]);
 
     return (
         <div
             ref={rowRef}
             data-motion-flight-row
             data-flight-id={flight.id}
-            className="flight-row group relative flex transition-[height,margin-bottom,opacity] duration-300 ease-out"
+            className="flight-row group relative flex"
             style={{
                 height: `${isVisible ? rowHeight : 0}px`,
                 marginBottom: `${isVisible ? 12 : 0}px`,
@@ -980,12 +987,13 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
                 <div aria-hidden="true" className="gantt-row-edge absolute inset-x-0 top-0 z-[15] h-1.5 border-t pointer-events-none" />
                 <div aria-hidden="true" className="gantt-row-edge absolute inset-x-0 bottom-0 z-[15] h-1.5 border-b pointer-events-none" />
 
-                {!isControlView && flight.annotations?.map((anno, idx) => (
-                    <AnnotationLine key={`anno-${idx}`} annotation={anno} flightId={flight.id} index={idx} timeScale={timeScale} />
-                ))}
-                {/* 管控视图：渲染检查胶囊；穿透视图：渲染任务胶囊 */}
-                {isControlView ? (
-                    (flight.inspections || []).map((insp) => (
+                <div
+                    data-view-mode-layer
+                    data-active={isControlView}
+                    aria-hidden={!isControlView}
+                    className="view-mode-layer absolute inset-0"
+                >
+                    {(flight.inspections || []).map((insp) => (
                         <InspectionPill
                             key={insp.id}
                             inspection={insp}
@@ -998,9 +1006,20 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
                             onInspectionClick={onInspectionClick}
                             onInspectionComplete={onInspectionComplete}
                         />
-                    ))
-                ) : (
-                    renderedEvents.map((event) => (
+                    ))}
+                </div>
+
+                <div
+                    data-view-mode-layer
+                    data-active={!isControlView}
+                    aria-hidden={isControlView}
+                    className="view-mode-layer absolute inset-0"
+                >
+                    {flight.annotations?.map((anno, idx) => (
+                        <AnnotationLine key={`anno-${idx}`} annotation={anno} flightId={flight.id} index={idx} timeScale={timeScale} />
+                    ))}
+
+                    {renderedEvents.map((event) => (
                         <EventPill
                             key={event.id}
                             event={event}
@@ -1014,11 +1033,10 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
                             trackSpacing={trackSpacing}
                             onHoverChange={(isHovered) => handleHoverChange(event.id, isHovered)}
                         />
-                    ))
-                )}
+                    ))}
 
                 {/* 紧凑行仅显示隐藏任务入口；展开后在同一时间位置复用为收起入口（管控视图无重叠折叠）。 */}
-                {!isControlView && !isExpanded && fixedRowLayout.overflowGroups.map((group) => (
+                {!isExpanded && fixedRowLayout.overflowGroups.map((group) => (
                     <OverflowPill
                         key={`overflow-${group.leftPx}-${group.events[0]?.id}`}
                         group={group}
@@ -1035,7 +1053,7 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
                     />
                 ))}
 
-                {!isControlView && isExpanded && expandedFromEventId && (
+                {isExpanded && expandedFromEventId && (
                     <CollapsePill
                         flightNo={flight.flightNo.split(' / ')[0]}
                         left={expandedControlLeft}
@@ -1044,18 +1062,19 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
                     />
                 )}
 
-                {contextMenu && (
+                {!isControlView && contextMenu && createPortal(
                     <ContextMenu
                         x={contextMenu.x}
                         y={contextMenu.y}
                         isDimmed={dimmedEventIds.has(contextMenu.eventId)}
                         onToggleDim={() => toggleDimmed(contextMenu.eventId)}
                         onClose={() => setContextMenu(null)}
-                    />
+                    />,
+                    document.body,
                 )}
 
                 {/* Calculated Scale Points - rendered as separate layer ABOVE all capsules (穿透视图生效) */}
-                {!isControlView && (() => {
+                {(() => {
                     if (!releaseAnno?.endTime || !takeoffAnno?.endTime) return null;
 
                     const calcColor = '#A78BFA';
@@ -1122,10 +1141,11 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
                         );
                     });
                 })()}
+                </div>
             </div>
             {/* White horizontal spacing line below the row to cover background dots/shading */}
             <div
-                className="absolute left-0 right-0 bg-white dark:bg-gray-900 pointer-events-none transition-[height,bottom] duration-300 ease-out"
+                className="flight-row-spacer absolute left-0 right-0 bg-white dark:bg-gray-900 pointer-events-none"
                 style={{
                     bottom: `-${isVisible ? 12 : 0}px`,
                     height: `${isVisible ? 12 : 0}px`,

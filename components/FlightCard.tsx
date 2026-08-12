@@ -186,7 +186,7 @@ export const FlightCard: React.FC<FlightCardProps> = ({
         setSelectedLeg(leg);
     }, [closePicker, selectedLeg, updatePickerPosition]);
 
-    React.useEffect(() => closePicker(), [closePicker, flight.id]);
+    React.useEffect(() => closePicker(), [closePicker, flight.id, isControlView]);
 
     React.useEffect(() => {
         if (!selectedLeg) return;
@@ -229,22 +229,11 @@ export const FlightCard: React.FC<FlightCardProps> = ({
     // 管控视图：只保留 进出港航班号及计划时间 [HH:MM(05)] 单行展示
     // 配色与穿透视图保持一致 (text-emerald-900 / text-blue-900)
     // 超长航班号（如 ZZMZT6343 / ZZMZT6344 达 18 字）时自动阶梯缩小字号，防止右侧时间被裁切截断
-    if (isControlView) {
-        const hasBoth = legPresence.arrival && legPresence.departure;
-        const flightNumSize = 'text-[19px]';
-        const timeSize = 'text-[12px]';
-
-        return (
-            <div
-                data-motion-layout
-                className={`sticky left-0 z-40 mr-2 box-border w-[260px] min-w-[260px] flex-none shrink-0 self-start rounded-l-xl rounded-r-2xl border-y border-r border-slate-300/80 px-3 flex flex-col shadow-[4px_0_12px_-2px_rgba(0,0,0,0.08)] transition-[background-color,border-color,box-shadow,opacity] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${isDelayed ? 'bg-rose-50' : 'bg-slate-100'} ${onClick ? 'cursor-pointer hover:bg-slate-200' : ''}`}
-                style={{ height: `${height}px` }}
-                onClick={(event) => {
-                    event.stopPropagation();
-                    onClick?.();
-                }}
-            >
-                <div className={`flex flex-col w-full h-full ${hasBoth ? 'justify-between py-1.5' : 'justify-center'}`}>
+    const hasBoth = legPresence.arrival && legPresence.departure;
+    const flightNumSize = 'text-[19px]';
+    const timeSize = 'text-[12px]';
+    const controlViewContent = (
+                <div className={`flex h-full w-full flex-col ${hasBoth ? 'justify-between py-1.5' : 'justify-center'}`}>
                     {legPresence.arrival && (
                         <div className="flex items-baseline justify-start gap-[6px] text-emerald-700">
                             <span className={`min-w-0 whitespace-nowrap pr-[3px] font-mono font-extrabold italic leading-none tabular-nums ${flightNumSize}`} title={arrivalFlightNo}>
@@ -266,20 +255,33 @@ export const FlightCard: React.FC<FlightCardProps> = ({
                         </div>
                     )}
                 </div>
-            </div>
-        );
-    }
+    );
 
     return (
         <div
             data-motion-layout
-            className={`sticky left-0 z-40 mr-2 box-border min-h-[140px] w-[260px] min-w-[260px] flex-none shrink-0 self-start rounded-l-xl rounded-r-2xl border-y border-r border-slate-300/80 px-2.5 py-2 shadow-[4px_0_12px_-2px_rgba(0,0,0,0.08)] transition-[background-color,border-color,box-shadow,opacity] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${isDelayed ? 'bg-rose-50' : 'bg-slate-100'} ${onClick ? 'cursor-pointer' : ''}`}
+            className={`flight-card-shell sticky left-0 z-40 mr-2 box-border w-[260px] min-w-[260px] flex-none shrink-0 self-start overflow-hidden rounded-l-xl rounded-r-2xl border-y border-r border-slate-300/80 shadow-[4px_0_12px_-2px_rgba(0,0,0,0.08)] ${isDelayed ? 'bg-rose-50' : 'bg-slate-100'} ${onClick ? `cursor-pointer ${isControlView ? 'hover:bg-slate-200' : ''}` : ''}`}
             style={{ height: `${height}px` }}
             onClick={(event) => {
                 event.stopPropagation();
                 onClick?.();
             }}
         >
+            <div
+                data-view-mode-layer
+                data-active={isControlView}
+                aria-hidden={!isControlView}
+                className="view-mode-layer absolute inset-0 flex flex-col px-3"
+            >
+                {controlViewContent}
+            </div>
+
+            <div
+                data-view-mode-layer
+                data-active={!isControlView}
+                aria-hidden={isControlView}
+                className="view-mode-layer absolute inset-0 px-2.5 py-2"
+            >
             <div
                 aria-hidden="true"
                 className="pointer-events-none absolute inset-0 z-0 flex select-none items-center justify-center overflow-hidden rounded-l-xl rounded-r-2xl"
@@ -358,8 +360,9 @@ export const FlightCard: React.FC<FlightCardProps> = ({
                     </section>
                 ) : null}
             </div>
+            </div>
 
-            {selectedLeg && pickerPosition && createPortal(
+            {!isControlView && selectedLeg && pickerPosition && createPortal(
                 <div
                     ref={pickerRef}
                     role="dialog"

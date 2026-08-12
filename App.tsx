@@ -316,8 +316,8 @@ const App: React.FC = () => {
   }, [flights, deferredSearchQuery]);
 
   const filteredFlightKey = useMemo(
-    () => `${deferredSearchQuery}|${selectedDate}|${isControlView}|${filteredFlights.map(flight => flight.id).join(',')}`,
-    [deferredSearchQuery, selectedDate, isControlView, filteredFlights]
+    () => `${deferredSearchQuery}|${selectedDate}|${filteredFlights.map(flight => flight.id).join(',')}`,
+    [deferredSearchQuery, selectedDate, filteredFlights]
   );
 
   const visibleFlightsCount = useMemo(() => {
