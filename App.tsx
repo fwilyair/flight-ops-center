@@ -216,18 +216,41 @@ const App: React.FC = () => {
     }));
   }, [currentTime]);
 
+  const handleInspectionUpdate = useCallback((flightId: string, inspectionId: string, newTime: string) => {
+    setFlights(prevFlights => prevFlights.map(flight => {
+      if (flight.id !== flightId) return flight;
+      const updatedInspections = flight.inspections?.map(insp => {
+        if (insp.id !== inspectionId) return insp;
+
+        // 删除/清空时间 -> 退回到未操作状态 (pending)
+        if (!newTime || newTime === '--:--') {
+          return {
+            ...insp,
+            status: 'pending' as const,
+            timeActual: '--:--',
+            operator: undefined,
+          };
+        }
+
+        // 修改/提交合法时间
+        const isOvertime = insp.timeScheduled && newTime > insp.timeScheduled;
+        return {
+          ...insp,
+          status: (isOvertime ? 'overtime-completed' : 'completed') as const,
+          timeActual: newTime,
+          operator: insp.operator || '操作员',
+        };
+      });
+      return { ...flight, inspections: updatedInspections };
+    }));
+  }, []);
+
   const handleInspectionClick = useCallback((flight: Flight, inspection: InspectionEvent) => {
-    // 允许登机：点击直接标记完成
-    if (inspection.type === '允许登机' || inspection.type === '允登') {
-      handleInspectionComplete(flight.id, inspection.id);
-      return;
-    }
-    // 其他检查项：打开弹窗
     setSelectedInspection(inspection);
     setInspectionFlightNo(flight.flightNo);
     setInspectionCodeshare(flight.codeshare);
     setIsInspectionModalOpen(true);
-  }, [handleInspectionComplete]);
+  }, []);
 
   const handleInspectionModalClose = useCallback(() => {
     setIsInspectionModalOpen(false);
@@ -815,6 +838,12 @@ const App: React.FC = () => {
           const targetFlight = flights.find(f => f.inspections?.some(i => i.id === inspectionId));
           if (targetFlight) {
             handleInspectionComplete(targetFlight.id, inspectionId);
+          }
+        }}
+        onUpdate={(inspectionId, newTime) => {
+          const targetFlight = flights.find(f => f.inspections?.some(i => i.id === inspectionId));
+          if (targetFlight) {
+            handleInspectionUpdate(targetFlight.id, inspectionId, newTime);
           }
         }}
       />
