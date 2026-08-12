@@ -308,7 +308,7 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
                       <span>推出开车</span>
                       <span>计 14:20 | 实 --:--</span>
                     </div>
-                    <p className="text-xs text-amber-700 dark:text-amber-400">任务预警 / 处理中。</p>
+                    <p className="text-xs text-amber-700 dark:text-amber-400">已管控未回执。</p>
                   </div>
 
                   <div className="rounded-xl border border-emerald-200 dark:border-emerald-900 bg-emerald-50/40 dark:bg-emerald-950/20 p-3 space-y-1.5">
