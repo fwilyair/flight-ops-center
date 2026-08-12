@@ -137,7 +137,7 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
                       <span className="size-2.5 rounded-full bg-cyan-600" />
                       <span className="font-bold text-xs text-cyan-900 dark:text-cyan-300">临期预警</span>
                     </div>
-                    <p className="text-xs text-cyan-700/80 dark:text-cyan-400/80">即将达到计划完成节点。</p>
+                    <p className="text-xs text-cyan-700/80 dark:text-cyan-400/80">即将到达计划时间。</p>
                   </div>
 
                   <div className="rounded-xl border border-pink-200 dark:border-pink-900 bg-pink-50/70 dark:bg-pink-950/20 p-3.5 space-y-1">
@@ -145,7 +145,7 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
                       <span className="size-2.5 rounded-full bg-pink-500" />
                       <span className="font-bold text-xs text-pink-900 dark:text-pink-300">延误航班</span>
                     </div>
-                    <p className="text-xs text-pink-700/80 dark:text-pink-400/80">延误航班自动呈淡粉底色。</p>
+                    <p className="text-xs text-pink-700/80 dark:text-pink-400/80">延误航班颜色区分。</p>
                   </div>
                 </div>
               </section>
