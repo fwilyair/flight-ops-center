@@ -108,52 +108,44 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
                 </h3>
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  <div className="rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-800/80 p-3.5 space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="size-2.5 rounded-full bg-emerald-600" />
-                      <span className="font-bold text-xs text-slate-900 dark:text-white">正常完成</span>
-                    </div>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">计划时间内按时完成。</p>
-                  </div>
-
-                  <div className="rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-800/80 p-3.5 space-y-1">
+                  <div className="rounded-xl border border-amber-200 dark:border-amber-900 bg-amber-50/70 dark:bg-amber-950/20 p-3.5 space-y-1">
                     <div className="flex items-center gap-2">
                       <span className="size-2.5 rounded-full bg-amber-500" />
-                      <span className="font-bold text-xs text-slate-900 dark:text-white">超时完成</span>
+                      <span className="font-bold text-xs text-amber-900 dark:text-amber-300">超时完成</span>
                     </div>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">已完成但超出计划时间。</p>
+                    <p className="text-xs text-amber-700/80 dark:text-amber-400/80">已完成但超出计划时间。</p>
                   </div>
 
-                  <div className="rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-800/80 p-3.5 space-y-1">
+                  <div className="rounded-xl border border-rose-200 dark:border-rose-900 bg-rose-50/70 dark:bg-rose-950/20 p-3.5 space-y-1">
                     <div className="flex items-center gap-2">
                       <span className="size-2.5 rounded-full bg-rose-600" />
-                      <span className="font-bold text-xs text-slate-900 dark:text-white">超时未完成</span>
+                      <span className="font-bold text-xs text-rose-900 dark:text-rose-300">超时未完成</span>
                     </div>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">已超时且尚未完成。</p>
+                    <p className="text-xs text-rose-700/80 dark:text-rose-400/80">已超时且尚未完成。</p>
                   </div>
 
-                  <div className="rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-800/80 p-3.5 space-y-1">
+                  <div className="rounded-xl border border-purple-200 dark:border-purple-900 bg-purple-50/70 dark:bg-purple-950/20 p-3.5 space-y-1">
                     <div className="flex items-center gap-2">
                       <span className="size-2.5 rounded-full bg-purple-600" />
-                      <span className="font-bold text-xs text-slate-900 dark:text-white">关联告警</span>
+                      <span className="font-bold text-xs text-purple-900 dark:text-purple-300">关联告警</span>
                     </div>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">前序环节延误引发告警。</p>
+                    <p className="text-xs text-purple-700/80 dark:text-purple-400/80">前序环节延误引发告警。</p>
                   </div>
 
-                  <div className="rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-800/80 p-3.5 space-y-1">
+                  <div className="rounded-xl border border-cyan-200 dark:border-cyan-900 bg-cyan-50/70 dark:bg-cyan-950/20 p-3.5 space-y-1">
                     <div className="flex items-center gap-2">
                       <span className="size-2.5 rounded-full bg-cyan-600" />
-                      <span className="font-bold text-xs text-slate-900 dark:text-white">临期预警</span>
+                      <span className="font-bold text-xs text-cyan-900 dark:text-cyan-300">临期预警</span>
                     </div>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">即将达到计划完成节点。</p>
+                    <p className="text-xs text-cyan-700/80 dark:text-cyan-400/80">即将达到计划完成节点。</p>
                   </div>
 
-                  <div className="rounded-xl border border-rose-200 dark:border-rose-950 bg-rose-50/70 dark:bg-rose-950/20 p-3.5 space-y-1">
+                  <div className="rounded-xl border border-pink-200 dark:border-pink-900 bg-pink-50/70 dark:bg-pink-950/20 p-3.5 space-y-1">
                     <div className="flex items-center gap-2">
-                      <span className="size-2.5 rounded-full bg-rose-500" />
-                      <span className="font-bold text-xs text-rose-900 dark:text-rose-200">延误航班卡片</span>
+                      <span className="size-2.5 rounded-full bg-pink-500" />
+                      <span className="font-bold text-xs text-pink-900 dark:text-pink-300">延误航班</span>
                     </div>
-                    <p className="text-xs text-rose-700/80 dark:text-rose-300/80">延误航班自动呈淡粉底色。</p>
+                    <p className="text-xs text-pink-700/80 dark:text-pink-400/80">延误航班自动呈淡粉底色。</p>
                   </div>
                 </div>
               </section>
