@@ -43,7 +43,7 @@ export interface Annotation {
   label?: string;
   style: 'solid' | 'dotted';
   color?: string;
-  markers?: ProcessMarker[]; // Electronic process sheet markers on this baseline
+  markers?: ProcessMarker[]; // 后端对接字段：电子进程单节点数据
 }
 
 export type FlightType = 'REG' | 'CARGO' | 'EXTRA' | 'FERRY' | 'DIV';
@@ -70,52 +70,52 @@ export interface RemarkEntry {
 }
 
 export interface Flight {
-  id: string;
-  flightNo: string;
-  codeshare?: string;
-  tags?: string[]; // New field for flight tags (e.g., '冰', 'Q', '控')
-  remarks?: string; // Current/Latest remark (Legacy)
-  remarksHistory?: RemarkEntry[]; // New field for flight remarks history
-  stand?: string;
-  gate?: string;
+  id: string; // 后端对接字段：flight_id
+  flightNo: string; // 后端对接字段：flight_no
+  codeshare?: string; // 后端对接字段：flight_no
+  tags?: string[]; // 后端对接字段：航班标记
+  remarks?: string; // 后端对接字段：航班备注
+  remarksHistory?: RemarkEntry[]; // 航班历史备注记录列表
+  stand?: string; // 后端对接字段：机位
+  gate?: string; // 后端对接字段：登机口
   // Aircraft info
-  registration?: string; // 机号 e.g. B-1234
-  aircraftType?: string; // 机型 e.g. A320
-  aircraftCategory?: string; // 机类 e.g. M/H/J
+  registration?: string; // 后端对接字段：机号 e.g. B-1234
+  aircraftType?: string; // 后端对接字段：机型 e.g. A320
+  aircraftCategory?: string; // 后端对接字段：机类 e.g. C/D/E/F
   // Route
-  route?: string; // 航线 e.g. CTU-PEK
-  flightType?: FlightType;
-  arrTags?: string[];
-  depTags?: string[];
-  arrFlightType?: FlightType;
-  depFlightType?: FlightType;
+  route?: string; // 后端对接字段：航线 e.g. PEK-CTU-SHA
+  flightType?: FlightType; // 后端对接字段：航班类型
+  arrTags?: string[]; // 后端对接字段：航班标记 (进港)
+  depTags?: string[]; // 后端对接字段：航班标记 (出港)
+  arrFlightType?: FlightType; // 后端对接字段：航班类型 (进港)
+  depFlightType?: FlightType; // 后端对接字段：航班类型 (出港)
   // Dual status support
   arrInfo?: {
-    status: '前起' | '到达' | '入位' | '备降' | '延误';
-    stand?: string;
-    baggageCarousel?: string; // 行李转盘 e.g. 7
+    status: '前起' | '到达' | '入位' | '备降' | '延误'; // 后端对接字段：运营状态
+    stand?: string; // 后端对接字段：机位
+    baggageCarousel?: string; // 后端对接字段：行李转盘 e.g. 7
   };
   depInfo?: {
-    status: '正常' | '允登' | '登机' | '催登' | '关闭' | '延误';
-    gate?: string;
+    status: '正常' | '允登' | '登机' | '催登' | '关闭' | '延误'; // 后端对接字段：运营状态
+    gate?: string; // 后端对接字段：登机口
   };
 
   times: {
     // Scheduled times
-    sta?: string; // 计划到达
-    std?: string; // 计划起飞
+    sta?: string; // 计划到达 (STA)
+    std?: string; // 计划起飞 (STD)
     // Estimated times
-    eta?: string; // 预计到达
-    etd?: string; // 预计起飞
+    eta?: string; // 预计到达 (ETA)
+    etd?: string; // 预计起飞 (ETD)
     // Actual times
-    ata?: string; // 实际到达
-    atd?: string; // 实际起飞
+    ata?: string; // 实际到达 (ATA)
+    atd?: string; // 实际起飞 (ATD)
     // Previous leg departure
-    ptd?: string; // 前站起飞
+    ptd?: string; // 后端对接字段：PerATD (前站实际起飞时间)
     // Slot times
-    cobt?: string; // COBT
-    ctot?: string; // CTOT
-    atot?: string; // ATOT
+    cobt?: string; // 计算关门时间 (COBT)
+    ctot?: string; // 计算起飞时间 (CTOT)
+    atot?: string; // 实际起飞时间 (ATOT)
   };
   events: TimelineEvent[];
   annotations: Annotation[];
