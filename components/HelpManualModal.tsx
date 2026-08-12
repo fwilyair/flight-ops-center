@@ -6,7 +6,7 @@ interface HelpManualModalProps {
   onClose: () => void;
 }
 
-type TabType = 'overview' | 'events' | 'interactions';
+type TabType = 'overview' | 'inspections' | 'events' | 'interactions';
 
 export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClose }) => {
   const [activeTab, setActiveTab] = useState<TabType>('overview');
@@ -15,7 +15,7 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
     <MotionModalShell
       isOpen={isOpen}
       onClose={onClose}
-      ariaLabel="穿透管控使用手册"
+      ariaLabel="穿透视图使用手册"
       containerClassName="p-4 sm:p-6 overflow-hidden"
       panelClassName="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-4xl h-[760px] max-h-[calc(100vh-2rem)] sm:max-h-[calc(100vh-3rem)] flex flex-col overflow-hidden border border-gray-100 dark:border-gray-800"
     >
@@ -27,7 +27,7 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
               <span className="material-symbols-outlined text-2xl">help</span>
             </div>
             <div>
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white leading-tight">穿透管控-使用手册</h2>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white leading-tight">穿透视图-使用手册</h2>
             </div>
           </div>
           <button
@@ -40,11 +40,11 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
           </button>
         </div>
 
-        {/* Tab Navigation - Equal 3-Column Split */}
-        <div data-motion-modal-content className="grid grid-cols-3 px-6 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shrink-0">
+        {/* Tab Navigation - Equal 4-Column Split */}
+        <div data-motion-modal-content className="grid grid-cols-4 px-6 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shrink-0">
           <button
             onClick={() => setActiveTab('overview')}
-            className={`w-full py-3 text-sm font-bold border-b-2 transition-colors flex items-center justify-center gap-2 ${
+            className={`w-full py-3 text-sm font-bold border-b-2 transition-colors flex items-center justify-center gap-1.5 ${
               activeTab === 'overview'
                 ? 'border-blue-600 text-blue-600 dark:text-blue-400'
                 : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
@@ -54,8 +54,19 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
             系统总览
           </button>
           <button
+            onClick={() => setActiveTab('inspections')}
+            className={`w-full py-3 text-sm font-bold border-b-2 transition-colors flex items-center justify-center gap-1.5 ${
+              activeTab === 'inspections'
+                ? 'border-blue-600 text-blue-600 dark:text-blue-400'
+                : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
+            }`}
+          >
+            <span className="material-symbols-outlined text-lg">fact_check</span>
+            四项检查
+          </button>
+          <button
             onClick={() => setActiveTab('events')}
-            className={`w-full py-3 text-sm font-bold border-b-2 transition-colors flex items-center justify-center gap-2 ${
+            className={`w-full py-3 text-sm font-bold border-b-2 transition-colors flex items-center justify-center gap-1.5 ${
               activeTab === 'events'
                 ? 'border-blue-600 text-blue-600 dark:text-blue-400'
                 : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
@@ -66,7 +77,7 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
           </button>
           <button
             onClick={() => setActiveTab('interactions')}
-            className={`w-full py-3 text-sm font-bold border-b-2 transition-colors flex items-center justify-center gap-2 ${
+            className={`w-full py-3 text-sm font-bold border-b-2 transition-colors flex items-center justify-center gap-1.5 ${
               activeTab === 'interactions'
                 ? 'border-blue-600 text-blue-600 dark:text-blue-400'
                 : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
@@ -163,7 +174,140 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
             </div>
           )}
 
-          {/* TAB 2: EVENTS & CAPSULES */}
+          {/* TAB 2: FOUR INSPECTIONS */}
+          {activeTab === 'inspections' && (
+            <div className="space-y-6 animate-in fade-in duration-150">
+              {/* Inspection Buttons Overview */}
+              <section className="space-y-4">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2.5">
+                  <span className="w-2 h-5 bg-blue-600 rounded-full"></span>
+                  保障检查按钮与说明
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="p-4 rounded-2xl border border-slate-200 bg-slate-50/70 dark:bg-gray-800/60 dark:border-gray-700 flex items-start gap-4">
+                    <div className="flex size-7 shrink-0 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-700 font-bold text-sm shadow-sm">
+                      入
+                    </div>
+                    <div className="space-y-1">
+                      <h4 className="font-bold text-sm text-gray-900 dark:text-white">入位检查（仅进港及连班）</h4>
+                      <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
+                        包含勤务接机到位、客运接机到位、进港摆渡车到位、客梯车到位等参考节点。
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-2xl border border-slate-200 bg-slate-50/70 dark:bg-gray-800/60 dark:border-gray-700 flex items-start gap-4">
+                    <div className="flex size-7 shrink-0 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-700 font-bold text-sm shadow-sm">
+                      登
+                    </div>
+                    <div className="space-y-1">
+                      <h4 className="font-bold text-sm text-gray-900 dark:text-white">登机检查（仅出港及连班）</h4>
+                      <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
+                        包含机上清洁结束时间、允许登机时间等参考节点。
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-2xl border border-slate-200 bg-slate-50/70 dark:bg-gray-800/60 dark:border-gray-700 flex items-start gap-4">
+                    <div className="flex size-7 shrink-0 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-700 font-bold text-sm shadow-sm">
+                      推
+                    </div>
+                    <div className="space-y-1">
+                      <h4 className="font-bold text-sm text-gray-900 dark:text-white">推出检查（仅出港及连班）</h4>
+                      <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
+                        包含关客舱门、关货舱门、撒轮挡、登机桥到位、牵引车到位、电子进程单状态等参考节点。
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-2xl border border-slate-200 bg-slate-50/70 dark:bg-gray-800/60 dark:border-gray-700 flex items-start gap-4">
+                    <div className="flex size-7 shrink-0 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-700 font-bold text-sm shadow-sm">
+                      允
+                    </div>
+                    <div className="space-y-1">
+                      <h4 className="font-bold text-sm text-gray-900 dark:text-white">允许登机（仅出港及连班）</h4>
+                      <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
+                        点击弹出时间修改与提交框（带清空 x 按钮），清空提交后退回至未操作状态。
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* 4 Button States */}
+              <section className="space-y-4">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2.5">
+                  <span className="w-2 h-5 bg-blue-600 rounded-full"></span>
+                  按钮 4 种状态样式
+                </h3>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div className="p-3.5 rounded-xl border border-slate-200 bg-white dark:bg-gray-800 flex flex-col items-center gap-2 shadow-sm text-center">
+                    <span className="flex size-7 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-600 text-xs font-normal shadow-sm">
+                      未
+                    </span>
+                    <div>
+                      <h5 className="text-xs font-bold text-gray-900 dark:text-white">1. 未操作</h5>
+                      <p className="text-[11px] text-gray-500">空心白色填充</p>
+                    </div>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl border border-rose-200 bg-rose-50/60 dark:bg-rose-900/20 flex flex-col items-center gap-2 shadow-sm text-center">
+                    <span className="flex size-7 items-center justify-center rounded-full border border-rose-500 bg-rose-500 text-white text-xs font-normal shadow-sm">
+                      超
+                    </span>
+                    <div>
+                      <h5 className="text-xs font-bold text-rose-900 dark:text-rose-300">2. 超时未完成</h5>
+                      <p className="text-[11px] text-rose-600 dark:text-rose-400">红色实心填充</p>
+                    </div>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl border border-amber-200 bg-amber-50/60 dark:bg-amber-900/20 flex flex-col items-center gap-2 shadow-sm text-center">
+                    <span className="flex size-7 items-center justify-center rounded-full border border-amber-500 bg-amber-500 text-white text-xs font-normal shadow-sm">
+                      完
+                    </span>
+                    <div>
+                      <h5 className="text-xs font-bold text-amber-900 dark:text-amber-300">3. 超时完成</h5>
+                      <p className="text-[11px] text-amber-600 dark:text-amber-400">黄色实心填充</p>
+                    </div>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl border border-emerald-200 bg-emerald-50/60 dark:bg-emerald-900/20 flex flex-col items-center gap-2 shadow-sm text-center">
+                    <span className="flex size-7 items-center justify-center rounded-full border border-emerald-600 bg-emerald-600 text-white text-xs font-normal shadow-sm">
+                      成
+                    </span>
+                    <div>
+                      <h5 className="text-xs font-bold text-emerald-900 dark:text-emerald-300">4. 正常完成</h5>
+                      <p className="text-[11px] text-emerald-600 dark:text-emerald-400">绿色实心填充</p>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* Flight Type Adaptation */}
+              <section className="space-y-4">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2.5">
+                  <span className="w-2 h-5 bg-blue-600 rounded-full"></span>
+                  航班类型自动适配
+                </h3>
+                <div className="p-5 rounded-2xl bg-slate-50 dark:bg-gray-800/80 border border-slate-200 dark:border-gray-700 space-y-3 shadow-sm">
+                  <div className="flex items-center gap-4">
+                    <span className="px-2.5 py-1 rounded-md bg-emerald-100 text-emerald-800 font-bold text-xs">单进航班</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-300">仅露出 <b className="font-bold text-gray-900 dark:text-white">入</b> 位检查按钮。</span>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <span className="px-2.5 py-1 rounded-md bg-blue-100 text-blue-800 font-bold text-xs">单出航班</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-300">露出 <b className="font-bold text-gray-900 dark:text-white">登</b>、<b className="font-bold text-gray-900 dark:text-white">推</b>、<b className="font-bold text-gray-900 dark:text-white">允</b> 3 个按钮。</span>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <span className="px-2.5 py-1 rounded-md bg-purple-100 text-purple-800 font-bold text-xs">连班航班</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-300">完整展示 <b className="font-bold text-gray-900 dark:text-white">入</b>、<b className="font-bold text-gray-900 dark:text-white">登</b>、<b className="font-bold text-gray-900 dark:text-white">推</b>、<b className="font-bold text-gray-900 dark:text-white">允</b> 4 个检查按钮。</span>
+                  </div>
+                </div>
+              </section>
+            </div>
+          )}
+
+          {/* TAB 3: EVENTS & CAPSULES */}
           {activeTab === 'events' && (
             <div className="space-y-7 animate-in fade-in duration-150">
               {/* Capsule Border Rules */}
@@ -181,11 +325,10 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
                       <span>靠桥</span>
                       <span>计 10:15 | 实 10:18</span>
                     </div>
-                    <p className="text-sm font-semibold text-gray-600 dark:text-gray-400">默认状态</p>
+                    <p className="text-sm font-semibold text-gray-600 dark:text-gray-400">默认保障状态</p>
                   </div>
 
                   <div className="relative p-5 rounded-2xl bg-amber-50/40 dark:bg-amber-900/10 flex flex-col gap-4 shadow-sm hover:shadow-md transition-all">
-                    {/* Outer card rotating animated SVG dashed border */}
                     <svg className="absolute inset-0 w-full h-full pointer-events-none rounded-2xl overflow-visible">
                       <rect x="1" y="1" width="calc(100% - 2px)" height="calc(100% - 2px)" rx="16" ry="16" fill="none" stroke="#F59E0B" strokeWidth="2" strokeDasharray="6 4" style={{ animation: 'dashMarch 2s linear infinite' }} />
                     </svg>
@@ -194,14 +337,13 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
                       <span className="font-bold text-base text-amber-900 dark:text-amber-300">2. 橙黄虚线旋转框</span>
                     </div>
                     <div className="relative h-11 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-between px-4 text-sm font-bold text-amber-900 dark:text-amber-200 shadow-inner">
-                      {/* Inner capsule rotating animated SVG dashed border */}
                       <svg className="absolute inset-0 w-full h-full pointer-events-none rounded-full overflow-visible">
                         <rect x="1" y="1" width="calc(100% - 2px)" height="calc(100% - 2px)" rx="22" ry="22" fill="none" stroke="#F59E0B" strokeWidth="2" strokeDasharray="6 4" style={{ animation: 'dashMarch 2s linear infinite' }} />
                       </svg>
                       <span>推出开车</span>
                       <span>计 14:20 | 实 --:--</span>
                     </div>
-                    <p className="text-sm font-semibold text-amber-700 dark:text-amber-400">已发管控/未回执</p>
+                    <p className="text-sm font-semibold text-amber-700 dark:text-amber-400">任务预警/处理中</p>
                   </div>
 
                   <div className="p-5 rounded-2xl border-2 border-emerald-500 bg-emerald-50/40 dark:bg-emerald-900/10 flex flex-col gap-4 shadow-sm hover:shadow-md transition-all">
@@ -212,7 +354,7 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
                       <span>开始卸载</span>
                       <span>计 10:30 | 实 10:29</span>
                     </div>
-                    <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-400">已收回执确认</p>
+                    <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-400">已回执确认完成</p>
                   </div>
                 </div>
               </section>
@@ -284,16 +426,16 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
             </div>
           )}
 
-          {/* TAB 3: INTERACTIONS */}
+          {/* TAB 4: INTERACTIONS */}
           {activeTab === 'interactions' && (
             <div className="space-y-4 animate-in fade-in duration-150">
               <section className="space-y-3">
                 <div className="p-3.5 sm:p-4 rounded-xl border border-violet-100 bg-violet-50/50 dark:bg-violet-900/10 dark:border-violet-900/30 flex items-start gap-3.5 shadow-sm hover:shadow-md transition-all">
                   <div className="w-9 h-9 rounded-lg bg-violet-600 text-white flex items-center justify-center font-bold text-base shrink-0 shadow-sm">1</div>
                   <div>
-                    <h4 className="font-bold text-gray-900 dark:text-white text-sm sm:text-base">顶部视图与批量展开</h4>
+                    <h4 className="font-bold text-gray-900 dark:text-white text-sm sm:text-base">批量展开与收起</h4>
                     <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mt-0.5 leading-normal">
-                      点击<b className="font-bold text-gray-900 dark:text-white">穿透视图/管控视图</b>切换视图入口状态；右侧<b className="font-bold text-gray-900 dark:text-white">全部展开/全部收起</b>按钮可一次调整当前航班列表。
+                      点击顶部的<b className="font-bold text-gray-900 dark:text-white">全部展开 / 全部收起</b>按钮，可一键展开或收起所有航班行内部折叠的任务轨道。
                     </p>
                   </div>
                 </div>
@@ -301,9 +443,9 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
                 <div className="p-3.5 sm:p-4 rounded-xl border border-blue-100 bg-blue-50/50 dark:bg-blue-900/10 dark:border-blue-900/30 flex items-start gap-3.5 shadow-sm hover:shadow-md transition-all">
                   <div className="w-9 h-9 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-base shrink-0 shadow-sm">2</div>
                   <div>
-                    <h4 className="font-bold text-gray-900 dark:text-white text-sm sm:text-base">航班详情与标记添加</h4>
+                    <h4 className="font-bold text-gray-900 dark:text-white text-sm sm:text-base">保障检查弹窗与提交</h4>
                     <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mt-0.5 leading-normal">
-                      点击左侧航班卡片打开<b className="font-bold text-gray-900 dark:text-white">航班详情</b>。点击标记末尾的<b className="font-bold text-gray-900 dark:text-white">“+”</b>选择并添加航班标记；已添加项不可重复选择。
+                      点击航班右侧抽屉面板上的 <b className="font-bold text-gray-900 dark:text-white">入、登、推、允</b> 按钮弹出保障检查弹窗。前 3 项可查看参考节点及一键完成，<b className="font-bold text-gray-900 dark:text-white">允</b> 弹窗支持录入/更新允登时间及清空重置。
                     </p>
                   </div>
                 </div>
@@ -311,9 +453,9 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
                 <div className="p-3.5 sm:p-4 rounded-xl border border-purple-100 bg-purple-50/50 dark:bg-purple-900/10 dark:border-purple-900/30 flex items-start gap-3.5 shadow-sm hover:shadow-md transition-all">
                   <div className="w-9 h-9 rounded-lg bg-purple-600 text-white flex items-center justify-center font-bold text-base shrink-0 shadow-sm">3</div>
                   <div>
-                    <h4 className="font-bold text-gray-900 dark:text-white text-sm sm:text-base">保障胶囊与航班管控</h4>
+                    <h4 className="font-bold text-gray-900 dark:text-white text-sm sm:text-base">航班详情与标记/视频入口</h4>
                     <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mt-0.5 leading-normal">
-                      点击<b className="font-bold text-gray-900 dark:text-white">任务胶囊</b>打开<b className="font-bold text-gray-900 dark:text-white">胶囊详情与航班管控</b>，提供查看<b className="font-bold text-gray-900 dark:text-white">全生命周期管控记录</b>、下发<b className="font-bold text-gray-900 dark:text-white">「多级管控」</b>或<b className="font-bold text-gray-900 dark:text-white">「穿透管控」</b>指令等功能。
+                      点击航班卡片可打开<b className="font-bold text-gray-900 dark:text-white">航班详情侧边抽屉</b>维护备注。点击卡片上的<b className="font-bold text-gray-900 dark:text-white">“+”</b>可选择并添加航班标记，点击蓝色播放按钮播放监控视频。
                     </p>
                   </div>
                 </div>
@@ -331,9 +473,9 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
                 <div className="p-3.5 sm:p-4 rounded-xl border border-amber-100 bg-amber-50/50 dark:bg-amber-900/10 dark:border-amber-900/30 flex items-start gap-3.5 shadow-sm hover:shadow-md transition-all">
                   <div className="w-9 h-9 rounded-lg bg-amber-600 text-white flex items-center justify-center font-bold text-base shrink-0 shadow-sm">5</div>
                   <div>
-                    <h4 className="font-bold text-gray-900 dark:text-white text-sm sm:text-base">时间轴缩放与搜索</h4>
+                    <h4 className="font-bold text-gray-900 dark:text-white text-sm sm:text-base">时间轴缩放与快捷键</h4>
                     <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mt-0.5 leading-normal">
-                      提供<b className="font-bold text-gray-900 dark:text-white">时间轴刻度比例缩放</b>、<b className="font-bold text-gray-900 dark:text-white">航班号搜索(日期必选)</b>等功能。
+                      提供<b className="font-bold text-gray-900 dark:text-white">时间轴刻度比例缩放</b>、按<b className="font-bold text-gray-900 dark:text-white">空格键</b>一键返回当前时间，以及航班号搜索(日期必选)等功能。
                     </p>
                   </div>
                 </div>
