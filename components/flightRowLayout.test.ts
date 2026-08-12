@@ -65,6 +65,17 @@ test('keeps a collapsed flight row fixed at the compact height', () => {
     }), 140);
 });
 
+test('keeps control-view rows at exactly two inspection capsule tracks', async () => {
+    const layout = await import('./flightRowLayout.ts');
+    assert.equal(typeof layout.getControlViewRowHeight, 'function');
+    if (typeof layout.getControlViewRowHeight !== 'function') return;
+
+    assert.equal(layout.getControlViewRowHeight(0), 68);
+    assert.equal(layout.getControlViewRowHeight(1), 68);
+    assert.equal(layout.getControlViewRowHeight(2), 68);
+    assert.equal(layout.getControlViewRowHeight(4), 68);
+});
+
 test('restores the original content-driven height after expanding a flight row', () => {
     assert.equal(getFlightRowHeight({
         isExpanded: true,

@@ -1,10 +1,12 @@
 import React from 'react';
-import { Flight, TimelineEvent, Annotation, ProcessMarker } from '../types';
+import { createPortal } from 'react-dom';
+import { Flight, TimelineEvent, Annotation, ProcessMarker, InspectionEvent } from '../types';
 import { timeToPixels, getColorForEventType } from '../utils';
-import { assignPriorityTracks, buildFixedRowOverflow, buildOverflowPreviewLayout, getCorrectedTime, getExpandedControlTop, getExpansionTargetEventId, getFlightRowHeight, getStateAfterExpansionChange, getTimeDifferenceMinutes } from './flightRowLayout';
+import { assignPriorityTracks, buildFixedRowOverflow, buildOverflowPreviewLayout, getControlViewRowHeight, getCorrectedTime, getExpandedControlTop, getExpansionTargetEventId, getFlightRowHeight, getStateAfterExpansionChange, getTimeDifferenceMinutes } from './flightRowLayout';
 import type { OverflowGroup } from './flightRowLayout';
 import { FlightCard } from './FlightCard';
 import { TimeKindBadge } from './TimeKindBadge';
+import { InspectionPill } from './InspectionPill';
 
 export interface EventHoverInfo {
     eventId: string;
@@ -21,8 +23,12 @@ export interface GanttRowProps {
     timeScale: number;
     currentTime?: string;
     expandAllRows?: boolean;
+    isControlView?: boolean;
+    isVisible?: boolean;
     onClick?: () => void;
     onEventClick?: (event: TimelineEvent) => void;
+    onInspectionClick?: (inspection: InspectionEvent) => void;
+    onInspectionComplete?: (inspectionId: string) => void;
     onVideoClick?: () => void;
     onFlightUpdate?: (flight: Flight) => void;
     onEventHover?: (info: EventHoverInfo | null) => void;
@@ -96,16 +102,26 @@ const EventCapsuleVisual: React.FC<{
     event: TimelineEvent;
     currentTime?: string;
 }> = ({ event, currentTime }) => {
-    const colors = getColorForEventType(event.type, event.status);
-    const isDelayed = event.status === 'delayed';
-
     const hasActualTime = event.timeActual && event.timeActual !== '--:--';
     const pendingTimeDiff = !hasActualTime
         ? getTimeDifferenceMinutes(currentTime, event.timeScheduled)
         : undefined;
-    const completedTimeDiff = hasActualTime && event.status === 'overtime-completed'
+    const completedTimeDiff = hasActualTime && event.timeScheduled && event.timeScheduled !== '--:--'
         ? getTimeDifferenceMinutes(event.timeActual, event.timeScheduled)
         : undefined;
+
+    const isPendingOverdue = !hasActualTime && pendingTimeDiff !== undefined && pendingTimeDiff > 0;
+    const isCompletedOvertime = hasActualTime && (event.status === 'overtime-completed' || (completedTimeDiff !== undefined && completedTimeDiff > 0));
+
+    const effectiveStatus = isCompletedOvertime
+        ? 'overtime-completed'
+        : isPendingOverdue || event.status === 'overtime-incomplete'
+        ? 'overtime-incomplete'
+        : event.status;
+
+    const colors = getColorForEventType(event.type, effectiveStatus);
+    const isDelayed = event.status === 'delayed';
+
     const getTimeDiffColor = (difference: number) => (
         difference > 0 ? 'text-red-500' : difference < 0 ? 'text-emerald-500' : 'text-gray-500'
     );
@@ -593,6 +609,7 @@ const OverflowPill: React.FC<{
     return (
         // 预览浮层复用真实胶囊视觉，确保折叠前后的状态识别一致。
         <div
+            data-overflow-preview-anchor
             className="absolute z-30 group/overflow"
             style={{ left: `${group.leftPx}px`, top: `${top}px` }}
         >
@@ -715,7 +732,7 @@ const CollapsePill: React.FC<{
     </button>
 );
 
-const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime, expandAllRows = false, onClick, onEventClick, onVideoClick, onFlightUpdate, onEventHover }) => {
+const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime, expandAllRows = false, isControlView = false, isVisible = true, onClick, onEventClick, onInspectionClick, onInspectionComplete, onVideoClick, onFlightUpdate, onEventHover }) => {
     const [expandedFromEventId, setExpandedFromEventId] = React.useState<string | null>(null);
     const [dimmedEventIds, setDimmedEventIds] = React.useState<Set<string>>(new Set());
     const [contextMenu, setContextMenu] = React.useState<{ x: number, y: number, eventId: string } | null>(null);
@@ -808,13 +825,55 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
         ),
         [flight.events, timeScale],
     );
-    const maxTrack = Math.max(0, ...(Array.from(eventTracks.values()) as number[]));
+
+    // 计算检查胶囊的轨道分配（包含 ml-4 偏移 16px、已完成/动态超时 +N 徽章宽幅、以及防止绿点连击重叠的 10px 安全尾距）
+    const inspectionTracks = React.useMemo(
+        () => assignPriorityTracks<InspectionEvent>(
+            flight.inspections || [],
+            insp => timeToPixels(insp.timeScheduled, timeScale),
+            insp => {
+                const isCompleted = insp.status === 'completed' || insp.status === 'overtime-completed';
+                const timeDiff = getTimeDifferenceMinutes(currentTime, insp.timeScheduled);
+                const isOverdue = !isCompleted && timeDiff !== undefined && timeDiff > 0;
+                
+                const completedTimeDiff = (isCompleted && insp.timeActual && insp.timeActual !== '--:--' && insp.timeScheduled && insp.timeScheduled !== '--:--')
+                    ? getTimeDifferenceMinutes(insp.timeActual, insp.timeScheduled)
+                    : undefined;
+
+                const isOvertimeCompleted = isCompleted && (insp.status === 'overtime-completed' || (completedTimeDiff !== undefined && completedTimeDiff > 0));
+                const isOvertimeIncomplete = !isCompleted && (isOverdue || insp.status === 'overtime-incomplete');
+
+                // ml-4 间距 (16px) + 安全防越界尾距 (10px) = 基础占宽 26px
+                let totalWidth = 26;
+
+                // 胶囊主体的实际 DOM 像素尺寸：
+                // 按时完成胶囊 [允登][实 09:48] 约 112px -> 总占宽 138px (约17.2分钟)
+                totalWidth += isCompleted ? 112 : 122;
+
+                // 超时完成（含 +2, +5, +7 等显示差值）或未操作超时（含 +166 等 3 位数巨大显示差值）
+                if (isOvertimeCompleted) {
+                    const diffVal = completedTimeDiff || 0;
+                    totalWidth += (diffVal >= 100) ? 65 : 42;
+                } else if (isOvertimeIncomplete) {
+                    const diffVal = timeDiff || 0;
+                    totalWidth += (diffVal >= 100) ? 65 : 42;
+                }
+
+                return totalWidth;
+            },
+        ),
+        [flight.inspections, timeScale, currentTime],
+    );
+
+    const maxTrack = isControlView
+        ? Math.max(0, ...(Array.from(inspectionTracks.values()) as number[]))
+        : Math.max(0, ...(Array.from(eventTracks.values()) as number[]));
     const trackCount = maxTrack + 1;
     // 判断是否有计算刻度点（需要更大的轨道间距来容纳紫色圆点）
     const releaseAnno = React.useMemo(() => flight.annotations?.find(a => a.label === '放行'), [flight.annotations]);
     const takeoffAnno = React.useMemo(() => flight.annotations?.find(a => a.label === '起飞'), [flight.annotations]);
     let hasCalcPoints = false;
-    if (releaseAnno?.endTime && takeoffAnno?.endTime) {
+    if (!isControlView && releaseAnno?.endTime && takeoffAnno?.endTime) {
         const [rH, rM] = releaseAnno.endTime.split(':').map(Number);
         const [tH, tM] = takeoffAnno.endTime.split(':').map(Number);
         const diff = (rH * 60 + rM) - (tH * 60 + tM);
@@ -840,8 +899,10 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
         : undefined;
     const expandedControlLeft = expandedControlGroup?.leftPx
         ?? (expandedControlEvent ? timeToPixels(expandedControlEvent.timeScheduled || expandedControlEvent.timeActual || '', timeScale) : 0);
-    const annotationCount = flight.annotations?.length || 0;
-    const rowHeight = getFlightRowHeight({ isExpanded, hasCalcPoints, trackCount, annotationCount });
+    const annotationCount = isControlView ? 0 : (flight.annotations?.length || 0);
+    const rowHeight = isControlView
+        ? getControlViewRowHeight(trackCount)
+        : getFlightRowHeight({ isExpanded, hasCalcPoints, trackCount, annotationCount });
     const expandedControlTop = getExpandedControlTop({ hasCalcPoints, trackCount });
     const renderedEvents = isExpanded ? flight.events : fixedRowLayout.visibleEvents;
 
@@ -851,6 +912,11 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
 
     // 当鼠标悬浮在胶囊或点上时，报告绿点/紫点的位置与时间信息
     React.useEffect(() => {
+        if (isControlView) {
+            onEventHover?.(null);
+            return;
+        }
+
         if (!hoveredEventId) {
             onEventHover?.(null);
             return;
@@ -889,22 +955,27 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
             greenDotY,
             purpleDotY,
         });
-    }, [hoveredEventId, flight, timeScale, trackSpacing, releaseAnno, takeoffAnno, eventTracks, onEventHover]);
+    }, [hoveredEventId, flight, timeScale, trackSpacing, releaseAnno, takeoffAnno, eventTracks, isControlView, onEventHover]);
 
     return (
         <div
             ref={rowRef}
             data-motion-flight-row
             data-flight-id={flight.id}
-            className="flight-row group relative mb-3 flex"
+            className="flight-row group relative flex"
             style={{
-                height: `${rowHeight}px`,
+                height: `${isVisible ? rowHeight : 0}px`,
+                marginBottom: `${isVisible ? 12 : 0}px`,
+                opacity: isVisible ? 1 : 0,
+                overflow: isVisible ? 'visible' : 'hidden',
+                pointerEvents: isVisible ? 'auto' : 'none',
             }}
         >
 
             <FlightCard
                 flight={flight}
                 height={rowHeight}
+                isControlView={isControlView}
                 onClick={onClick}
                 onVideoClick={onVideoClick}
                 onFlightUpdate={onFlightUpdate}
@@ -916,26 +987,55 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
                 <div aria-hidden="true" className="gantt-row-edge absolute inset-x-0 top-0 z-[15] h-1.5 border-t pointer-events-none" />
                 <div aria-hidden="true" className="gantt-row-edge absolute inset-x-0 bottom-0 z-[15] h-1.5 border-b pointer-events-none" />
 
-                {flight.annotations?.map((anno, idx) => (
-                    <AnnotationLine key={`anno-${idx}`} annotation={anno} flightId={flight.id} index={idx} timeScale={timeScale} />
-                ))}
-                {renderedEvents.map((event) => (
-                    <EventPill
-                        key={event.id}
-                        event={event}
-                        flightId={flight.id}
-                        track={eventTracks.get(event.id) || 0}
-                        timeScale={timeScale}
-                        currentTime={currentTime}
-                        onEventClick={onEventClick}
-                        onContextMenu={handleContextMenu}
-                        isDimmed={dimmedEventIds.has(event.id)}
-                        trackSpacing={trackSpacing}
-                        onHoverChange={(isHovered) => handleHoverChange(event.id, isHovered)}
-                    />
-                ))}
+                <div
+                    data-view-mode-layer
+                    data-active={isControlView}
+                    aria-hidden={!isControlView}
+                    className="view-mode-layer absolute inset-0"
+                >
+                    {(flight.inspections || []).map((insp) => (
+                        <InspectionPill
+                            key={insp.id}
+                            inspection={insp}
+                            timeScale={timeScale}
+                            currentTime={currentTime || ''}
+                            flightId={flight.id}
+                            track={inspectionTracks.get(insp.id) || 0}
+                            totalTracks={trackCount}
+                            trackSpacing={30}
+                            onInspectionClick={onInspectionClick}
+                            onInspectionComplete={onInspectionComplete}
+                        />
+                    ))}
+                </div>
 
-                {/* 紧凑行仅显示隐藏任务入口；展开后在同一时间位置复用为收起入口。 */}
+                <div
+                    data-view-mode-layer
+                    data-active={!isControlView}
+                    aria-hidden={isControlView}
+                    className="view-mode-layer absolute inset-0"
+                >
+                    {flight.annotations?.map((anno, idx) => (
+                        <AnnotationLine key={`anno-${idx}`} annotation={anno} flightId={flight.id} index={idx} timeScale={timeScale} />
+                    ))}
+
+                    {renderedEvents.map((event) => (
+                        <EventPill
+                            key={event.id}
+                            event={event}
+                            flightId={flight.id}
+                            track={eventTracks.get(event.id) || 0}
+                            timeScale={timeScale}
+                            currentTime={currentTime}
+                            onEventClick={onEventClick}
+                            onContextMenu={handleContextMenu}
+                            isDimmed={dimmedEventIds.has(event.id)}
+                            trackSpacing={trackSpacing}
+                            onHoverChange={(isHovered) => handleHoverChange(event.id, isHovered)}
+                        />
+                    ))}
+
+                {/* 紧凑行仅显示隐藏任务入口；展开后在同一时间位置复用为收起入口（管控视图无重叠折叠）。 */}
                 {!isExpanded && fixedRowLayout.overflowGroups.map((group) => (
                     <OverflowPill
                         key={`overflow-${group.leftPx}-${group.events[0]?.id}`}
@@ -962,17 +1062,18 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
                     />
                 )}
 
-                {contextMenu && (
+                {!isControlView && contextMenu && createPortal(
                     <ContextMenu
                         x={contextMenu.x}
                         y={contextMenu.y}
                         isDimmed={dimmedEventIds.has(contextMenu.eventId)}
                         onToggleDim={() => toggleDimmed(contextMenu.eventId)}
                         onClose={() => setContextMenu(null)}
-                    />
+                    />,
+                    document.body,
                 )}
 
-                {/* Calculated Scale Points - rendered as separate layer ABOVE all capsules */}
+                {/* Calculated Scale Points - rendered as separate layer ABOVE all capsules (穿透视图生效) */}
                 {(() => {
                     if (!releaseAnno?.endTime || !takeoffAnno?.endTime) return null;
 
@@ -1040,7 +1141,17 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
                         );
                     });
                 })()}
+                </div>
             </div>
+            {/* White horizontal spacing line below the row to cover background dots/shading */}
+            <div
+                className="flight-row-spacer absolute left-0 right-0 bg-white dark:bg-gray-900 pointer-events-none"
+                style={{
+                    bottom: `-${isVisible ? 12 : 0}px`,
+                    height: `${isVisible ? 12 : 0}px`,
+                    zIndex: 15,
+                }}
+            />
         </div >
     );
 };
@@ -1051,8 +1162,12 @@ export const GanttRow = React.memo(GanttRowInner, (prevProps, nextProps) => {
         prevProps.timeScale === nextProps.timeScale &&
         prevProps.currentTime === nextProps.currentTime &&
         prevProps.expandAllRows === nextProps.expandAllRows &&
+        prevProps.isControlView === nextProps.isControlView &&
+        prevProps.isVisible === nextProps.isVisible &&
         prevProps.onClick === nextProps.onClick &&
         prevProps.onEventClick === nextProps.onEventClick &&
+        prevProps.onInspectionClick === nextProps.onInspectionClick &&
+        prevProps.onInspectionComplete === nextProps.onInspectionComplete &&
         prevProps.onVideoClick === nextProps.onVideoClick &&
         prevProps.onFlightUpdate === nextProps.onFlightUpdate &&
         prevProps.onEventHover === nextProps.onEventHover

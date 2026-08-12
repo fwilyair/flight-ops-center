@@ -132,10 +132,53 @@
     }
 
     /* 航班行分组：利用现有行间距建立边界，不增加行高 */
+    .flight-row,
+    .flight-card-shell {
+      transition-duration: 240ms;
+      transition-timing-function: cubic-bezier(0.77, 0, 0.175, 1);
+    }
+
     .flight-row {
       --flight-row-surface: #ffffff;
       background-color: transparent;
-      transition: height 300ms cubic-bezier(0.16, 1, 0.3, 1);
+      transition-property: height, margin-bottom, opacity;
+    }
+
+    /* 浮窗跨越航班行时，连同行容器一起抬高，避免后续行的胶囊压住浮窗。 */
+    .flight-row:has([data-overflow-preview-anchor]:hover) {
+      z-index: 50;
+    }
+
+    .flight-card-shell {
+      transition-property: height, background-color, border-color, box-shadow, opacity;
+    }
+
+    .flight-row-spacer {
+      transition: height 240ms cubic-bezier(0.77, 0, 0.175, 1),
+        bottom 240ms cubic-bezier(0.77, 0, 0.175, 1);
+    }
+
+    .view-mode-layer {
+      z-index: 20;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: translate3d(0, 4px, 0);
+      transition: opacity 140ms cubic-bezier(0.23, 1, 0.32, 1),
+        transform 180ms cubic-bezier(0.23, 1, 0.32, 1),
+        visibility 0s linear 180ms;
+    }
+
+    .view-mode-layer[data-active="true"] {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translate3d(0, 0, 0);
+      transition-delay: 30ms, 30ms, 0s;
+    }
+
+    .view-mode-layer:not([data-active="true"]) * {
+      animation-play-state: paused !important;
     }
 
     .flight-row:nth-child(even) {

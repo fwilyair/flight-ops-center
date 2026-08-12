@@ -3,11 +3,12 @@ import { Header } from './components/Header';
 import { GanttRow, EventHoverInfo } from './components/GanttRow';
 import { FlightDetailPanel } from './components/FlightDetailPanel';
 import { CapsuleDetailModal } from './components/CapsuleDetailModal';
+import { InspectionDetailModal } from './components/InspectionDetailModal';
 import { HelpManualModal } from './components/HelpManualModal';
 import { MotionModalShell } from './components/MotionModalShell';
 import { MOCK_FLIGHTS } from './data';
-import { timeToPixels } from './utils';
-import { START_TIME_HOUR, Flight, TimelineEvent } from './types';
+import { timeToPixels, getTimeDifferenceMinutes } from './utils';
+import { START_TIME_HOUR, Flight, TimelineEvent, InspectionEvent } from './types';
 import { Flip, gsap } from './motion/gsap';
 import { MOTION_DURATION, MOTION_EASE, MOTION_STAGGER } from './motion/tokens';
 import { prefersReducedMotion, REDUCED_MOTION_QUERY } from './motion/preferences';
@@ -193,6 +194,84 @@ const App: React.FC = () => {
     setIsCapsuleModalOpen(false);
   }, []);
 
+  // 检查胶囊弹窗状态（管控视图）
+  const [selectedInspection, setSelectedInspection] = useState<InspectionEvent | null>(null);
+  const [isInspectionModalOpen, setIsInspectionModalOpen] = useState(false);
+  const [inspectionFlightNo, setInspectionFlightNo] = useState('');
+  const [inspectionCodeshare, setInspectionCodeshare] = useState<string | undefined>(undefined);
+
+  const handleInspectionClick = useCallback((inspection: InspectionEvent, flight: Flight) => {
+    setSelectedInspection(inspection);
+    setInspectionFlightNo(flight.flightNo.split(' / ')[0]);
+    setInspectionCodeshare(flight.codeshare);
+    setIsInspectionModalOpen(true);
+  }, []);
+
+  const handleInspectionComplete = useCallback((inspectionId: string, flightId?: string) => {
+    const now = new Date();
+    const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    setFlights(prev => prev.map(f => {
+      if (!f.inspections) return f;
+      const hasInspection = f.inspections.some(insp => insp.id === inspectionId);
+      if (!hasInspection) return f;
+      return {
+        ...f,
+        inspections: f.inspections.map(insp => {
+          if (insp.id !== inspectionId) return insp;
+          // 判断是否超时完成
+          const [schH, schM] = insp.timeScheduled.split(':').map(Number);
+          const schTotal = schH * 60 + schM;
+          const [actH, actM] = [now.getHours(), now.getMinutes()];
+          const actTotal = actH * 60 + actM;
+          const isOvertime = actTotal > schTotal;
+          return {
+            ...insp,
+            timeActual: timeStr,
+            operator: '当前用户',
+            status: isOvertime ? 'overtime-completed' as const : 'completed' as const,
+          };
+        }),
+      };
+    }));
+  }, []);
+
+  const handleInspectionUpdate = useCallback((inspectionId: string, timeActual: string) => {
+    setFlights(prev => prev.map(f => {
+      if (!f.inspections) return f;
+      const hasInspection = f.inspections.some(insp => insp.id === inspectionId);
+      if (!hasInspection) return f;
+      return {
+        ...f,
+        inspections: f.inspections.map(insp => {
+          if (insp.id !== inspectionId) return insp;
+          if (!timeActual || timeActual === '--:--') {
+            return {
+              ...insp,
+              timeActual: '--:--',
+              operator: undefined,
+              status: 'pending' as const,
+            };
+          }
+          const [schH, schM] = insp.timeScheduled.split(':').map(Number);
+          const schTotal = schH * 60 + schM;
+          const [actH, actM] = timeActual.split(':').map(Number);
+          const actTotal = actH * 60 + actM;
+          const isOvertime = actTotal > schTotal;
+          return {
+            ...insp,
+            timeActual,
+            operator: insp.operator || '当前用户',
+            status: isOvertime ? ('overtime-completed' as const) : ('completed' as const),
+          };
+        }),
+      };
+    }));
+  }, []);
+
+  const handleInspectionModalClose = useCallback(() => {
+    setIsInspectionModalOpen(false);
+  }, []);
+
   // 视频监控弹窗状态
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
 
@@ -204,25 +283,46 @@ const App: React.FC = () => {
     setIsVideoModalOpen(false);
   }, []);
 
+  // 判断航班是否有预警/异常/超时任务节点
+  const hasProblematicTasks = useCallback((flight: Flight) => {
+    // 1. 航班本身为延误状态
+    if (flight.arrInfo?.status === '延误' || flight.depInfo?.status === '延误') return true;
+
+    // 2. 检查事件列表是否有异常（告警、超时未完成、延误、警告、超时完成）
+    const hasEventProblem = flight.events.some(e =>
+      ['alert', 'overtime-incomplete', 'delayed', 'warning', 'overtime-completed'].includes(e.status || '')
+    );
+    if (hasEventProblem) return true;
+
+    // 3. 检查管控检查项是否有异常（超时未完成、超时完成）
+    if (flight.inspections) {
+      const hasInspectionProblem = flight.inspections.some(insp =>
+        ['overtime-incomplete', 'overtime-completed'].includes(insp.status || '')
+      );
+      if (hasInspectionProblem) return true;
+    }
+
+    return false;
+  }, []);
+
   // 过滤航班列表
   const filteredFlights = useMemo(() => {
     return flights.filter(flight => {
       // 航班号过滤（不区分大小写）
-      const matchesSearch = deferredSearchQuery === '' ||
+      return deferredSearchQuery === '' ||
         flight.flightNo.toLowerCase().includes(deferredSearchQuery.toLowerCase()) ||
         (flight.codeshare?.toLowerCase().includes(deferredSearchQuery.toLowerCase()));
-
-      // 日期过滤（暂时返回 true，后续可扩展）
-      const matchesDate = true;
-
-      return matchesSearch && matchesDate;
     });
-  }, [flights, deferredSearchQuery, selectedDate]);
+  }, [flights, deferredSearchQuery]);
 
   const filteredFlightKey = useMemo(
     () => `${deferredSearchQuery}|${selectedDate}|${filteredFlights.map(flight => flight.id).join(',')}`,
     [deferredSearchQuery, selectedDate, filteredFlights]
   );
+
+  const visibleFlightsCount = useMemo(() => {
+    return filteredFlights.filter(f => isControlView || hasProblematicTasks(f)).length;
+  }, [filteredFlights, isControlView, hasProblematicTasks]);
 
   // 计算所有航班事件的最大时间，确保时间轴足够长
   const calculateMaxTime = () => {
@@ -389,6 +489,12 @@ const App: React.FC = () => {
     setTimeScale(nextScale);
   }, [revertTimelineFlip, timeScale]);
 
+  const handleControlViewToggle = useCallback(() => {
+    revertTimelineFlip();
+    pendingFlipStateRef.current = null;
+    setIsControlView(previous => !previous);
+  }, [revertTimelineFlip]);
+
   useLayoutEffect(() => {
     const previous = pendingFlipStateRef.current;
     pendingFlipStateRef.current = null;
@@ -531,7 +637,7 @@ const App: React.FC = () => {
           onWheel={handleUserGesture}
           onTouchMove={handleUserGesture}
           onMouseDown={handleUserGesture}
-          className="flex-1 overflow-x-auto overflow-y-auto relative"
+          className="flex-1 overflow-x-auto overflow-y-auto relative bg-white dark:bg-gray-900"
         >
 
           <div ref={timelineLayoutRef} className="min-w-max h-full flex flex-col relative">
@@ -545,7 +651,7 @@ const App: React.FC = () => {
                   type="button"
                   aria-pressed={isControlView}
                   aria-label={`当前为${isControlView ? '管控视图' : '穿透视图'}，点击切换为${isControlView ? '穿透视图' : '管控视图'}`}
-                  onClick={() => setIsControlView(previous => !previous)}
+                  onClick={handleControlViewToggle}
                   className={`flex h-8 min-w-0 flex-1 items-center justify-center gap-1 rounded-full border border-white/90 px-2 text-[13px] font-semibold transition-[background-color,background-image,border-color,color,box-shadow] duration-200 ${isControlView
                     ? 'bg-teal-50 bg-[radial-gradient(circle_at_center,#ccfbf1_0%,#f0fdfa_68%,#ffffff_100%)] text-teal-800 shadow-[0_2px_8px_rgba(13,148,136,0.14)] hover:bg-[radial-gradient(circle_at_center,#99f6e4_0%,#ccfbf1_68%,#f0fdfa_100%)]'
                     : 'bg-violet-50 bg-[radial-gradient(circle_at_center,#ede9fe_0%,#f5f3ff_68%,#ffffff_100%)] text-violet-700 shadow-[0_2px_8px_rgba(124,58,237,0.14)] hover:bg-[radial-gradient(circle_at_center,#ddd6fe_0%,#ede9fe_68%,#f5f3ff_100%)]'
@@ -560,7 +666,7 @@ const App: React.FC = () => {
                   type="button"
                   aria-pressed={expandAllRows}
                   aria-label={expandAllRows ? '收起全部航班任务' : '展开全部航班任务'}
-                  disabled={filteredFlights.length === 0}
+                  disabled={visibleFlightsCount === 0 || isControlView}
                   onClick={() => setExpandAllRows(previous => !previous)}
                   className={`flex h-8 min-w-0 flex-1 items-center justify-center gap-1 rounded-full border border-white/90 px-2 text-[13px] font-semibold transition-[background-color,background-image,border-color,color,box-shadow] duration-200 disabled:cursor-not-allowed disabled:opacity-40 ${expandAllRows
                     ? 'bg-white text-slate-700 shadow-[0_2px_8px_rgba(15,23,42,0.12)] hover:bg-slate-50'
@@ -646,7 +752,7 @@ const App: React.FC = () => {
             </div>
 
             {/* Flight Rows Area */}
-            <div className="flight-rows-area relative flex flex-1">
+            <div className="flight-rows-area relative flex w-full min-w-max">
 
               {/* 航班信息区白色遮罩：固定在左侧，阻止横向滚动的时间轴点阵透入卡片间隙。 */}
               <div
@@ -724,20 +830,27 @@ const App: React.FC = () => {
               ></div>
 
               <div className="flex flex-col w-full min-w-max">
-                {filteredFlights.map((flight) => (
-                  <GanttRow
-                    key={flight.id}
-                    flight={flight}
-                    timeScale={timeScale}
-                    currentTime={currentTime}
-                    expandAllRows={expandAllRows}
-                    onClick={() => handleFlightClick(flight)}
-                    onEventClick={(event) => handleEventClick(event, flight)}
-                    onVideoClick={handleVideoClick}
-                    onFlightUpdate={handleFlightUpdate}
-                    onEventHover={handleEventHover}
-                  />
-                ))}
+                {filteredFlights.map((flight) => {
+                  const isVisible = isControlView || hasProblematicTasks(flight);
+                  return (
+                    <GanttRow
+                      key={flight.id}
+                      flight={flight}
+                      timeScale={timeScale}
+                      currentTime={currentTime}
+                      expandAllRows={expandAllRows}
+                      isControlView={isControlView}
+                      isVisible={isVisible}
+                      onClick={() => handleFlightClick(flight)}
+                      onEventClick={(event) => handleEventClick(event, flight)}
+                      onInspectionClick={(inspection) => handleInspectionClick(inspection, flight)}
+                      onInspectionComplete={(inspectionId) => handleInspectionComplete(inspectionId, flight.id)}
+                      onVideoClick={handleVideoClick}
+                      onFlightUpdate={handleFlightUpdate}
+                      onEventHover={handleEventHover}
+                    />
+                  );
+                })}
 
                 {/* Fill remaining space with empty rows for aesthetics */}
 
@@ -776,6 +889,17 @@ const App: React.FC = () => {
         codeshare={capsuleCodeshare}
         currentTime={currentTime}
         onControl={() => console.log('Control clicked for event:', selectedEvent?.label)}
+      />
+
+      {/* Inspection Detail Modal (管控视图) */}
+      <InspectionDetailModal
+        isOpen={isInspectionModalOpen}
+        onClose={handleInspectionModalClose}
+        inspection={selectedInspection}
+        flightNo={inspectionFlightNo}
+        codeshare={inspectionCodeshare}
+        onComplete={handleInspectionComplete}
+        onUpdate={handleInspectionUpdate}
       />
 
       {/* Video Monitor Modal - Under Construction */}

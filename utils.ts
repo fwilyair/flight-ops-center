@@ -18,8 +18,14 @@ export const timeToPixels = (timeStr: string, scale: number = 10): number => {
   return totalMinutes * pixelsPerMinute;
 };
 
-export const getDurationPixels = (start: string, end: string, scale: number = 10): number => {
-  return timeToPixels(end, scale) - timeToPixels(start, scale);
+export const getTimeDifferenceMinutes = (current: string, scheduled: string): number | undefined => {
+  if (!current || !scheduled || current === '--:--' || scheduled === '--:--') return undefined;
+  const [cH, cM] = current.split(':').map(Number);
+  const [sH, sM] = scheduled.split(':').map(Number);
+  let cTotal = cH * 60 + cM;
+  let sTotal = sH * 60 + sM;
+  if (cH < START_TIME_HOUR && sH >= START_TIME_HOUR) cTotal += 24 * 60;
+  return cTotal - sTotal;
 };
 
 export const getColorForEventType = (type: string, status?: string) => {

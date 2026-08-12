@@ -45,6 +45,7 @@ const CONTROL_TO_ANNOTATION_GAP = 6;
 const ANNOTATION_HALF_HEIGHT = 11;
 const ANNOTATION_BOTTOM_OFFSET = 21;
 const ANNOTATION_SPACING = 34;
+const CONTROL_VIEW_ROW_HEIGHT = 68;
 
 const CRITICAL_STATUSES = new Set(['alert', 'overtime-incomplete', 'delayed']);
 const WARNING_STATUSES = new Set(['warning', 'overtime-completed']);
@@ -81,6 +82,9 @@ export const getFlightRowHeight = ({
         + topAnnotationBottomOffset;
     return Math.max(130, contentHeight);
 };
+
+// 管控视图固定容纳两条 30px 检查胶囊轨道，并保留上下各 4px 呼吸空间。
+export const getControlViewRowHeight = (_trackCount: number): number => CONTROL_VIEW_ROW_HEIGHT;
 
 export const getExpandedControlTop = ({
     hasCalcPoints,
