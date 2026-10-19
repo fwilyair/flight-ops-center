@@ -16,8 +16,6 @@ import { shouldReturnToCurrentTime } from './components/keyboardPolicy';
 
 // Time markers generation - dynamically calculated based on flight data
 
-const HOVER_GUIDE_TIMELINE_OFFSET_PX = 269;
-
 const App: React.FC = () => {
   const [currentTime, setCurrentTime] = useState(() => {
     const now = new Date();
@@ -234,9 +232,10 @@ const App: React.FC = () => {
 
         // 修改/提交合法时间
         const isOvertime = insp.timeScheduled && newTime > insp.timeScheduled;
+        const status: InspectionEvent['status'] = isOvertime ? 'overtime-completed' : 'completed';
         return {
           ...insp,
-          status: (isOvertime ? 'overtime-completed' : 'completed') as const,
+          status,
           timeActual: newTime,
           operator: insp.operator || '操作员',
         };
@@ -737,7 +736,7 @@ const App: React.FC = () => {
                     data-motion-hover-guide
                     className="absolute pointer-events-none z-40"
                     style={{
-                      left: `${HOVER_GUIDE_TIMELINE_OFFSET_PX + renderedHoverInfo.greenDotPx}px`,
+                      left: `${renderedHoverInfo.timelineOffsetPx + renderedHoverInfo.greenDotPx}px`,
                       top: 0,
                       height: `${renderedHoverInfo.greenDotY}px`,
                       width: '2px',
@@ -752,7 +751,7 @@ const App: React.FC = () => {
                       data-motion-hover-guide
                       className="absolute pointer-events-none z-40"
                       style={{
-                        left: `${HOVER_GUIDE_TIMELINE_OFFSET_PX + renderedHoverInfo.purpleDotPx}px`,
+                        left: `${renderedHoverInfo.timelineOffsetPx + renderedHoverInfo.purpleDotPx}px`,
                         top: 0,
                         height: `${renderedHoverInfo.purpleDotY}px`,
                         width: '2px',

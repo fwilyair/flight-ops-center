@@ -2,12 +2,32 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { assignPriorityTracks, buildFixedRowOverflow, buildOverflowPreviewLayout, getCorrectedTime, getExpandedControlTop, getExpansionTargetEventId, getFlightRowHeight, getStateAfterExpansionChange, getTimeDifferenceMinutes } from './flightRowLayout.ts';
+import * as flightRowLayout from './flightRowLayout.ts';
 
 type TestEvent = {
     id: string;
     status: string;
     x: number;
 };
+
+test('limits 入登推 to white and green while 允 keeps all four colors', () => {
+    const getTone = (flightRowLayout as Record<string, unknown>).getInspectionActionButtonTone;
+
+    assert.equal(typeof getTone, 'function');
+    const tone = getTone as (label: string, status: string) => string;
+
+    for (const label of ['入', '登', '推']) {
+        assert.equal(tone(label, 'pending'), 'white');
+        assert.equal(tone(label, 'overtime-incomplete'), 'white');
+        assert.equal(tone(label, 'completed'), 'green');
+        assert.equal(tone(label, 'overtime-completed'), 'green');
+    }
+
+    assert.equal(tone('允', 'pending'), 'white');
+    assert.equal(tone('允', 'completed'), 'green');
+    assert.equal(tone('允', 'overtime-completed'), 'yellow');
+    assert.equal(tone('允', 'overtime-incomplete'), 'red');
+});
 
 test('keeps only events assigned to visible tracks', () => {
     const events: TestEvent[] = [

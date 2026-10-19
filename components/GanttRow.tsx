@@ -1,7 +1,7 @@
 import React from 'react';
 import { Flight, TimelineEvent, Annotation, ProcessMarker } from '../types';
 import { timeToPixels, getColorForEventType } from '../utils';
-import { assignPriorityTracks, buildFixedRowOverflow, buildOverflowPreviewLayout, getCorrectedTime, getExpandedControlTop, getExpansionTargetEventId, getFlightRowHeight, getStateAfterExpansionChange, getTimeDifferenceMinutes } from './flightRowLayout';
+import { assignPriorityTracks, buildFixedRowOverflow, buildOverflowPreviewLayout, getCorrectedTime, getExpandedControlTop, getExpansionTargetEventId, getFlightRowHeight, getInspectionActionButtonTone, getStateAfterExpansionChange, getTimeDifferenceMinutes } from './flightRowLayout';
 import type { OverflowGroup } from './flightRowLayout';
 import { FlightCard } from './FlightCard';
 import { getFlightCardLegPresence } from './flightCardLayout';
@@ -11,6 +11,7 @@ export interface EventHoverInfo {
     eventId: string;
     timeScheduled: string;
     calcPointTime?: string;
+    timelineOffsetPx: number;
     greenDotPx: number;
     purpleDotPx?: number;
     greenDotY: number;
@@ -727,6 +728,7 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
     const hoverTimerRef = React.useRef<NodeJS.Timeout | null>(null);
     const previewHoverAnchorRef = React.useRef<{ eventId: string; greenDotY: number; purpleDotY?: number } | null>(null);
     const rowRef = React.useRef<HTMLDivElement>(null);
+    const timelineRef = React.useRef<HTMLDivElement>(null);
 
     const handleHoverChange = React.useCallback((eventId: string, isHovered: boolean) => {
         if (hoverTimerRef.current) {
@@ -869,6 +871,7 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
         const track = eventTracks.get(event.id) || 0;
         const topPaddingCalc = trackSpacing > 30 ? 22 : 4;
         const capsuleTopY = topPaddingCalc + track * trackSpacing;
+        const timelineOffsetPx = timelineRef.current?.offsetLeft ?? 0;
         const greenDotPx = timeToPixels(event.timeScheduled, timeScale);
         const rowTop = rowRef.current?.offsetTop || 0;
         const previewAnchor = previewHoverAnchorRef.current?.eventId === event.id
@@ -888,6 +891,7 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
             eventId: event.id,
             timeScheduled: event.timeScheduled,
             calcPointTime,
+            timelineOffsetPx,
             greenDotPx,
             purpleDotPx,
             greenDotY,
@@ -937,15 +941,14 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
                                 {buttons.map(({ label, fullType, shortType }) => {
                                     const insp = flight.inspections?.find(i => i.type === fullType || i.type === shortType);
                                     const status = insp?.status || 'pending';
-
-                                    let btnStyle = 'border border-slate-300 bg-white text-slate-600 hover:border-indigo-500 hover:text-indigo-600 shadow-[0_1px_2px_rgba(0,0,0,0.04)]'; // 状态1: 未点击过（白色空心）
-                                    if (status === 'overtime-incomplete') {
-                                        btnStyle = 'border border-rose-500 bg-rose-500 text-white font-medium hover:bg-rose-600 shadow-sm'; // 状态2: 超时未完成（红色实心）
-                                    } else if (status === 'overtime-completed') {
-                                        btnStyle = 'border border-amber-500 bg-amber-500 text-white font-medium hover:bg-amber-600 shadow-sm'; // 状态3: 超时完成（黄色实心）
-                                    } else if (status === 'completed') {
-                                        btnStyle = 'border border-emerald-600 bg-emerald-600 text-white font-medium hover:bg-emerald-700 shadow-sm'; // 状态4: 正常完成（绿色实心）
-                                    }
+                                    const tone = getInspectionActionButtonTone(label, status);
+                                    const buttonStyles = {
+                                        white: 'border border-slate-300 bg-white text-slate-600 hover:border-indigo-500 hover:text-indigo-600 shadow-[0_1px_2px_rgba(0,0,0,0.04)]',
+                                        green: 'border border-emerald-600 bg-emerald-600 text-white font-medium hover:bg-emerald-700 shadow-sm',
+                                        yellow: 'border border-amber-500 bg-amber-500 text-white font-medium hover:bg-amber-600 shadow-sm',
+                                        red: 'border border-rose-500 bg-rose-500 text-white font-medium hover:bg-rose-600 shadow-sm',
+                                    };
+                                    const btnStyle = buttonStyles[tone];
 
                                     return (
                                         <button
@@ -976,7 +979,7 @@ const GanttRowInner: React.FC<GanttRowProps> = ({ flight, timeScale, currentTime
             </div>
 
             {/* Right Content: Timeline */}
-            <div className="flex-1 relative gantt-grid-bg" style={{ overflow: 'visible' }}>
+            <div ref={timelineRef} className="flex-1 relative gantt-grid-bg" style={{ overflow: 'visible' }}>
                 {/* 用行内表面色覆盖边缘点阵，只强化分组而不增加行高。 */}
                 <div aria-hidden="true" className="gantt-row-edge absolute inset-x-0 top-0 z-[15] h-1.5 border-t pointer-events-none" />
                 <div aria-hidden="true" className="gantt-row-edge absolute inset-x-0 bottom-0 z-[15] h-1.5 border-b pointer-events-none" />

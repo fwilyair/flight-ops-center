@@ -246,32 +246,31 @@ export const HelpManualModal: React.FC<HelpManualModalProps> = ({ isOpen, onClos
               <section className="space-y-3">
                 <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-2">
                   <span className="size-2 rounded-full bg-indigo-600" />
-                  按钮 4 种状态样式
+                  按钮颜色规则
                 </h3>
 
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  <div className="flex flex-col items-center justify-center p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40 gap-1 text-center">
-                    <span className="flex size-6 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-600 text-xs font-normal shadow-sm">入</span>
-                    <span className="text-xs font-bold text-slate-800 dark:text-slate-200">1. 未操作</span>
-                    <span className="text-[11px] text-slate-400">白色空心</span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40 p-3 space-y-2">
+                    <div className="flex items-center gap-1.5">
+                      {['入', '登', '推'].map(label => (
+                        <span key={label} className="flex size-6 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-600 text-xs shadow-sm">{label}</span>
+                      ))}
+                      <span className="text-slate-300">/</span>
+                      {['入', '登', '推'].map(label => (
+                        <span key={label} className="flex size-6 items-center justify-center rounded-full border border-emerald-600 bg-emerald-600 text-white text-xs shadow-sm">{label}</span>
+                      ))}
+                    </div>
+                    <p className="text-xs font-bold text-slate-800 dark:text-slate-200">入、登、推：未完成白色，完成绿色</p>
                   </div>
 
-                  <div className="flex flex-col items-center justify-center p-3 rounded-xl border border-rose-200 dark:border-rose-950 bg-rose-50/60 dark:bg-rose-950/20 gap-1 text-center">
-                    <span className="flex size-6 items-center justify-center rounded-full border border-rose-500 bg-rose-500 text-white text-xs font-normal shadow-sm">登</span>
-                    <span className="text-xs font-bold text-rose-900 dark:text-rose-300">2. 超时未完成</span>
-                    <span className="text-[11px] text-rose-600 dark:text-rose-400">红色实心</span>
-                  </div>
-
-                  <div className="flex flex-col items-center justify-center p-3 rounded-xl border border-amber-200 dark:border-amber-950 bg-amber-50/60 dark:bg-amber-950/20 gap-1 text-center">
-                    <span className="flex size-6 items-center justify-center rounded-full border border-amber-500 bg-amber-500 text-white text-xs font-normal shadow-sm">推</span>
-                    <span className="text-xs font-bold text-amber-900 dark:text-amber-300">3. 超时完成</span>
-                    <span className="text-[11px] text-amber-600 dark:text-amber-400">黄色实心</span>
-                  </div>
-
-                  <div className="flex flex-col items-center justify-center p-3 rounded-xl border border-emerald-200 dark:border-emerald-950 bg-emerald-50/60 dark:bg-emerald-950/20 gap-1 text-center">
-                    <span className="flex size-6 items-center justify-center rounded-full border border-emerald-600 bg-emerald-600 text-white text-xs font-normal shadow-sm">允</span>
-                    <span className="text-xs font-bold text-emerald-900 dark:text-emerald-300">4. 正常完成</span>
-                    <span className="text-[11px] text-emerald-600 dark:text-emerald-400">绿色实心</span>
+                  <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/80 p-3 space-y-2">
+                    <div className="flex items-center gap-1.5">
+                      <span className="flex size-6 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-600 text-xs shadow-sm">允</span>
+                      <span className="flex size-6 items-center justify-center rounded-full border border-emerald-600 bg-emerald-600 text-white text-xs shadow-sm">允</span>
+                      <span className="flex size-6 items-center justify-center rounded-full border border-amber-500 bg-amber-500 text-white text-xs shadow-sm">允</span>
+                      <span className="flex size-6 items-center justify-center rounded-full border border-rose-500 bg-rose-500 text-white text-xs shadow-sm">允</span>
+                    </div>
+                    <p className="text-xs font-bold text-slate-800 dark:text-slate-200">允：未操作白、正常完成绿、超时完成黄、超时未完成红</p>
                   </div>
                 </div>
               </section>

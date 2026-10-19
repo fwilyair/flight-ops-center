@@ -1,4 +1,18 @@
 export type OverflowSeverity = 'normal' | 'warning' | 'critical';
+export type InspectionActionButtonTone = 'white' | 'green' | 'yellow' | 'red';
+
+export const getInspectionActionButtonTone = (
+    label: string,
+    status: string,
+): InspectionActionButtonTone => {
+    if (label === '允') {
+        if (status === 'overtime-incomplete') return 'red';
+        if (status === 'overtime-completed') return 'yellow';
+    }
+
+    if (status === 'completed' || status === 'overtime-completed') return 'green';
+    return 'white';
+};
 
 export interface FixedRowEvent {
     id: string;
